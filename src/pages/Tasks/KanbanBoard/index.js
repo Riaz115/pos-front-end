@@ -32,7 +32,6 @@ const Kanbanboard = () => {
   const [isRight, setIsRight] = useState(false);
   const [isEditItem, setIsEditItem] = useState(false);
   const [itemId, setItemId] = useState("");
-  const [qty, setQty] = useState("");
   const [allMenuItems, setAllMenuItems] = useState([]);
   const [errors, setErrors] = useState({});
 
@@ -66,6 +65,26 @@ const Kanbanboard = () => {
     } catch (err) {
       console.log("there is error in the get all menu items function", err);
     }
+  };
+
+  //this is for handle change for add combo deal
+  const handleCheckboxChange = (itemId, checked) => {
+    setItems((prevItems) => {
+      if (checked) {
+        return [...prevItems, { id: itemId, quantity: 1 }]; // Default quantity of 1
+      } else {
+        return prevItems.filter((item) => item.id !== itemId);
+      }
+    });
+  };
+
+  //this is for quantity of add function
+  const handleQuantityChange = (id, value) => {
+    const quantity = value.replace(/^0+/, "") || ""; // Defaults to '1' if empty
+
+    setItems((prevItems) =>
+      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
   };
 
   //this is for controll rendering of get all items of restaurent
@@ -109,7 +128,7 @@ const Kanbanboard = () => {
       isOk = false;
       newErrors.name = "Please Enter Name";
       toast.error("please enter the name");
-    } else if (price.length < 0) {
+    } else if (price.length === 0) {
       isOk = false;
       newErrors.price = "Please Enter price";
       toast.error("please enter the price");
@@ -117,18 +136,13 @@ const Kanbanboard = () => {
       isOk = false;
       newErrors.items = "Please Select Items";
       toast.error("please Select Items");
-    } else if (qty === "") {
-      isOk = false;
-      newErrors.qty = "Please Enter quantity";
-      toast.error("please enter quantity");
     } else if (!desc.trim()) {
       isOk = false;
       newErrors.desc = "Please enter description";
       toast.error("please enter description");
-    } else if (image === "") {
+    } else if (items.some((item) => !item.quantity || item.quantity <= 0)) {
       isOk = false;
-      newErrors.image = "Please upload image";
-      toast.error("please upload image");
+      toast.error("Please Enter the quantity of the selected item");
     }
 
     setErrors(newErrors);
@@ -143,12 +157,12 @@ const Kanbanboard = () => {
       const formData = new FormData();
       formData.append("name", name);
       formData.append("price", price);
-      items.forEach((itemId) => {
-        formData.append("items[]", itemId); // Each item as a separate entry
+      items.forEach((item) => {
+        formData.append("items[]", item.id);
+        formData.append(`quantities[${item.id}]`, item.quantity);
       });
       formData.append("desc", desc);
       formData.append("image", image);
-      formData.append("qty", qty);
 
       const forAddCombo = async () => {
         const url = `${myUrl}/foradd/${id}/combo`;
@@ -164,6 +178,8 @@ const Kanbanboard = () => {
             toast.success(data.msg);
             forGetAllComboItems();
             setIsRight(false);
+            setImage("");
+            setItems([]);
           } else {
             toast.error(data.msg);
           }
@@ -176,6 +192,25 @@ const Kanbanboard = () => {
     }
   };
 
+  //this is for checked items for edit function
+  const handleCheckboxChangeEdit = (itemId, checked) => {
+    setItems((prevItems) => {
+      if (checked) {
+        return [...prevItems, { id: itemId, quantity: 1 }];
+      } else {
+        return prevItems.filter((item) => item.id !== itemId);
+      }
+    });
+  };
+
+  // Handling quantity changes for edit function
+  const handleQuantityChangeEdit = (id, value) => {
+    const quantity = value.replace(/^0+/, "") || "";
+    setItems((prevItems) =>
+      prevItems.map((item) => (item.id === id ? { ...item, quantity } : item))
+    );
+  };
+
   //this is for get data for edit combo item
   const getDataForEditComboItem = async (id) => {
     const url = `${myUrl}/getdataforedit/${id}/comboitem`;
@@ -184,12 +219,17 @@ const Kanbanboard = () => {
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
+        console.log("ok data", data);
         setName(data.myItem.name);
         setPrice(data.myItem.price);
         setDesc(data.myItem.desc);
         setEditImage(data.myItem.image);
-        setQty(data.myItem.qty);
-        setItems(data.myItem.items.map((item) => item.id));
+        setItems(
+          data.myItem.items.map((item) => ({
+            id: item.id,
+            quantity: item.qty,
+          }))
+        );
       } else {
         console.log("err data", data);
       }
@@ -210,42 +250,64 @@ const Kanbanboard = () => {
     e.preventDefault();
 
     if (forCatcErorComboItem()) {
-      if (editImage !== "") {
-        const formData = new FormData();
-        formData.append("name", name);
-        formData.append("price", price);
-        items.forEach((itemId) => {
-          formData.append("items[]", itemId);
-        });
-        formData.append("desc", desc);
-        formData.append("image", editImage);
-        formData.append("qty", qty);
+      const formData = new FormData();
+      formData.append("name", name);
+      formData.append("price", price);
+      items.forEach((item) => {
+        formData.append("items[]", item.id);
+        formData.append(`quantities[${item.id}]`, item.quantity);
+      });
+      formData.append("desc", desc);
+      formData.append("image", image);
 
-        const forEditCombo = async () => {
-          const url = `${myUrl}/editcomboitem/${itemId}`;
-          const options = {
-            method: "PATCH",
-            body: formData,
-          };
-
-          try {
-            const response = await fetch(url, options);
-            const data = await response.json();
-            if (response.ok) {
-              console.log("ok data", data);
-              toast.success(data.msg);
-              forGetAllComboItems();
-              forEditItemPartShow(false);
-            } else {
-              toast.error(data.msg);
-            }
-          } catch (err) {
-            console.log("there is error in the edit combo item function", err);
-          }
+      const forEditCombo = async () => {
+        const url = `${myUrl}/editcomboitem/${itemId}`;
+        const options = {
+          method: "PATCH",
+          body: formData,
         };
 
-        forEditCombo();
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          if (response.ok) {
+            console.log("ok data", data);
+            toast.success(data.msg);
+            forGetAllComboItems();
+            forEditItemPartShow(false);
+            setImage("");
+            setItems([]);
+          } else {
+            toast.error(data.msg);
+          }
+        } catch (err) {
+          console.log("there is error in the edit combo item function", err);
+        }
+      };
+
+      forEditCombo();
+    }
+  };
+
+  //this is for delete the combo item
+  const forDeleteComboItem = async (id) => {
+    const url = `${myUrl}/delete/${id}/comboitem`;
+    const options = {
+      method: "DELETE",
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("ok data", data);
+        toast.success(data.msg);
+        forGetAllComboItems();
+      } else {
+        toast.error(data.msg);
       }
+    } catch (err) {
+      console.log("there is error in the delete combo item function", err);
     }
   };
 
@@ -306,7 +368,6 @@ const Kanbanboard = () => {
                       <th scope="col">Deal Name</th>
                       <th scope="col">Price</th>
                       <th scope="col">items</th>
-                      <th scope="col">quantity</th>
                       <th scope="col">Action</th>
                     </tr>
                   </thead>
@@ -330,10 +391,12 @@ const Kanbanboard = () => {
                         <td>${item.price}</td>
                         <td>
                           {item.items.map((item, index) => (
-                            <span key={index}>{item.name}, </span>
+                            <span key={index}>
+                              {item.name} qty:{item.qty} ,
+                            </span>
                           ))}
                         </td>
-                        <td>{item.qty}</td>
+
                         <td>
                           <div className="hstack gap-3 flex-wrap">
                             <button
@@ -346,6 +409,7 @@ const Kanbanboard = () => {
                               <i className="ri-pencil-fill align-bottom" />
                             </button>
                             <button
+                              onClick={() => forDeleteComboItem(item._id)}
                               className="btn btn-sm btn-soft-danger remove-list delete-btn"
                               style={{
                                 padding: "4px 8px",
@@ -428,7 +492,7 @@ const Kanbanboard = () => {
                   </div>
                 </Col>
 
-                <Col sm={12}>
+                <Col sm={6}>
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
@@ -480,31 +544,6 @@ const Kanbanboard = () => {
                   </div>
                 </Col>
 
-                <Col sm={6}>
-                  <div className="mb-3">
-                    <Label htmlFor="billinginfo-email" className="form-label">
-                      Quantity
-                    </Label>
-                    <input
-                      type="number"
-                      className="form-control"
-                      id="billinginfo-email"
-                      placeholder="Enter Price"
-                      onChange={(e) => setQty(e.target.value)}
-                    />
-                    {errors.qty && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}>
-                        {errors.qty}
-                      </p>
-                    )}
-                  </div>
-                </Col>
-
                 <Col sm={12}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-address" className="form-label">
@@ -538,7 +577,7 @@ const Kanbanboard = () => {
                       placeholder="Search items..."
                       value={searchQuery}
                       onChange={(e) => setSearchQuery(e.target.value)}
-                      style={{ marginBottom: "10px" }} // Optional styling
+                      style={{ marginBottom: "10px" }}
                     />
                     {errors.items && (
                       <p
@@ -550,25 +589,54 @@ const Kanbanboard = () => {
                         {errors.items}
                       </p>
                     )}
+
                     <Row>
-                      {filteredItems.map((item, index) => (
-                        <Col md={6} key={index} className="my-1">
-                          <input
-                            className="p-1 mx-2"
-                            type="checkbox"
-                            value={item._id}
-                            checked={items.includes(item._id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                setItems([...items, item._id]);
-                              } else {
-                                setItems(items.filter((id) => id !== item._id));
-                              }
-                            }}
-                          />
-                          <span className="mx-2 fs-5">{item.name}</span>
-                        </Col>
-                      ))}
+                      {filteredItems.map((item) => {
+                        const selectedItem = items.find(
+                          (i) => i.id === item._id
+                        );
+                        return (
+                          <Col md={6} key={item._id} className="my-1">
+                            <div className="d-flex align-items-center">
+                              <label className="d-flex align-items-center mb-0">
+                                <input
+                                  className="p-1 mx-2"
+                                  type="checkbox"
+                                  value={item._id}
+                                  checked={Boolean(selectedItem)}
+                                  onChange={(e) =>
+                                    handleCheckboxChange(
+                                      item._id,
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                <span className="fs-5">{item.name}</span>
+                              </label>
+                              {selectedItem && (
+                                <input
+                                  type="number"
+                                  value={selectedItem.quantity || ""}
+                                  min="1"
+                                  onChange={(e) =>
+                                    handleQuantityChange(
+                                      item._id,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="form-control mx-2"
+                                  style={{
+                                    width: "60px",
+                                    padding: "4px",
+                                    backgroundColor: "#f8f9fa",
+                                    borderRadius: "5px",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </Col>
+                        );
+                      })}
                     </Row>
                   </div>
                 </Col>
@@ -646,7 +714,7 @@ const Kanbanboard = () => {
                   </div>
                 </Col>
 
-                <Col sm={12}>
+                <Col sm={6}>
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
@@ -679,31 +747,6 @@ const Kanbanboard = () => {
                     />
                   </div>
                 </Col>
-                <Col sm={6}>
-                  <div className="mb-3">
-                    <Label htmlFor="billinginfo-email" className="form-label">
-                      Quantity
-                    </Label>
-                    <input
-                      type="number"
-                      value={qty}
-                      className="form-control"
-                      id="billinginfo-email"
-                      placeholder="Enter Price"
-                      onChange={(e) => setQty(e.target.value)}
-                    />
-                    {errors.qty && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}>
-                        {errors.qty}
-                      </p>
-                    )}
-                  </div>
-                </Col>
 
                 <Col sm={12}>
                   <div>
@@ -718,27 +761,53 @@ const Kanbanboard = () => {
                     />
 
                     <Row>
-                      {filteredItems.map((item, index) => (
-                        <Col md={6} key={index} className="my-1">
-                          <input
-                            className="p-1 mx-2"
-                            type="checkbox"
-                            value={item._id}
-                            // Check if the item is selected
-                            checked={items.includes(item._id)}
-                            onChange={(e) => {
-                              if (e.target.checked) {
-                                // Add item to the selected list if checked
-                                setItems([...items, item._id]);
-                              } else {
-                                // Remove item from the selected list if unchecked
-                                setItems(items.filter((id) => id !== item._id));
-                              }
-                            }}
-                          />
-                          <span className="mx-2 fs-5">{item.name}</span>
-                        </Col>
-                      ))}
+                      {filteredItems.map((item) => {
+                        const selectedItem = items.find(
+                          (i) => i.id === item._id
+                        );
+
+                        return (
+                          <Col md={6} key={item._id} className="my-1">
+                            <div className="d-flex align-items-center">
+                              <label className="d-flex align-items-center mb-0">
+                                <input
+                                  className="p-1 mx-2"
+                                  type="checkbox"
+                                  value={item._id}
+                                  checked={Boolean(selectedItem)}
+                                  onChange={(e) =>
+                                    handleCheckboxChangeEdit(
+                                      item._id,
+                                      e.target.checked
+                                    )
+                                  }
+                                />
+                                <span className="fs-5">{item.name}</span>
+                              </label>
+                              {selectedItem && (
+                                <input
+                                  type="number"
+                                  value={selectedItem.quantity}
+                                  min="1"
+                                  onChange={(e) =>
+                                    handleQuantityChangeEdit(
+                                      item._id,
+                                      e.target.value
+                                    )
+                                  }
+                                  className="form-control mx-2"
+                                  style={{
+                                    width: "60px",
+                                    padding: "4px",
+                                    backgroundColor: "#f8f9fa",
+                                    borderRadius: "5px",
+                                  }}
+                                />
+                              )}
+                            </div>
+                          </Col>
+                        );
+                      })}
                     </Row>
                   </div>
                 </Col>

@@ -1,6 +1,5 @@
-import { method } from "lodash";
 import { createContext, useContext, useEffect, useState } from "react";
-
+import { toast } from "react-toastify";
 export const RiazStore = createContext();
 
 export const MyDataProvider = ({ children }) => {
@@ -8,11 +7,13 @@ export const MyDataProvider = ({ children }) => {
   const [showForEditGuest, setShowForEditGuest] = useState(false);
   const [showForGuestAdd, setShowForGuestAdd] = useState(false);
   const [allOwnerUser, setAllOwnerUser] = useState([]);
+  const [guestId, setGuestId] = useState(localStorage.getItem("guestid"));
+  const [restId, setRestId] = useState(localStorage.getItem("restid"));
+
+  const token = localStorage.getItem("token");
 
   const [userData, setUserData] = useState("");
   const [userImage, setUserImage] = useState("");
-
-  const token = localStorage.getItem("token");
 
   //this is my backend url
   const myUrl = "http://localhost:8000/api";
@@ -96,6 +97,26 @@ export const MyDataProvider = ({ children }) => {
     allOwnerUserGet();
   }, []);
 
+  //this is for delete the guest
+  const forDeleteGuest = async (id) => {
+    const url = `${myUrl}/delete/${id}/guest`;
+    const options = {
+      method: "DELETE",
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.msg);
+      } else {
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log("there is error in the delete guest function", err);
+    }
+  };
+
   return (
     <>
       <RiazStore.Provider
@@ -115,6 +136,11 @@ export const MyDataProvider = ({ children }) => {
           loggedIn,
           userData,
           userImage,
+          restId,
+          setRestId,
+          guestId,
+          setGuestId,
+          forDeleteGuest,
         }}>
         {children}
       </RiazStore.Provider>

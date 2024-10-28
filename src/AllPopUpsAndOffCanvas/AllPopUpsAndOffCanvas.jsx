@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Input,
   Label,
@@ -7,7 +7,6 @@ import {
   Offcanvas,
   OffcanvasBody,
   OffcanvasHeader,
-  Form,
 } from "reactstrap";
 import { FaPlus, FaRegEdit } from "react-icons/fa";
 import { UseRiazHook } from "../RiazStore/RiazStore";
@@ -16,15 +15,16 @@ import SimpleBar from "simplebar-react";
 import { toast } from "react-toastify";
 import isEmail from "validator/lib/isEmail";
 import myImage from "../assets/images/users/avatar-1.jpg";
+
 function AllPopUpsAndOffCanvas() {
-  const [GuestName, setGuestName] = useState("");
-  const [GuestEmail, setGuestEmail] = useState("");
-  const [GuestPhone, setGuestPhone] = useState("");
-  const [GuestAddress, setGuestAddress] = useState("");
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
   const [GuestImage, setGuestImage] = useState("");
   const [errors, setErrors] = useState({});
-  const [GuestAge, setGuestAge] = useState("");
-  const [GuestGender, setGuestGender] = useState("");
+  const [age, setAge] = useState("");
+  const [gender, setGender] = useState("");
 
   //this is show for guest
   const {
@@ -34,20 +34,23 @@ function AllPopUpsAndOffCanvas() {
     editGuestChangeState,
     showForGuestAdd,
     addGuestChangeState,
+    myUrl,
+    restId,
+    guestId,
   } = UseRiazHook();
 
   //this is for select Guest gender
   function handleSelectGender(selectedOption) {
-    setGuestGender(selectedOption.value);
+    setGender(selectedOption.value);
   }
 
   //this is Guest Gender List
-  const GuestGenders = [
+  const genders = [
     {
       options: [
         { label: "Select Gender...", value: "Select Gender" },
-        { label: "Male", value: "Male" },
-        { label: "Female", value: "Female" },
+        { label: "Male", value: "male" },
+        { label: "Female", value: "female" },
       ],
     },
   ];
@@ -57,32 +60,32 @@ function AllPopUpsAndOffCanvas() {
     let isOk = true;
     let newErrors = {};
 
-    if (!GuestEmail.trim()) {
-      newErrors.GuestEmail = "Email is Required";
+    if (!email.trim()) {
+      newErrors.email = "Email is Required";
       toast.error("Email is Required");
       isOk = false;
-    } else if (!isEmail(GuestEmail)) {
-      newErrors.GuestEmail = "Please Enter Valid Email";
+    } else if (!isEmail(email)) {
+      newErrors.email = "Please Enter Valid Email";
       toast.error("Please Enter Valid email");
       isOk = false;
-    } else if (!GuestName.trim()) {
-      newErrors.GuestName = "Name is Required";
+    } else if (!name.trim()) {
+      newErrors.name = "Name is Required";
       toast.error("Name is Required");
       isOk = false;
-    } else if (!GuestAge.trim()) {
-      newErrors.GuestAge = "Age is Required";
+    } else if (age === "") {
+      newErrors.age = "Age is Required";
       toast.error("Age is Required");
       isOk = false;
-    } else if (GuestPhone.length < 11) {
-      newErrors.GuestPhone = "phone Number should be at least 11 letters";
+    } else if (phone.length < 11) {
+      newErrors.phone = "phone Number should be at least 11 letters";
       toast.error("phone Number should be at least 11 letters");
       isOk = false;
-    } else if (!GuestAddress.trim()) {
-      newErrors.GuestAddress = "Address is Required";
+    } else if (!address.trim()) {
+      newErrors.address = "Address is Required";
       toast.error("address is required");
       isOk = false;
-    } else if (!GuestGender.trim()) {
-      newErrors.GuestGender = "Please Select Gender";
+    } else if (!gender.trim()) {
+      newErrors.gender = "Please Select Gender";
       toast.error("Please Select Gender");
       isOk = false;
     }
@@ -92,17 +95,117 @@ function AllPopUpsAndOffCanvas() {
 
   //this is for handleSubmit
   const forAddGuestSubmit = () => {
+    e.preventDefault();
     if (CatchErrorAddGuest()) {
-      let formData = new FormData();
-      formData.append("Guest Email", GuestEmail);
-      formData.append("GuestName", GuestName);
-      formData.append("GuestPhone", GuestPhone);
-      formData.append("GuestAddress", GuestAddress);
-      formData.append("image", GuestImage);
-      formData.append("GuestAge", GuestAge);
-      formData.append("GuestGender", GuestGender);
+      let formData = {
+        name,
+        email,
+        phone,
+        age,
+        address,
+        gender,
+      };
 
-      console.log("my form Data", formData);
+      //this is for add guest
+      const forAddGuest = async () => {
+        const url = `${myUrl}/foradd/${restId}/guest`;
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          if (response.ok) {
+            toast.success(data.msg);
+            addGuestChangeState();
+            setName("");
+            setEmail("");
+            setAge("");
+            setAddress("");
+            setPhone("");
+            setGender("");
+          } else {
+            toast.error(data.msg);
+          }
+        } catch (err) {
+          console.log("there is error in the add rest guest function", err);
+        }
+      };
+
+      forAddGuest();
+    }
+  };
+
+  //this is for get data of user for edit
+  const forEditGetGuestData = async () => {
+    const url = `${myUrl}/getforedit/${guestId}/guest`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setName(data.guestPrevData.name);
+        setEmail(data.guestPrevData.email);
+        setPhone(data.guestPrevData.phone);
+        setAge(data.guestPrevData.age);
+        setAddress(data.guestPrevData.address);
+        setGender(data.guestPrevData.gender);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log("there is error in the get data of guest for edit", err);
+    }
+  };
+
+  //this is for control rendering of the get data of guest for edit
+  useEffect(() => {
+    forEditGetGuestData();
+  }, [guestId]);
+
+  //this is for edit guest
+
+  const forClickEditGuest = (e) => {
+    e.preventDefault();
+    if (CatchErrorAddGuest()) {
+      let formData = {
+        name,
+        email,
+        phone,
+        age,
+        gender,
+        address,
+      };
+
+      const forEditGuest = async () => {
+        const url = `${myUrl}/editguest/${guestId}`;
+        const options = {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        };
+
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          if (response.ok) {
+            toast.success(data.msg);
+          } else {
+            toast.error(data.msg);
+          }
+        } catch (err) {
+          console.log("there is error in the edit guest", err);
+        }
+      };
+
+      forEditGuest();
     }
   };
 
@@ -544,48 +647,6 @@ function AllPopUpsAndOffCanvas() {
           <SimpleBar style={{ height: "100vh" }}>
             <div className="px-5 py-3">
               <Row>
-                <Col lg={12}>
-                  <div className="text-center">
-                    <div className="position-relative d-inline-block">
-                      <div className="position-absolute bottom-0 end-0">
-                        <Label htmlFor="company-logo-input" className="mb-0">
-                          <div className="avatar-xs cursor-pointer">
-                            <div className="avatar-title bg-light border rounded-circle text-muted">
-                              <i className="ri-image-fill"></i>
-                            </div>
-                          </div>
-                        </Label>
-                        <Input
-                          name="img"
-                          className="form-control d-none"
-                          id="company-logo-input"
-                          type="file"
-                          accept="image/png, image/gif, image/jpeg"
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            setGuestImage(file);
-                          }}
-                        />
-                      </div>
-                      <div className="avatar-lg p-1">
-                        <div className="avatar-title bg-light rounded-circle">
-                          <img
-                            src={
-                              GuestImage
-                                ? URL.createObjectURL(GuestImage)
-                                : myImage
-                            }
-                            alt="multiGuest"
-                            id="companylogo-img"
-                            className="avatar-md rounded-circle object-fit-cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <h5 className="fs-13 mt-3">Guest Image</h5>
-                  </div>
-                </Col>
-
                 <Col sm={6} className="mt-2">
                   <div className="mb-3">
                     <Label
@@ -598,16 +659,16 @@ function AllPopUpsAndOffCanvas() {
                       className="form-control"
                       id="billinginfo-firstName"
                       placeholder="Enter Email"
-                      onChange={(e) => setGuestEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
-                    {errors.GuestEmail && (
+                    {errors.email && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestEmail}
+                        {errors.email}
                       </p>
                     )}
                   </div>
@@ -622,23 +683,21 @@ function AllPopUpsAndOffCanvas() {
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Name"
-                      onChange={(e) => setGuestName(e.target.value)}
+                      onChange={(e) => setName(e.target.value)}
                     />
-                    {errors.GuestName && (
+                    {errors.name && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestName}
+                        {errors.name}
                       </p>
                     )}
                   </div>
                 </Col>
-              </Row>
 
-              <Row>
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
@@ -649,16 +708,16 @@ function AllPopUpsAndOffCanvas() {
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Name"
-                      onChange={(e) => setGuestAge(e.target.value)}
+                      onChange={(e) => setAge(e.target.value)}
                     />
-                    {errors.GuestAge && (
+                    {errors.age && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestAge}
+                        {errors.age}
                       </p>
                     )}
                   </div>
@@ -673,22 +732,21 @@ function AllPopUpsAndOffCanvas() {
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Phone"
-                      onChange={(e) => setGuestPhone(e.target.value)}
+                      onChange={(e) => setPhone(e.target.value)}
                     />
-                    {errors.GuestPhone && (
+                    {errors.phone && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestPhone}
+                        {errors.phone}
                       </p>
                     )}
                   </div>
                 </Col>
-              </Row>
-              <Row>
+
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
@@ -699,16 +757,16 @@ function AllPopUpsAndOffCanvas() {
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Address"
-                      onChange={(e) => setGuestAddress(e.target.value)}
+                      onChange={(e) => setAddress(e.target.value)}
                     />
-                    {errors.GuestAddress && (
+                    {errors.address && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestAddress}
+                        {errors.address}
                       </p>
                     )}
                   </div>
@@ -719,21 +777,21 @@ function AllPopUpsAndOffCanvas() {
                       Select Gender
                     </Label>
                     <Select
-                      value={GuestGender}
+                      value={gender}
                       onChange={(selectedOption) =>
                         handleSelectGender(selectedOption)
                       }
-                      placeholder={GuestGender ? GuestGender : "select Gender"}
-                      options={GuestGenders}
+                      placeholder={gender ? gender : "select Gender"}
+                      options={genders}
                       id="gender"></Select>
-                    {errors.GuestGender && (
+                    {errors.gender && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestGender}
+                        {errors.gender}
                       </p>
                     )}
                   </div>
@@ -749,8 +807,9 @@ function AllPopUpsAndOffCanvas() {
                 </button>
                 <button
                   className="btn btn-primary"
+                  type="submit"
                   id="add-btn"
-                  onClick={forAddGuestSubmit}>
+                  onClick={(e) => forAddGuestSubmit(e)}>
                   Add Guest
                 </button>
               </div>
@@ -767,7 +826,7 @@ function AllPopUpsAndOffCanvas() {
         id="offcanvasRight"
         className="border-bottom w-75  ">
         <OffcanvasHeader toggle={editGuestChangeState} id="offcanvasRightLabel">
-          <h1>Add Guest</h1>
+          <h1>Edit Guest</h1>
         </OffcanvasHeader>
         <OffcanvasBody className="p-0 overflow-scroll">
           <SimpleBar style={{ height: "100vh" }}>
@@ -824,19 +883,20 @@ function AllPopUpsAndOffCanvas() {
                     </Label>
                     <input
                       type="email"
+                      value={email}
                       className="form-control"
                       id="billinginfo-firstName"
                       placeholder="Enter Email"
-                      onChange={(e) => setGuestEmail(e.target.value)}
+                      onChange={(e) => setEmail(e.target.value)}
                     />
-                    {errors.GuestEmail && (
+                    {errors.email && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestEmail}
+                        {errors.email}
                       </p>
                     )}
                   </div>
@@ -848,19 +908,20 @@ function AllPopUpsAndOffCanvas() {
                     </Label>
                     <input
                       type="text"
+                      value={name}
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Name"
-                      onChange={(e) => setGuestName(e.target.value)}
+                      onChange={(e) => setName(e.target.value)}
                     />
-                    {errors.GuestName && (
+                    {errors.name && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestName}
+                        {errors.name}
                       </p>
                     )}
                   </div>
@@ -875,19 +936,20 @@ function AllPopUpsAndOffCanvas() {
                     </Label>
                     <input
                       type="number"
+                      value={age}
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Name"
-                      onChange={(e) => setGuestAge(e.target.value)}
+                      onChange={(e) => setAge(e.target.value)}
                     />
-                    {errors.GuestAge && (
+                    {errors.age && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestAge}
+                        {errors.age}
                       </p>
                     )}
                   </div>
@@ -899,19 +961,20 @@ function AllPopUpsAndOffCanvas() {
                     </Label>
                     <input
                       type="number"
+                      value={phone}
                       className="form-control"
                       id="billinginfo-email"
                       placeholder="Enter Phone"
-                      onChange={(e) => setGuestPhone(e.target.value)}
+                      onChange={(e) => setPhone(e.target.value)}
                     />
-                    {errors.GuestPhone && (
+                    {errors.phone && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestPhone}
+                        {errors.phone}
                       </p>
                     )}
                   </div>
@@ -926,18 +989,19 @@ function AllPopUpsAndOffCanvas() {
                     <input
                       type="text"
                       className="form-control"
+                      value={address}
                       id="billinginfo-email"
                       placeholder="Enter Address"
-                      onChange={(e) => setGuestAddress(e.target.value)}
+                      onChange={(e) => setAddress(e.target.value)}
                     />
-                    {errors.GuestAddress && (
+                    {errors.address && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestAddress}
+                        {errors.address}
                       </p>
                     )}
                   </div>
@@ -948,21 +1012,21 @@ function AllPopUpsAndOffCanvas() {
                       Select Gender
                     </Label>
                     <Select
-                      value={GuestGender}
+                      value={gender}
                       onChange={(selectedOption) =>
                         handleSelectGender(selectedOption)
                       }
-                      placeholder={GuestGender ? GuestGender : "select Gender"}
-                      options={GuestGenders}
+                      placeholder={gender ? gender : "select Gender"}
+                      options={genders}
                       id="gender"></Select>
-                    {errors.GuestGender && (
+                    {errors.gender && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
                         }}>
-                        {errors.GuestGender}
+                        {errors.gender}
                       </p>
                     )}
                   </div>
@@ -977,9 +1041,10 @@ function AllPopUpsAndOffCanvas() {
                   Close
                 </button>
                 <button
+                  type="submit"
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={forAddGuestSubmit}>
+                  onClick={(e) => forClickEditGuest(e)}>
                   Edit Guest
                 </button>
               </div>

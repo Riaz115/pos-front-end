@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import {
   Container,
@@ -17,11 +17,12 @@ const ListView = () => {
   const [forShowAddCounter, setForShowAddCoutner] = useState(false);
   const [counterName, setCounterName] = useState("");
 
+  //this is for getting url from my data provider
+  const { myUrl, setRestId } = UseRiazHook();
+
   //this is for get id from url
   const { id } = useParams();
-
-  //this is for getting url from my data provider
-  const { myUrl } = UseRiazHook();
+  setRestId(id);
 
   //this is for open and close for add counter
   const toggleAddCounter = () => {
@@ -158,6 +159,32 @@ const ListView = () => {
                   style={{ gap: "10px" }}>
                   <Link
                     to="#"
+                    style={{
+                      textDecoration: "none",
+                      padding: "5px 30px",
+                      borderRadius: "20px",
+                      backgroundColor: "black",
+                      color: "white",
+                    }}>
+                    Open
+                  </Link>
+                </div>
+              </div>
+            </Col>
+            <Col lg={4} md={6}>
+              <div
+                className="d-felx align-items-center justify-content-center flex-column text-center my-2"
+                style={{
+                  border: "1px solid black",
+                  borderRadius: "10px",
+                  padding: "10px",
+                }}>
+                <h2>All Guests of Restaurent </h2>
+                <div
+                  className="d-flex align-items-center justify-content-center my-2 p-2"
+                  style={{ gap: "10px" }}>
+                  <Link
+                    to={`/guest/${id}`}
                     style={{
                       textDecoration: "none",
                       padding: "5px 30px",

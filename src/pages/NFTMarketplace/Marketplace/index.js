@@ -7,7 +7,7 @@ const Marketplace = () => {
   const [userAllResturents, setUserAllResturents] = useState([]);
 
   //this is for getting data from the hook
-  const { myUrl, token } = UseRiazHook();
+  const { myUrl, token, setRestId } = UseRiazHook();
 
   //this is for get users all restaurents
   const forGetUserAllRestaurents = async () => {
@@ -39,6 +39,12 @@ const Marketplace = () => {
   useEffect(() => {
     forGetUserAllRestaurents();
   }, []);
+
+  //this is for rest id
+  const forGetRestId = (id) => {
+    localStorage.setItem("restid", id);
+    setRestId(id);
+  };
 
   return (
     <React.Fragment>
@@ -82,6 +88,7 @@ const Marketplace = () => {
                     <div className="d-flex align-items-center justify-content-center  my-3">
                       <Link
                         to={`/restaurent/${item._id}/restdata`}
+                        onClick={() => forGetRestId(item._id)}
                         className="btn btn-primary btn-smn py-1 px-4  mx-2">
                         Open
                       </Link>

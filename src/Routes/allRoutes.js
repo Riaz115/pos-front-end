@@ -254,7 +254,7 @@ const authProtectedRoutes = [
   { path: "/credit-book", component: <DashboardNFT /> },
   { path: "/collection-report", component: <DashboardCrm /> },
   { path: "/settlements", component: <UiScrollbar /> },
-  { path: "/guest", component: <RemixIcons /> },
+  { path: "/guest/:id", component: <RemixIcons /> },
   {
     path: "/dine",
     component: <EcommerceProductDetail />,

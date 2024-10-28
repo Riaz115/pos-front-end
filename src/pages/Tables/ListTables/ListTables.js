@@ -33,6 +33,7 @@ const BasicTables = () => {
   const [allMenuItems, setAllMenuItems] = useState([]);
   const [itemId, setItemId] = useState("");
   const [editImage, setEditImage] = useState("");
+  const [qty, setQty] = useState("");
 
   //this is for getting data from my hook
   const { myUrl } = UseRiazHook();
@@ -120,6 +121,9 @@ const BasicTables = () => {
     } else if (!desc.trim()) {
       toast.error("please enter item description");
       isOk = false;
+    } else if (qty === "") {
+      toast.error("please enter the quantity");
+      isOk = true;
     }
 
     return isOk;
@@ -141,6 +145,9 @@ const BasicTables = () => {
     } else if (!desc.trim()) {
       toast.error("please enter item description");
       isOk = false;
+    } else if (qty === "") {
+      toast.error("please enter the quantity");
+      isOk = true;
     }
 
     return isOk;
@@ -156,6 +163,7 @@ const BasicTables = () => {
       formData.append("catagory", catagory);
       formData.append("desc", desc);
       formData.append("image", image);
+      formData.append("qty", qty);
 
       //this is for add items
       const forAddMenuItem = async () => {
@@ -172,6 +180,7 @@ const BasicTables = () => {
             toast.success(data.msg);
             forGetAllMenuItems();
             setIsRight(false);
+            setImage("");
           } else {
             toast.error(data.msg);
           }
@@ -191,11 +200,12 @@ const BasicTables = () => {
       const response = await fetch(url, options);
       const data = await response.json();
       if (response.ok) {
-        setName(data.myItem.name),
-          setPrice(data.myItem.price),
-          setCatagory(data.myItem.catagory),
-          setDesc(data.myItem.desc),
-          setEditImage(data.myItem.image);
+        setName(data.myItem.name);
+        setPrice(data.myItem.price);
+        setCatagory(data.myItem.catagory);
+        setDesc(data.myItem.desc);
+        setEditImage(data.myItem.image);
+        setQty(data.myItem.qty);
       } else {
         console.log("err data", data);
       }
@@ -221,6 +231,7 @@ const BasicTables = () => {
       formData.append("catagory", catagory);
       formData.append("desc", desc);
       formData.append("image", image);
+      formData.append("qty", qty);
 
       //this is for update the menu item
       const forUpdateMenuItem = async () => {
@@ -237,6 +248,7 @@ const BasicTables = () => {
             toast.success(data.msg);
             forGetAllMenuItems();
             setIsEditItem(false);
+            setImage("");
           } else {
             toast.error(data.msg);
           }
@@ -328,6 +340,7 @@ const BasicTables = () => {
                       <th scope="col">Item Name</th>
                       <th scope="col">Price</th>
                       <th scope="col">Catagory</th>
+                      <th scope="col">Quantity</th>
                       <th scope="col">Action</th>
                     </tr>
                   </thead>
@@ -350,6 +363,7 @@ const BasicTables = () => {
                         </td>
                         <td>${item.price}</td>
                         <td>{item.catagory}</td>
+                        <td>{item.qty}</td>
 
                         <td>
                           <div className="hstack gap-3 flex-wrap">
@@ -436,7 +450,7 @@ const BasicTables = () => {
                   </div>
                 </Col>
 
-                <Col sm={12}>
+                <Col sm={6}>
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
@@ -452,9 +466,22 @@ const BasicTables = () => {
                     />
                   </div>
                 </Col>
-              </Row>
+                <Col sm={6}>
+                  <div className="mb-3">
+                    <Label htmlFor="catagory" className="form-label">
+                      Catagory
+                    </Label>
+                    <Select
+                      value={catagory}
+                      onChange={(selectedOption) =>
+                        handleSelectCatagory(selectedOption)
+                      }
+                      placeholder={catagory ? catagory : "select catagroy"}
+                      options={forAllCatagories}
+                      id="country"></Select>
+                  </div>
+                </Col>
 
-              <Row>
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
@@ -472,17 +499,16 @@ const BasicTables = () => {
 
                 <Col sm={6}>
                   <div className="mb-3">
-                    <Label htmlFor="catagory" className="form-label">
-                      Catagory
+                    <Label htmlFor="billinginfo-email" className="form-label">
+                      Quantity
                     </Label>
-                    <Select
-                      value={catagory}
-                      onChange={(selectedOption) =>
-                        handleSelectCatagory(selectedOption)
-                      }
-                      placeholder={catagory ? catagory : "select catagroy"}
-                      options={forAllCatagories}
-                      id="country"></Select>
+                    <input
+                      type="number"
+                      className="form-control"
+                      id="billinginfo-email"
+                      placeholder="Enter Price"
+                      onChange={(e) => setQty(e.target.value)}
+                    />
                   </div>
                 </Col>
               </Row>
@@ -570,7 +596,7 @@ const BasicTables = () => {
                   </div>
                 </Col>
 
-                <Col sm={12}>
+                <Col sm={6}>
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
@@ -587,9 +613,7 @@ const BasicTables = () => {
                     />
                   </div>
                 </Col>
-              </Row>
 
-              <Row>
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
@@ -602,6 +626,22 @@ const BasicTables = () => {
                       id="billinginfo-email"
                       placeholder="Enter Price"
                       onChange={(e) => setPrice(e.target.value)}
+                    />
+                  </div>
+                </Col>
+
+                <Col sm={6}>
+                  <div className="mb-3">
+                    <Label htmlFor="billinginfo-email" className="form-label">
+                      Quantity
+                    </Label>
+                    <input
+                      type="number"
+                      value={qty}
+                      className="form-control"
+                      id="billinginfo-email"
+                      placeholder="Enter Price"
+                      onChange={(e) => setQty(e.target.value)}
                     />
                   </div>
                 </Col>
