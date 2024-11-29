@@ -86,7 +86,7 @@ const BasicTables = () => {
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
-        setAllMenuItems(data.updatedrestMenuItems);
+        setAllMenuItems(data.allItems);
       } else {
         console.log("err data", data);
       }
@@ -323,7 +323,8 @@ const BasicTables = () => {
                   className="add-btn bg-dark text-white px-4 py-1 border-none cursor-pointer
 "
                   id="create-btn"
-                  onClick={toggleRightCanvas}>
+                  onClick={toggleRightCanvas}
+                >
                   <i className="ri-add-line align-bottom me-1"></i> Add Item
                 </Button>
               </div>
@@ -339,6 +340,7 @@ const BasicTables = () => {
                       <th scope="col">Id</th>
                       <th scope="col">Item Name</th>
                       <th scope="col">Price</th>
+
                       <th scope="col">Catagory</th>
                       <th scope="col">Quantity</th>
                       <th scope="col">Action</th>
@@ -362,6 +364,7 @@ const BasicTables = () => {
                           </div>
                         </td>
                         <td>${item.price}</td>
+
                         <td>{item.catagory}</td>
                         <td>{item.qty}</td>
 
@@ -373,7 +376,8 @@ const BasicTables = () => {
                               style={{
                                 padding: "4px 8px",
                                 backgroundColor: "#E6F7FC",
-                              }}>
+                              }}
+                            >
                               <i className="ri-pencil-fill align-bottom" />
                             </button>
                             <button
@@ -383,7 +387,8 @@ const BasicTables = () => {
                                 padding: "4px 8px",
                                 backgroundColor: "#FEEDE9",
                                 color: "red",
-                              }}>
+                              }}
+                            >
                               <i className="ri-delete-bin-5-fill align-bottom" />
                             </button>
                           </div>
@@ -404,7 +409,8 @@ const BasicTables = () => {
         direction="end"
         toggle={toggleRightCanvas}
         id="offcanvasRight"
-        className="border-bottom w-75">
+        className="border-bottom w-75"
+      >
         <OffcanvasHeader toggle={toggleRightCanvas} id="offcanvasRightLabel">
           <h1>Add Item</h1>
         </OffcanvasHeader>
@@ -454,7 +460,8 @@ const BasicTables = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       Item Name
                     </Label>
                     <input
@@ -466,6 +473,7 @@ const BasicTables = () => {
                     />
                   </div>
                 </Col>
+
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="catagory" className="form-label">
@@ -478,7 +486,8 @@ const BasicTables = () => {
                       }
                       placeholder={catagory ? catagory : "select catagroy"}
                       options={forAllCatagories}
-                      id="country"></Select>
+                      id="country"
+                    ></Select>
                   </div>
                 </Col>
 
@@ -511,30 +520,38 @@ const BasicTables = () => {
                     />
                   </div>
                 </Col>
+
+                <Col sm={6}>
+                  {" "}
+                  <div className="mb-3">
+                    <Label htmlFor="billinginfo-address" className="form-label">
+                      Description
+                    </Label>
+                    <textarea
+                      className="form-control"
+                      id="billinginfo-address"
+                      value={desc}
+                      placeholder="Enter Item Description"
+                      onChange={(e) => setDesc(e.target.value)}
+                      rows="3"
+                    ></textarea>
+                  </div>
+                </Col>
               </Row>
 
-              <div className="mb-3">
-                <Label htmlFor="billinginfo-address" className="form-label">
-                  Description
-                </Label>
-                <textarea
-                  className="form-control"
-                  id="billinginfo-address"
-                  placeholder="Enter Item Description"
-                  onChange={(e) => setDesc(e.target.value)}
-                  rows="3"></textarea>
-              </div>
               <div className="hstack gap-2 justify-content-end my-5">
                 <button
                   type="button"
                   className="btn btn-light"
-                  onClick={toggleRightCanvas}>
+                  onClick={toggleRightCanvas}
+                >
                   Close
                 </button>
                 <button
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={(e) => forAddItemSubmit(e)}>
+                  onClick={(e) => forAddItemSubmit(e)}
+                >
                   Add Item
                 </button>
               </div>
@@ -549,7 +566,8 @@ const BasicTables = () => {
         direction="end"
         toggle={forEditItemPartShow}
         id="offcanvasRight"
-        className="border-bottom w-75">
+        className="border-bottom w-75"
+      >
         <OffcanvasHeader toggle={forEditItemPartShow} id="offcanvasRightLabel">
           <h1>Edit Item</h1>
         </OffcanvasHeader>
@@ -600,7 +618,8 @@ const BasicTables = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       Item Name
                     </Label>
                     <input
@@ -658,35 +677,43 @@ const BasicTables = () => {
                       }
                       placeholder={catagory ? catagory : "select catagroy"}
                       options={forAllCatagories}
-                      id="country"></Select>
+                      id="country"
+                    ></Select>
+                  </div>
+                </Col>
+
+                <Col sm={6}>
+                  {" "}
+                  <div className="mb-3">
+                    <Label htmlFor="billinginfo-address" className="form-label">
+                      Description
+                    </Label>
+                    <textarea
+                      className="form-control"
+                      id="billinginfo-address"
+                      value={desc}
+                      placeholder="Enter Item Description"
+                      onChange={(e) => setDesc(e.target.value)}
+                      rows="3"
+                    ></textarea>
                   </div>
                 </Col>
               </Row>
 
-              <div className="mb-3">
-                <Label htmlFor="billinginfo-address" className="form-label">
-                  Description
-                </Label>
-                <textarea
-                  className="form-control"
-                  id="billinginfo-address"
-                  value={desc}
-                  placeholder="Enter Item Description"
-                  onChange={(e) => setDesc(e.target.value)}
-                  rows="3"></textarea>
-              </div>
               <div className="hstack gap-2 justify-content-end my-5">
                 <button
                   type="button"
                   className="btn btn-light"
-                  onClick={forEditItemPartShow}>
+                  onClick={forEditItemPartShow}
+                >
                   Close
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={(e) => forEditItemSubmit(e)}>
+                  onClick={(e) => forEditItemSubmit(e)}
+                >
                   Edit Item
                 </button>
               </div>

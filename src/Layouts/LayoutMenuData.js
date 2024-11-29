@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { UseRiazHook } from "../RiazStore/RiazStore";
 
 const Navdata = () => {
   const history = useNavigate();
+  //this is for getting data from my hook
+  const { counterId } = UseRiazHook();
+
   //state data
   const [isDashboard, setIsDashboard] = useState(false);
   const [isApps, setIsApps] = useState(false);
@@ -178,7 +182,7 @@ const Navdata = () => {
         {
           id: "Cashier",
           label: "Cashier",
-          link: "/all-tables-etc",
+          link: "/area/tables/testing",
           parentId: "User",
         },
       ],
@@ -243,6 +247,12 @@ const Navdata = () => {
           id: "dashboard",
           label: "dashboard",
           link: "/my-dashboard",
+          parentId: "dashboard",
+        },
+        {
+          id: "dashboard",
+          label: "CounterAreas",
+          link: `/counter/${counterId}/counterareas`,
           parentId: "dashboard",
         },
       ],
@@ -324,8 +334,14 @@ const Navdata = () => {
       subItems: [
         {
           id: "KDS",
-          label: "KDS",
-          link: "/advance-ui-nestable",
+          label: "Counter KDS",
+          link: "/for-kds/for/onlycounter",
+          parentId: "KDS",
+        },
+        {
+          id: "KDS",
+          label: "Restaurent All KDS",
+          link: "/for-kds/for/allrestaurent",
           parentId: "KDS",
         },
       ],

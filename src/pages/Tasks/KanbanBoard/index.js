@@ -36,7 +36,7 @@ const Kanbanboard = () => {
   const [errors, setErrors] = useState({});
 
   // this is for search items when making combo deal
-  const filteredItems = allMenuItems.filter((item) =>
+  const filteredItems = allMenuItems?.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -58,7 +58,7 @@ const Kanbanboard = () => {
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
-        setAllMenuItems(data.updatedrestMenuItems);
+        setAllMenuItems(data.allItems);
       } else {
         console.log("err data", data);
       }
@@ -73,7 +73,7 @@ const Kanbanboard = () => {
       if (checked) {
         return [...prevItems, { id: itemId, quantity: 1 }]; // Default quantity of 1
       } else {
-        return prevItems.filter((item) => item.id !== itemId);
+        return prevItems?.filter((item) => item.id !== itemId);
       }
     });
   };
@@ -132,7 +132,7 @@ const Kanbanboard = () => {
       isOk = false;
       newErrors.price = "Please Enter price";
       toast.error("please enter the price");
-    } else if (items.length < 0) {
+    } else if (items === "") {
       isOk = false;
       newErrors.items = "Please Select Items";
       toast.error("please Select Items");
@@ -351,7 +351,8 @@ const Kanbanboard = () => {
                   className="add-btn bg-dark text-white px-4 py-1 border-none cursor-pointer
 "
                   id="create-btn"
-                  onClick={toggleRightCanvas}>
+                  onClick={toggleRightCanvas}
+                >
                   <i className="ri-add-line align-bottom me-1"></i> Add Deal
                 </Button>
               </div>
@@ -405,7 +406,8 @@ const Kanbanboard = () => {
                               style={{
                                 padding: "4px 8px",
                                 backgroundColor: "#E6F7FC",
-                              }}>
+                              }}
+                            >
                               <i className="ri-pencil-fill align-bottom" />
                             </button>
                             <button
@@ -415,7 +417,8 @@ const Kanbanboard = () => {
                                 padding: "4px 8px",
                                 backgroundColor: "#FEEDE9",
                                 color: "red",
-                              }}>
+                              }}
+                            >
                               <i className="ri-delete-bin-5-fill align-bottom" />
                             </button>
                           </div>
@@ -436,7 +439,8 @@ const Kanbanboard = () => {
         direction="end"
         toggle={toggleRightCanvas}
         id="offcanvasRight"
-        className="border-bottom w-75">
+        className="border-bottom w-75"
+      >
         <OffcanvasHeader toggle={toggleRightCanvas} id="offcanvasRightLabel">
           <h1>Add Deal</h1>
         </OffcanvasHeader>
@@ -484,7 +488,8 @@ const Kanbanboard = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.image}
                       </p>
                     )}
@@ -496,7 +501,8 @@ const Kanbanboard = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       Item Name
                     </Label>
                     <input
@@ -512,7 +518,8 @@ const Kanbanboard = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.name}
                       </p>
                     )}
@@ -537,7 +544,8 @@ const Kanbanboard = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.price}
                       </p>
                     )}
@@ -554,7 +562,8 @@ const Kanbanboard = () => {
                       id="billinginfo-address"
                       placeholder="Enter Item Description"
                       onChange={(e) => setDesc(e.target.value)}
-                      rows="3"></textarea>
+                      rows="3"
+                    ></textarea>
                   </div>
                   {errors.desc && (
                     <p
@@ -562,7 +571,8 @@ const Kanbanboard = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.desc}
                     </p>
                   )}
@@ -585,13 +595,14 @@ const Kanbanboard = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.items}
                       </p>
                     )}
 
                     <Row>
-                      {filteredItems.map((item) => {
+                      {filteredItems?.map((item) => {
                         const selectedItem = items.find(
                           (i) => i.id === item._id
                         );
@@ -646,13 +657,15 @@ const Kanbanboard = () => {
                 <button
                   type="button"
                   className="btn btn-light"
-                  onClick={toggleRightCanvas}>
+                  onClick={toggleRightCanvas}
+                >
                   Close
                 </button>
                 <button
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={(e) => forAddComboItemClickBtn(e)}>
+                  onClick={(e) => forAddComboItemClickBtn(e)}
+                >
                   Add Item
                 </button>
               </div>
@@ -667,7 +680,8 @@ const Kanbanboard = () => {
         direction="end"
         toggle={forEditItemPartShow}
         id="offcanvasRight"
-        className="border-bottom w-75">
+        className="border-bottom w-75"
+      >
         <OffcanvasHeader toggle={forEditItemPartShow} id="offcanvasRightLabel">
           <h1>Edit Deal</h1>
         </OffcanvasHeader>
@@ -718,7 +732,8 @@ const Kanbanboard = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       Item Name
                     </Label>
                     <input
@@ -761,7 +776,7 @@ const Kanbanboard = () => {
                     />
 
                     <Row>
-                      {filteredItems.map((item) => {
+                      {filteredItems?.map((item) => {
                         const selectedItem = items.find(
                           (i) => i.id === item._id
                         );
@@ -823,20 +838,23 @@ const Kanbanboard = () => {
                   value={desc}
                   placeholder="Enter Item Description"
                   onChange={(e) => setDesc(e.target.value)}
-                  rows="3"></textarea>
+                  rows="3"
+                ></textarea>
               </div>
               <div className="hstack gap-2 justify-content-end my-5">
                 <button
                   type="button"
                   className="btn btn-light"
-                  onClick={forEditItemPartShow}>
+                  onClick={forEditItemPartShow}
+                >
                   Close
                 </button>
                 <button
                   type="submit"
                   onClick={(e) => handleEditDealSubmit(e)}
                   className="btn btn-primary"
-                  id="add-btn">
+                  id="add-btn"
+                >
                   Edit Item
                 </button>
               </div>

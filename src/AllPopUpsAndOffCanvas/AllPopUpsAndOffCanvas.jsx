@@ -34,15 +34,51 @@ function AllPopUpsAndOffCanvas() {
     editGuestChangeState,
     showForGuestAdd,
     addGuestChangeState,
+    guestData,
     myUrl,
     restId,
     guestId,
+    setGuestId,
+    setGuestData,
+    forTableData,
+    forTableId,
+    forGettingTableData,
+    allGuests,
+    setAllGuests,
+    filteredGuest,
+    setFilterGuests,
   } = UseRiazHook();
 
   //this is for select Guest gender
   function handleSelectGender(selectedOption) {
     setGender(selectedOption.value);
   }
+
+  //this is for getting all guests data
+  const forGettingAllGuests = async () => {
+    const url = `${myUrl}/forgetall/${restId}/guests`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setAllGuests(data.guests);
+        setFilterGuests(data.guests);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the get all restaurent guest function",
+        err
+      );
+    }
+  };
+
+  //this is for controll rendering of all all guest getting data function
+  useEffect(() => {
+    forGettingAllGuests();
+  }, []);
 
   //this is Guest Gender List
   const genders = [
@@ -95,7 +131,6 @@ function AllPopUpsAndOffCanvas() {
 
   //this is for handleSubmit
   const forAddGuestSubmit = () => {
-    e.preventDefault();
     if (CatchErrorAddGuest()) {
       let formData = {
         name,
@@ -116,13 +151,13 @@ function AllPopUpsAndOffCanvas() {
           },
           body: JSON.stringify(formData),
         };
-
         try {
           const response = await fetch(url, options);
           const data = await response.json();
           if (response.ok) {
             toast.success(data.msg);
             addGuestChangeState();
+            forGettingAllGuests();
             setName("");
             setEmail("");
             setAge("");
@@ -165,12 +200,21 @@ function AllPopUpsAndOffCanvas() {
 
   //this is for control rendering of the get data of guest for edit
   useEffect(() => {
-    forEditGetGuestData();
+    if (guestId) {
+      forEditGetGuestData();
+    }
   }, [guestId]);
 
-  //this is for edit guest
+  //this is for click on edit guests
+  const forClickOnEditGuest = async (id) => {
+    editGuestChangeState();
+    localStorage.setItem("guestid", id);
+    setGuestId(id);
+    forEditGetGuestData();
+  };
 
-  const forClickEditGuest = (e) => {
+  //this is for edit guest
+  const forHandleEditGuestSubmit = (e) => {
     e.preventDefault();
     if (CatchErrorAddGuest()) {
       let formData = {
@@ -197,6 +241,8 @@ function AllPopUpsAndOffCanvas() {
           const data = await response.json();
           if (response.ok) {
             toast.success(data.msg);
+            forGettingAllGuests();
+            editGuestChangeState();
           } else {
             toast.error(data.msg);
           }
@@ -206,6 +252,62 @@ function AllPopUpsAndOffCanvas() {
       };
 
       forEditGuest();
+    }
+  };
+
+  //this is for add guest to order
+  const forAddGuestToOrder = async (guestData) => {
+    let newGuestData = {
+      guestData: guestData,
+    };
+    const url = `${myUrl}/add/${forTableId}/guesttoorder`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(newGuestData),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("ok data", data);
+        setGuestData({});
+        forGettingTableData();
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the for add and remove guest data to order",
+        err
+      );
+    }
+  };
+
+  //this is for guest handle change
+  const handleGuestSelection = (item) => {
+    setGuestData(item);
+    guestSearchChangeState();
+    forAddGuestToOrder(item);
+  };
+
+  //this is for search from guests
+  const OnchangeHandler = (e) => {
+    let search = e.target.value;
+    if (search) {
+      const filteredUsers = allGuests.filter((data) =>
+        Object.values(data).some(
+          (field) =>
+            typeof field === "string" &&
+            field.toLowerCase().includes(search.toLowerCase())
+        )
+      );
+      setFilterGuests(filteredUsers);
+    } else {
+      setFilterGuests(allGuests);
     }
   };
 
@@ -222,21 +324,25 @@ function AllPopUpsAndOffCanvas() {
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
             zIndex: 12,
-          }}>
+          }}
+        >
           <div
             className="d-flex  flex-column bg-white  pb-4 "
             style={{
               width: "700px",
               height: "80vh",
               boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-            }}>
+            }}
+          >
             <div
               className=" p-1  d-flex justify-content-between align-items-center  mb-2"
-              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}>
+              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+            >
               <p className="p-0 m-0 text-white">Guest</p>
               <p
                 className="m-0 p-2 color-dark cursor-pointer"
-                onClick={guestSearchChangeState}>
+                onClick={guestSearchChangeState}
+              >
                 x
               </p>
             </div>
@@ -246,13 +352,15 @@ function AllPopUpsAndOffCanvas() {
               style={{
                 fontSize: "14px",
                 backgroundColor: "#F3F3F3",
-              }}>
+              }}
+            >
               <div className="d-flex align-items-center justify-content-center fs-4">
                 All Guests
               </div>
               <div
                 className="d-flex align-items-center justify-content-center   "
-                style={{ gap: "5px" }}>
+                style={{ gap: "5px" }}
+              >
                 <p
                   onClick={addGuestChangeState}
                   className="cursor-pointer"
@@ -261,7 +369,8 @@ function AllPopUpsAndOffCanvas() {
                     color: "white",
                     padding: "3px 5px",
                     margin: 0,
-                  }}>
+                  }}
+                >
                   <FaPlus className="pe-1" /> Add Guest
                 </p>
               </div>
@@ -269,18 +378,29 @@ function AllPopUpsAndOffCanvas() {
 
             <div
               className="d-flex  flex-column my-1 px-3 py-1"
-              style={{ gap: "10px" }}>
+              style={{ gap: "10px" }}
+            >
               <div className="d-flex flex-column">
-                <Label for="kotNumber">Mobile Number *</Label>
+                <Label for="kotNumber" style={{ fontSize: "14px" }}>
+                  Mobile Number *
+                </Label>
                 <Input
                   type="number"
                   id="kotNumber"
                   placeholder="Mobile Number"
+                  onChange={(e) => OnchangeHandler(e)}
                 />
               </div>
               <div className="d-flex flex-column">
-                <Label for="kotNumber">Guest Name *</Label>
-                <Input type="text" id="kotNumber" placeholder="Guest Name" />
+                <Label for="kotNumber" style={{ fontSize: "14px" }}>
+                  Guest Name *
+                </Label>
+                <Input
+                  type="text"
+                  onChange={(e) => OnchangeHandler(e)}
+                  id="kotNumber"
+                  placeholder="Guest Name"
+                />
               </div>
             </div>
 
@@ -291,339 +411,98 @@ function AllPopUpsAndOffCanvas() {
                 msOverflowStyle: "none",
                 overflowY: "scroll",
                 gap: "1px",
-              }}>
+              }}
+            >
               <div className="p-1">
                 <div
                   className="table-responsive "
                   style={{
                     overflowY: "scroll",
                     gap: "1px",
-                  }}>
+                  }}
+                >
                   <table className="table  table-striped  table-hover table-light  ">
                     <thead>
                       <tr>
                         <th
                           scope="col"
                           style={{ fontSize: "12px" }}
-                          className="fw-bold">
+                          className="fw-bold"
+                        >
                           #
                         </th>
                         <th
                           scope="col"
                           style={{ fontSize: "12px" }}
-                          className="fw-bold">
+                          className="fw-bold"
+                        >
                           Name
                         </th>
                         <th
                           scope="col"
                           style={{ fontSize: "12px" }}
-                          className="fw-bold">
+                          className="fw-bold"
+                        >
                           Phone
                         </th>
                         <th
                           scope="col"
                           style={{ fontSize: "12px" }}
-                          className="fw-bold">
+                          className="fw-bold"
+                        >
                           Address
                         </th>
                         <th
                           scope="col"
                           style={{ fontSize: "12px" }}
-                          className="fw-bold">
+                          className="fw-bold"
+                        >
                           Action
                         </th>
                       </tr>
                     </thead>
-                    <tbody style={{ fontSize: "12px" }}>
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              onClick={editGuestChangeState}
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>{" "}
-                      <tr>
-                        <td>1</td>
-                        <td>Muhammad Riaz Ahmad</td>
-                        <td>03223456789086</td>
-                        <td>i live in sahiwal and i live in lahore </td>
-                        <td>
-                          <div
-                            className="d-flex align-items-center justify-content-between"
-                            style={{ gap: "2px" }}>
-                            <Input
-                              className="form-check-input p-2"
-                              type="checkbox"
-                              id="formCheck6"
-                            />
-                            <FaRegEdit
-                              style={{
-                                padding: "5px",
-                                backgroundColor: "#FFBE07",
-                                fontSize: "20px",
-                              }}
-                            />
-                          </div>
-                        </td>
-                      </tr>
+
+                    <tbody>
+                      {filteredGuest.map((item, index) => (
+                        <tr key={index} style={{ fontSize: "12px" }}>
+                          <td>1</td>
+                          <td>{item.name}</td>
+                          <td>{item.phone}</td>
+                          <td>{item.address}</td>
+                          <td>
+                            <div
+                              className="d-flex align-items-center justify-content-between"
+                              style={{ gap: "2px" }}
+                            >
+                              <Input
+                                className="form-check-input p-2"
+                                type="checkbox"
+                                id="formCheck6"
+                                checked={
+                                  forTableData?.currentOrder?.guest?.id ===
+                                  item._id
+                                }
+                                onChange={(e) => {
+                                  if (e.target.checked) {
+                                    handleGuestSelection(item);
+                                  } else {
+                                    setGuestData({});
+                                    forAddGuestToOrder(guestData);
+                                  }
+                                }}
+                              />
+                              <FaRegEdit
+                                onClick={() => forClickOnEditGuest(item._id)}
+                                style={{
+                                  padding: "5px",
+                                  backgroundColor: "#FFBE07",
+                                  fontSize: "20px",
+                                }}
+                              />
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
                     </tbody>
                   </table>
                 </div>
@@ -639,7 +518,8 @@ function AllPopUpsAndOffCanvas() {
         direction="end"
         toggle={addGuestChangeState}
         id="offcanvasRight"
-        className="border-bottom w-75  ">
+        className="border-bottom w-75  "
+      >
         <OffcanvasHeader toggle={addGuestChangeState} id="offcanvasRightLabel">
           <h1>Add Guest</h1>
         </OffcanvasHeader>
@@ -651,7 +531,8 @@ function AllPopUpsAndOffCanvas() {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       Guest Email
                     </Label>
                     <input
@@ -667,7 +548,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.email}
                       </p>
                     )}
@@ -691,7 +573,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.name}
                       </p>
                     )}
@@ -716,7 +599,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.age}
                       </p>
                     )}
@@ -740,7 +624,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.phone}
                       </p>
                     )}
@@ -765,7 +650,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.address}
                       </p>
                     )}
@@ -783,14 +669,16 @@ function AllPopUpsAndOffCanvas() {
                       }
                       placeholder={gender ? gender : "select Gender"}
                       options={genders}
-                      id="gender"></Select>
+                      id="gender"
+                    ></Select>
                     {errors.gender && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.gender}
                       </p>
                     )}
@@ -802,14 +690,16 @@ function AllPopUpsAndOffCanvas() {
                 <button
                   type="button"
                   className="btn bg-dark text-white"
-                  onClick={addGuestChangeState}>
+                  onClick={addGuestChangeState}
+                >
                   Close
                 </button>
                 <button
                   className="btn btn-primary"
                   type="submit"
                   id="add-btn"
-                  onClick={(e) => forAddGuestSubmit(e)}>
+                  onClick={(e) => forAddGuestSubmit(e)}
+                >
                   Add Guest
                 </button>
               </div>
@@ -824,7 +714,8 @@ function AllPopUpsAndOffCanvas() {
         direction="end"
         toggle={editGuestChangeState}
         id="offcanvasRight"
-        className="border-bottom w-75  ">
+        className="border-bottom w-75  "
+      >
         <OffcanvasHeader toggle={editGuestChangeState} id="offcanvasRightLabel">
           <h1>Edit Guest</h1>
         </OffcanvasHeader>
@@ -878,7 +769,8 @@ function AllPopUpsAndOffCanvas() {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       Guest Email
                     </Label>
                     <input
@@ -895,7 +787,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.email}
                       </p>
                     )}
@@ -920,7 +813,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.name}
                       </p>
                     )}
@@ -948,7 +842,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.age}
                       </p>
                     )}
@@ -973,7 +868,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.phone}
                       </p>
                     )}
@@ -1000,7 +896,8 @@ function AllPopUpsAndOffCanvas() {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.address}
                       </p>
                     )}
@@ -1018,14 +915,16 @@ function AllPopUpsAndOffCanvas() {
                       }
                       placeholder={gender ? gender : "select Gender"}
                       options={genders}
-                      id="gender"></Select>
+                      id="gender"
+                    ></Select>
                     {errors.gender && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.gender}
                       </p>
                     )}
@@ -1037,14 +936,16 @@ function AllPopUpsAndOffCanvas() {
                 <button
                   type="button"
                   className="btn bg-dark text-white"
-                  onClick={editGuestChangeState}>
+                  onClick={editGuestChangeState}
+                >
                   Close
                 </button>
                 <button
                   type="submit"
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={(e) => forClickEditGuest(e)}>
+                  onClick={(e) => forHandleEditGuestSubmit(e)}
+                >
                   Edit Guest
                 </button>
               </div>

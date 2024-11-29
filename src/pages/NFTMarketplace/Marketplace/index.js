@@ -2,12 +2,13 @@ import React, { useState, useEffect } from "react";
 import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
+import { toast } from "react-toastify";
 
 const Marketplace = () => {
   const [userAllResturents, setUserAllResturents] = useState([]);
 
   //this is for getting data from the hook
-  const { myUrl, token, setRestId } = UseRiazHook();
+  const { myUrl, token, setRestId, forGettingAllGuests } = UseRiazHook();
 
   //this is for get users all restaurents
   const forGetUserAllRestaurents = async () => {
@@ -44,6 +45,29 @@ const Marketplace = () => {
   const forGetRestId = (id) => {
     localStorage.setItem("restid", id);
     setRestId(id);
+    forGettingAllGuests();
+  };
+
+  //this is for delete restaurent
+  const forDeleteRestaurent = async (id) => {
+    const url = `${myUrl}/delete/${id}/restaurent`;
+    const options = {
+      method: "DELETE",
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.msg);
+        forGetUserAllRestaurents();
+      } else {
+        console.log("err data", data);
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log("there is error in the delete restaurent function", err);
+    }
   };
 
   return (
@@ -81,7 +105,8 @@ const Marketplace = () => {
                     <h5 className="my-3 ">{item.restName}</h5>
                     <p
                       className="text-muted my-2"
-                      style={{ fontSize: "16px", color: "black" }}>
+                      style={{ fontSize: "16px", color: "black" }}
+                    >
                       {item.restEmail}
                     </p>
                     <p className="text-muted my-2 ">{item.restAddress}</p>
@@ -89,13 +114,24 @@ const Marketplace = () => {
                       <Link
                         to={`/restaurent/${item._id}/restdata`}
                         onClick={() => forGetRestId(item._id)}
-                        className="btn btn-primary btn-smn py-1 px-4  mx-2">
+                        className="btn btn-primary btn-smn py-1 px-4  mx-2"
+                      >
                         Open
                       </Link>
+
                       <Link
                         to={`/edit-restaurent/${item._id}`}
-                        className="btn btn-success py-1 px-4 btn-sm mx-2">
+                        className="btn btn-success py-1 px-4 btn-sm mx-2"
+                      >
                         Edit
+                      </Link>
+
+                      <Link
+                        to="#"
+                        onClick={() => forDeleteRestaurent(item._id)}
+                        className="btn btn-primary btn-smn py-1 px-4  mx-2"
+                      >
+                        Delete
                       </Link>
                     </div>
                   </CardBody>

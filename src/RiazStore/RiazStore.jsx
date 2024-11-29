@@ -5,15 +5,25 @@ export const RiazStore = createContext();
 export const MyDataProvider = ({ children }) => {
   const [showForGuest, setShowForGuest] = useState(false);
   const [showForEditGuest, setShowForEditGuest] = useState(false);
+  const [restData, setRestData] = useState({});
   const [showForGuestAdd, setShowForGuestAdd] = useState(false);
   const [allOwnerUser, setAllOwnerUser] = useState([]);
+  const [guestData, setGuestData] = useState({});
+  const [forTableData, setForTableData] = useState({});
+  const [forTableId, setForTableId] = useState("");
   const [guestId, setGuestId] = useState(localStorage.getItem("guestid"));
   const [restId, setRestId] = useState(localStorage.getItem("restid"));
-
+  const [showBtns, setShowBtns] = useState(false);
+  const [persons, setPersons] = useState(localStorage.getItem("person"));
+  const [counterAreaId, setCounterAreaId] = useState(
+    localStorage.getItem("areaid")
+  );
+  const [counterId, setCounterId] = useState(localStorage.getItem("counterid"));
   const token = localStorage.getItem("token");
-
   const [userData, setUserData] = useState("");
   const [userImage, setUserImage] = useState("");
+  const [allGuests, setAllGuests] = useState([]);
+  const [filteredGuest, setFilterGuests] = useState([]);
 
   //this is my backend url
   const myUrl = "http://localhost:8000/api";
@@ -117,6 +127,79 @@ export const MyDataProvider = ({ children }) => {
     }
   };
 
+  //this is for getting restaurent all data
+  const forGettingRestAllData = async () => {
+    const url = `${myUrl}/getRestDataforEdit/${restId}`;
+    const options = {
+      method: "GET",
+    };
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setRestData(data.myRest);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log("there is error in the get rest data function", err);
+    }
+  };
+
+  //this is for controll rendering
+  useEffect(() => {
+    forGettingRestAllData();
+  }, [restId]);
+
+  //this is for getting table data
+  const forGettingTableData = async () => {
+    if (!forTableId) return;
+    const url = `${myUrl}/getdata/${forTableId}/table`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setForTableData(data.tableData);
+        setGuestData(data?.tableData?.currentOrder?.guest);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log("there is error in the get table data for edit", err);
+    }
+  };
+  //this is for getting table data rendering
+  useEffect(() => {
+    forGettingTableData();
+  }, [forTableId]);
+
+  //this is for getting all guests data
+  const forGettingAllGuests = async () => {
+    const url = `${myUrl}/forgetall/${restId}/guests`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setAllGuests(data.guests);
+        setFilterGuests(data.guests);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the get all restaurent guest function",
+        err
+      );
+    }
+  };
+
+  //this is for controll rendering of all all guest getting data function
+  useEffect(() => {
+    forGettingAllGuests();
+  }, [restId]);
+
   return (
     <>
       <RiazStore.Provider
@@ -141,7 +224,30 @@ export const MyDataProvider = ({ children }) => {
           guestId,
           setGuestId,
           forDeleteGuest,
-        }}>
+          showBtns,
+          setShowBtns,
+          persons,
+          setPersons,
+          counterAreaId,
+          setCounterAreaId,
+          restData,
+          setRestData,
+          guestData,
+          setGuestData,
+          forTableData,
+          setForTableData,
+          forTableId,
+          setForTableId,
+          forGettingTableData,
+          counterId,
+          setCounterId,
+          allGuests,
+          setAllGuests,
+          forGettingAllGuests,
+          filteredGuest,
+          setFilterGuests,
+        }}
+      >
         {children}
       </RiazStore.Provider>
     </>

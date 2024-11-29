@@ -48,10 +48,14 @@ const FileManager = () => {
   const [restState, setRestState] = useState("");
   const [restWebsite, setRestWebsite] = useState("");
   const [restCurrencySymbol, setRestCurrencySymbol] = useState("");
-  const [serviceChargesType, setServiceChargesType] = useState("");
-  const [deliveryChargesType, setDeliveryCharesType] = useState("");
   const [errors, setErrors] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [serviceChargesAmount, setServiceChargesAmount] = useState("");
+  const [deliveryChargesAmount, setDeliveryChargesAmount] = useState(0);
+  const [typeOfServiceCharges, setTypeOfServiceCharges] = useState("");
+  const [typeOfDeliveryCharges, setTypeOfDeliveryCharges] = useState("");
+  const [gstTexAmount, setGstTexAmount] = useState(0);
+  const [gstTexType, setGstTexType] = useState("");
 
   //this is data from my hook
   const { myUrl, token } = UseRiazHook();
@@ -236,14 +240,31 @@ const FileManager = () => {
       isOk = false;
       newErrors.payemtPreOrPost = "Please Select Pre or Post";
       toast.error("Please Select pre Or post");
-    } else if (!serviceChargesType.trim()) {
+    } else if (!typeOfServiceCharges.trim()) {
       isOk = false;
-      newErrors.serviceChargesType = "Please Fill This Input";
+      newErrors.typeOfServiceCharges = "Please Fill This Input";
+      toast.error("Please select service  charges");
+    } else if (!serviceChargesAmount === "") {
+      isOk = false;
+      newErrors.serviceChargesAmount = "Please enter service charges amount";
       toast.error("Please fill services charges input");
-    } else if (!deliveryChargesType.trim()) {
+    } else if (!typeOfDeliveryCharges.trim()) {
       isOk = false;
-      newErrors.deliveryChargesType = "Please Fill This Input";
+      newErrors.typeOfDeliveryCharges =
+        "Please Select type of delivery charges";
+      toast.error("Please select type of delivery charges");
+    } else if (!deliveryChargesAmount === "") {
+      isOk = false;
+      newErrors.deliveryChargesAmount = "Please Fill This Input";
       toast.error("Please enter delivery charges");
+    } else if (!gstTexType.trim()) {
+      isOk = false;
+      newErrors.gstTexType = "Please select the food tex type";
+      toast.error("Please select the food tex type");
+    } else if (!gstTexAmount === "") {
+      isOk = false;
+      newErrors.gstTexAmount = "Please enter the food tex amount";
+      toast.error("Please enter the food tex amount");
     }
 
     setErrors(newErrors);
@@ -280,15 +301,18 @@ const FileManager = () => {
       formData.append("posTooltip", posTooltip);
       formData.append("menuTooltip", menuTooltip);
       formData.append("payemtPreOrPost", payemtPreOrPost);
-      formData.append("serviceChargesType", serviceChargesType);
-      formData.append("deliveryChargesType", deliveryChargesType);
+      formData.append("typeOfServiceCharges", typeOfServiceCharges);
+      formData.append("serviceChargesAmount", serviceChargesAmount);
+      formData.append("typeOfDeliveryCharges", typeOfDeliveryCharges);
+      formData.append("deliveryChargesAmount", deliveryChargesAmount);
+      formData.append("gstTexType", gstTexType);
+      formData.append("gstTexAmount", gstTexAmount);
 
       //this is function for add restaurent
       const forEditRetaurent = async () => {
         const url = `${myUrl}/editRestaurent/${id}`;
         const options = {
           method: "PATCH",
-
           body: formData,
         };
 
@@ -312,7 +336,7 @@ const FileManager = () => {
 
   //this is for edit rest link
   const getDataForEditRest = async () => {
-    const url = `${myUrl}//getRestDataforEdit/${id}`;
+    const url = `${myUrl}/getRestDataforEdit/${id}`;
     const options = {
       method: "GET",
     };
@@ -346,8 +370,12 @@ const FileManager = () => {
         setPosTooltip(data.myRest.posTooltip);
         setMenuTooltip(data.myRest.menuTooltip);
         setPaymentPreOrPost(data.myRest.payemtPreOrPost);
-        setServiceChargesType(data.myRest.serviceChargesType);
-        setDeliveryCharesType(data.myRest.deliveryChargesType);
+        setServiceChargesAmount(data.myRest.serviceChargesAmount);
+        setDeliveryChargesAmount(data.myRest.deliveryChargesAmount);
+        setTypeOfServiceCharges(data.myRest.typeOfServiceCharges);
+        setTypeOfDeliveryCharges(data.myRest.typeOfDeliveryCharges);
+        setGstTexAmount(data.myRest.gstTexAmount);
+        setGstTexType(data.myRest.gstTexType);
       } else {
         console.log("err data", data);
       }
@@ -373,7 +401,8 @@ const FileManager = () => {
           <h2 className="text-muted px-3 py-2">Settings</h2>
           <div
             className=" p-3 rounded-2 "
-            style={{ backgroundColor: "#FFFFFF" }}>
+            style={{ backgroundColor: "#FFFFFF" }}
+          >
             <Row>
               <Col lg={4} xl={3} md={6} className="my-2">
                 <div>
@@ -384,7 +413,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Name
                   </Label>
                   <Input
@@ -401,7 +431,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restName}
                     </p>
                   )}
@@ -416,7 +447,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Email
                   </Label>
                   <Input
@@ -433,7 +465,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restEmail}
                     </p>
                   )}
@@ -448,12 +481,14 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Restaurent Logo
                     <Button
                       className="py-0 px-2 "
                       onClick={toggleModal}
-                      style={{ margin: "0px", backgroundColor: "#7367F0" }}>
+                      style={{ margin: "0px", backgroundColor: "#7367F0" }}
+                    >
                       show
                     </Button>
                   </Label>
@@ -478,7 +513,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Phone Number
                   </Label>
                   <Input
@@ -495,7 +531,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restPhone}
                     </p>
                   )}
@@ -505,7 +542,8 @@ const FileManager = () => {
                 <div className="mb-3">
                   <Label
                     htmlFor="choices-single-no-search"
-                    className="form-label text-muted">
+                    className="form-label text-muted"
+                  >
                     Country
                   </Label>
 
@@ -526,7 +564,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.myCountry}
                     </p>
                   )}
@@ -541,7 +580,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     State
                   </Label>
                   <Input
@@ -558,7 +598,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restState}
                     </p>
                   )}
@@ -573,7 +614,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     city
                   </Label>
                   <Input
@@ -590,7 +632,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restCity}
                     </p>
                   )}
@@ -605,7 +648,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Address
                   </Label>
                   <Input
@@ -622,7 +666,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restAddress}
                     </p>
                   )}
@@ -637,7 +682,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Website
                   </Label>
                   <Input
@@ -659,7 +705,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Select Date Formate
                   </Label>
                   <Select
@@ -671,14 +718,16 @@ const FileManager = () => {
                       dateFormate ? dateFormate : "select Date Formate"
                     }
                     options={DateFormateOptions}
-                    id="dateFormate"></Select>
+                    id="dateFormate"
+                  ></Select>
                   {errors.dateFormate && (
                     <p
                       style={{
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.dateFormate}
                     </p>
                   )}
@@ -693,7 +742,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Time Zone
                   </Label>
                   <Select
@@ -710,7 +760,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.selectedTimezone}
                     </p>
                   )}
@@ -725,7 +776,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Currency symbol
                   </Label>
                   <Input
@@ -742,7 +794,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restCurrencySymbol}
                     </p>
                   )}
@@ -757,7 +810,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Currency Position
                   </Label>
                   <Select
@@ -781,7 +835,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.currencyPosition}
                     </p>
                   )}
@@ -796,7 +851,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Precision
                   </Label>
                   <Select
@@ -816,7 +872,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.precision}
                     </p>
                   )}
@@ -831,7 +888,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Decimal Sepreator
                   </Label>
                   <Select
@@ -856,7 +914,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.decimalSprator}
                     </p>
                   )}
@@ -871,7 +930,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Thousand Sepreator
                   </Label>
                   <Select
@@ -896,7 +956,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.thousandSapreater}
                     </p>
                   )}
@@ -911,7 +972,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Order Type
                   </Label>
                   <Select
@@ -932,7 +994,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.orderType}
                     </p>
                   )}
@@ -947,7 +1010,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Delivery Partner
                   </Label>
                   <Select
@@ -974,7 +1038,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.deliveryPartner}
                     </p>
                   )}
@@ -989,7 +1054,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Waiter
                   </Label>
                   <Select
@@ -1015,7 +1081,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.defalutWaiter}
                     </p>
                   )}
@@ -1030,7 +1097,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Customer
                   </Label>
                   <Select
@@ -1056,7 +1124,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.defaultCustomer}
                     </p>
                   )}
@@ -1071,7 +1140,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Payment Method
                   </Label>
                   <Select
@@ -1097,7 +1167,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.defaultPaymentMethod}
                     </p>
                   )}
@@ -1112,7 +1183,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Place Order Tooltip(in POS)
                   </Label>
                   <Select
@@ -1132,7 +1204,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.posTooltip}
                     </p>
                   )}
@@ -1147,7 +1220,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Food Menu Tooltip(in POS)
                   </Label>
                   <Select
@@ -1169,7 +1243,8 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.menuTooltip}
                     </p>
                   )}
@@ -1184,7 +1259,8 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Pre or Post Payment
                   </Label>
                   <Select
@@ -1193,8 +1269,8 @@ const FileManager = () => {
                       setPaymentPreOrPost(selectedOption.value);
                     }}
                     options={[
-                      { value: "show", label: "Show" },
-                      { value: "hide", label: "Hide" },
+                      { value: "pre", label: "pre" },
+                      { value: "post", label: "post" },
                     ]}
                     placeholder={
                       payemtPreOrPost
@@ -1208,13 +1284,55 @@ const FileManager = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.payemtPreOrPost}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-              <Col md={6} className="my-2">
+              <Col lg={3} md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Service Charges Type
+                  </Label>
+                  <Select
+                    value={typeOfServiceCharges}
+                    onChange={(selectedOption) => {
+                      setTypeOfServiceCharges(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "number", label: "Number" },
+                      { value: "percentage", label: "PercentAge" },
+                    ]}
+                    placeholder={
+                      typeOfServiceCharges
+                        ? typeOfServiceCharges
+                        : "select service charges type"
+                    }
+                  />
+                  {errors.currencyPosition && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.typeOfServiceCharges}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col lg={3} md={6} className="my-2">
                 <div>
                   <Label
                     htmlFor="basiInput"
@@ -1223,25 +1341,139 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Service Charge (eg:10% or 10)
                   </Label>
                   <Input
-                    type="text"
+                    type="number"
                     className="form-control"
-                    value={serviceChargesType}
-                    placeholder="10% or 10"
+                    placeholder="Enter Service charges amount"
+                    value={serviceChargesAmount}
                     id="basiInput"
-                    onChange={(e) => setServiceChargesType(e.target.value)}
+                    onChange={(e) => setServiceChargesAmount(e.target.value)}
                   />
-                  {errors.serviceChargesType && (
+                  {errors.serviceChargesAmount && (
                     <p
                       style={{
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
-                      {errors.serviceChargesType}
+                      }}
+                    >
+                      {errors.serviceChargesAmount}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col lg={3} md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Delivery Charges Type
+                  </Label>
+                  <Select
+                    value={typeOfDeliveryCharges}
+                    onChange={(selectedOption) => {
+                      setTypeOfDeliveryCharges(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "number", label: "Number" },
+                      { value: "percentage", label: "PercentAge" },
+                    ]}
+                    placeholder={
+                      typeOfDeliveryCharges
+                        ? typeOfDeliveryCharges
+                        : "Select typeOfDeliveryCharges"
+                    }
+                  />
+                  {errors.typeOfDeliveryCharges && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.typeOfDeliveryCharges}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col lg={3} md={6} className="my-2">
+                <div>
+                  <Label
+                    htmlFor="basiInput"
+                    className="form-label ps-1"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Delivery Charge Amount
+                  </Label>
+                  <Input
+                    type="number"
+                    className="form-control"
+                    value={deliveryChargesAmount}
+                    placeholder="Enter Delivery Charges Amount"
+                    id="basiInput"
+                    onChange={(e) => setDeliveryChargesAmount(e.target.value)}
+                  />
+                  {errors.deliveryChargesAmount && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.deliveryChargesAmount}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Food Tex Type
+                  </Label>
+                  <Select
+                    value={gstTexType}
+                    onChange={(selectedOption) => {
+                      setGstTexType(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "number", label: "Number" },
+                      { value: "percentage", label: "PercentAge" },
+                    ]}
+                    placeholder={gstTexType ? gstTexType : "select Text Type"}
+                  />
+                  {errors.gstTexType && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.gstTexType}
                     </p>
                   )}
                 </div>
@@ -1255,25 +1487,27 @@ const FileManager = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
-                    Delivery Charge (eg:10% or 10)
+                    }}
+                  >
+                    Food Tex Amount
                   </Label>
                   <Input
-                    type="text"
+                    type="number"
+                    value={gstTexAmount}
                     className="form-control"
-                    value={deliveryChargesType}
                     placeholder="10 or 10%"
                     id="basiInput"
-                    onChange={(e) => setDeliveryCharesType(e.target.value)}
+                    onChange={(e) => setGstTexAmount(e.target.value)}
                   />
-                  {errors.deliveryChargesType && (
+                  {errors.gstTexAmount && (
                     <p
                       style={{
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
-                      {errors.deliveryChargesType}
+                      }}
+                    >
+                      {errors.gstTexAmount}
                     </p>
                   )}
                 </div>
@@ -1285,7 +1519,8 @@ const FileManager = () => {
               <Button
                 type="submit"
                 onClick={forEditRestSubmit}
-                className="add-btn bg-info  w-100 text-white px-3 py-2 border-none rounded-5">
+                className="add-btn bg-info  w-100 text-white px-3 py-2 border-none rounded-5"
+              >
                 Edit
               </Button>
             </div>
@@ -1300,7 +1535,8 @@ const FileManager = () => {
             style={{ backgroundColor: "#F8F8F8" }}
             close={
               <FaTimes onClick={toggleModal} style={{ cursor: "pointer" }} />
-            }>
+            }
+          >
             <span style={{ flex: 1, fontSize: "20px" }}>Invoice Logo</span>{" "}
             {/* Title */}
           </ModalHeader>
@@ -1309,7 +1545,8 @@ const FileManager = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-            }}>
+            }}
+          >
             {restLogo && (
               <img
                 src={

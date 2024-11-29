@@ -24,7 +24,13 @@ const EcommerceOrders = () => {
   const { counterId } = useParams();
 
   //this is for get data from my hook
-  const { myUrl } = UseRiazHook();
+  const { myUrl, setCounterAreaId } = UseRiazHook();
+
+  //this is for select counter area id
+  const forSelectCounterAreaId = (id) => {
+    setCounterAreaId(id);
+    localStorage.setItem("areaid", id);
+  };
 
   //this is for get all counter areas
   const forGetAllCounterAreas = async () => {
@@ -134,6 +140,7 @@ const EcommerceOrders = () => {
           if (response.ok) {
             toast.success("add sucesfuly");
             forGetAllCounterAreas();
+            setAddCounterArea(false);
           } else {
             console.log("err data", data);
           }
@@ -185,6 +192,27 @@ const EcommerceOrders = () => {
     }
   };
 
+  //this is for delete counter area
+  const forDeleteCounterArea = async (id) => {
+    // const url = `${myUrl}/delete/${id}/counterarea`;
+    // const options = {
+    //   method: "DELETE",
+    // };
+    // try {
+    //   const response = await fetch(url, options);
+    //   const data = await response.json();
+    //   if (response.ok) {
+    //     toast.success(data.msg);
+    //     forGetAllCounterAreas();
+    //   } else {
+    //     console.log("ok err", data);
+    //     toast.error(data.msg);
+    //   }
+    // } catch (err) {
+    //   console.log("there is error in the delete counter area funtcion", err);
+    // }
+  };
+
   return (
     <div className="page-content">
       <Container fluid>
@@ -199,24 +227,27 @@ const EcommerceOrders = () => {
                 borderRadius: "20px",
                 backgroundColor: "black",
                 color: "white",
-              }}>
+              }}
+            >
               Add Area
             </button>
           </div>
 
           {allAreas.map((area, index) => (
-            <Col lg={3} md={6} key={index}>
+            <Col lg={4} md={6} key={index}>
               <div
                 className="d-flex align-items-center justify-content-center flex-column text-center my-2"
                 style={{
                   border: "1px solid black",
                   borderRadius: "10px",
                   padding: "10px",
-                }}>
+                }}
+              >
                 <h2>{area.areaName} </h2>
                 <div
                   className="d-flex align-items-center justify-content-center my-2 p-2"
-                  style={{ gap: "10px" }}>
+                  style={{ gap: "10px" }}
+                >
                   <button
                     onClick={() => forClickOnEditButton(area._id)}
                     style={{
@@ -225,19 +256,35 @@ const EcommerceOrders = () => {
                       borderRadius: "20px",
                       backgroundColor: "black",
                       color: "white",
-                    }}>
+                    }}
+                  >
                     Edit
                   </button>
                   <Link
+                    to={`/area/${area._id}/tables`}
+                    onClick={() => forSelectCounterAreaId(area._id)}
                     style={{
                       textDecoration: "none",
                       padding: "5px 30px",
                       borderRadius: "20px",
                       backgroundColor: "black",
                       color: "white",
-                    }}>
+                    }}
+                  >
                     Open
                   </Link>
+                  <button
+                    onClick={() => forDeleteCounterArea(area._id)}
+                    style={{
+                      textDecoration: "none",
+                      padding: "5px 30px",
+                      borderRadius: "20px",
+                      backgroundColor: "black",
+                      color: "white",
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               </div>
             </Col>
@@ -249,7 +296,8 @@ const EcommerceOrders = () => {
           <ModalHeader
             className="bg-light p-3"
             id="exampleModalLabel"
-            toggle={showForaddCounterArea}>
+            toggle={showForaddCounterArea}
+          >
             Add Counter Area
           </ModalHeader>
           <form className="tablelist-form">
@@ -272,7 +320,8 @@ const EcommerceOrders = () => {
                       color: "red",
                       fontSize: "12px",
                       paddingLeft: "5px",
-                    }}>
+                    }}
+                  >
                     {errors.areaName}
                   </p>
                 )}
@@ -283,13 +332,15 @@ const EcommerceOrders = () => {
                 <button
                   type="button"
                   className="btn btn-light"
-                  onClick={() => setAddCounterArea(false)}>
+                  onClick={() => setAddCounterArea(false)}
+                >
                   Close
                 </button>
                 <button
                   onClick={forHandleAddAreaSubmit}
                   className="btn btn-primary px-2"
-                  id="add-btn">
+                  id="add-btn"
+                >
                   Add
                 </button>
               </div>
@@ -303,7 +354,8 @@ const EcommerceOrders = () => {
           <ModalHeader
             className="bg-light p-3"
             id="exampleModalLabel"
-            toggle={foreditCounterArea}>
+            toggle={foreditCounterArea}
+          >
             Edit Area Name
           </ModalHeader>
           <form className="tablelist-form">
@@ -326,7 +378,8 @@ const EcommerceOrders = () => {
                       color: "red",
                       fontSize: "12px",
                       paddingLeft: "5px",
-                    }}>
+                    }}
+                  >
                     {errors.areaName}
                   </p>
                 )}
@@ -337,14 +390,16 @@ const EcommerceOrders = () => {
                 <button
                   type="button"
                   className="btn btn-light"
-                  onClick={() => setEditCounterArea(false)}>
+                  onClick={() => setEditCounterArea(false)}
+                >
                   Close
                 </button>
                 <button
                   onClick={(e) => forEditCounterAreaSubmit(e)}
                   type="submit"
                   className="btn btn-primary px-2"
-                  id="add-btn">
+                  id="add-btn"
+                >
                   Edit
                 </button>
               </div>

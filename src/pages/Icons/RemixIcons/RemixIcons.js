@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import {
   Button,
   Col,
@@ -12,9 +12,12 @@ import {
 
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import { useParams } from "react-router-dom";
+import Pagination from "../../../Components/Common/Pagination";
 
 const DashboardCrypto = () => {
   const [allGuests, setAllGuests] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [allFilterGuest, setAllFitlerGuest] = useState([]);
 
   //this is for getting rest id
   const { id } = useParams();
@@ -53,6 +56,45 @@ const DashboardCrypto = () => {
     forDeleteGuest,
   } = UseRiazHook();
 
+  //this is for pagination
+  const perPageData = 10;
+  const indexOfLast = currentPage * perPageData;
+  const indexOfFirst = indexOfLast - perPageData;
+
+  //this is for page current data
+  const currentdata = useMemo(
+    () => allGuests?.slice(indexOfFirst, indexOfLast),
+    [indexOfFirst, indexOfLast]
+  );
+
+  //this is for first time load and set data
+  useEffect(() => {
+    setAllFitlerGuest(allGuests.slice(0, perPageData));
+  }, [allGuests]);
+
+  //this is for set current data of page
+  useEffect(() => {
+    setAllFitlerGuest(currentdata);
+  }, [currentdata]);
+
+  //this is for search from guests
+  const OnchangeHandler = (e) => {
+    let search = e.target.value;
+    if (search) {
+      const filteredUsers = allGuests.filter((data) =>
+        Object.values(data).some(
+          (field) =>
+            typeof field === "string" &&
+            field.toLowerCase().includes(search.toLowerCase())
+        )
+      );
+      setAllFitlerGuest(filteredUsers.slice(0, perPageData));
+      setCurrentPage(1);
+    } else {
+      setAllFitlerGuest(allGuests.slice(indexOfFirst, indexOfLast));
+    }
+  };
+
   //this is for click on edit button
   const forClickOnEditBtn = (id) => {
     editGuestChangeState(true);
@@ -70,29 +112,21 @@ const DashboardCrypto = () => {
               <div>
                 <Button
                   className="add-btn btn-warning text-white px-3 me-2 py-2 border-none"
-                  id="create-btn">
+                  id="create-btn"
+                >
                   <i className="ri-download-line align-bottom me-1"></i>
                   Export to excel
                 </Button>
                 <Button
                   className="add-btn bg-dark text-white px-3 py-2 border-none"
                   onClick={addGuestChangeState}
-                  id="create-btn">
+                  id="create-btn"
+                >
                   <i className="ri-add-line align-bottom me-1"></i> Add Guest
                 </Button>
               </div>
             </div>
             <hr></hr>
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h6 className="bg-light-dark mt-2 mb-4">Search Guest</h6>
-              <div>
-                <Button
-                  className="add-btn primary text-white px-3 py-2 border-none"
-                  id="create-btn">
-                  <i className="ri-search-line align-bottom me-1"></i> Search
-                </Button>
-              </div>
-            </div>
 
             <Form>
               <Row>
@@ -101,8 +135,9 @@ const DashboardCrypto = () => {
                     Mobile No
                   </Label>
                   <Input
-                    type="text"
+                    type="number"
                     id="kotType"
+                    onChange={(e) => OnchangeHandler(e)}
                     placeholder="Enter mobile number"
                   />
                 </Col>
@@ -113,6 +148,7 @@ const DashboardCrypto = () => {
                   </Label>
                   <Input
                     type="text"
+                    onChange={(e) => OnchangeHandler(e)}
                     id="additionalInfo"
                     placeholder="Enter name"
                   />
@@ -140,7 +176,7 @@ const DashboardCrypto = () => {
               </thead>
 
               <tbody>
-                {allGuests.map((item, index) => (
+                {allFilterGuest.map((item, index) => (
                   <tr>
                     <td>{index + 1}</td>
                     <td>{item.name}</td>
@@ -157,7 +193,8 @@ const DashboardCrypto = () => {
                           style={{
                             padding: "4px 8px",
                             backgroundColor: "#E6F7FC",
-                          }}>
+                          }}
+                        >
                           <i className="ri-pencil-fill align-bottom" />
                         </button>
                         <button
@@ -168,7 +205,8 @@ const DashboardCrypto = () => {
 
                             backgroundColor: "#FEEDE9",
                             color: "red",
-                          }}>
+                          }}
+                        >
                           <i className="ri-delete-bin-5-fill align-bottom" />
                         </button>
                       </div>
@@ -177,6 +215,15 @@ const DashboardCrypto = () => {
                 ))}
               </tbody>
             </Table>
+          </div>
+
+          <div className="my-3 p-3">
+            <Pagination
+              perPageData={perPageData}
+              data={allGuests}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
           </div>
         </Container>
       </div>

@@ -1,499 +1,5540 @@
-import React, { useEffect, useState, useMemo } from "react";
-
-import {
-  CardBody,
-  Container,
-  Progress,
-  Row,
-  Card,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  Table,
-} from "reactstrap";
-
-//Import Breadcrumb
+import React, { useState } from "react";
+import { Container, Row, Col, Input, Label } from "reactstrap";
+import { FaTicketAlt, FaFileAlt, FaRupeeSign, FaList } from "react-icons/fa";
+import { Link } from "react-router-dom";
+import { FiEdit } from "react-icons/fi";
 import BreadCrumb from "../../../Components/Common/BreadCrumb";
 
-import Img2 from "../../../assets/images/companies/img-2.png";
-import ReviewSlider from "../../../Components/Common/ReviewSlider";
-import TableContainer from "../../../Components/Common/TableContainer";
-//Import actions
-import { getProducts as onGetProducts } from "../../../slices/thunks";
-
-import {
-  Rating,
-  Published,
-  Price,
-} from "../EcommerceProducts/EcommerceProductCol";
-
-import Revenue from "./Revenue";
-
-//redux
-import { useSelector, useDispatch } from "react-redux";
-import { Link } from "react-router-dom";
-import { createSelector } from "reselect";
-
 const EcommerceSellerDetail = () => {
-  document.title = "Sellers Details | Velzon - React Admin & Dashboard Template";
+  const [forSettlement, setForSettlement] = useState(false);
+  const [forSettingKot, setForSettingKot] = useState(false);
+  const [forKot, setForKot] = useState(false);
+  const [clickedWaiter, setClickedWaiter] = useState(null);
+  const [clickedValue, setClickedValue] = useState(null);
 
-  const dispatch = useDispatch();
+  //this is for guest page open
 
-  const ecomsellerData = createSelector(
-    (state) => state.Ecommerce,
-    (products) => products.products
-  );
-  // Inside your component
-  const products = useSelector(ecomsellerData);
+  // Function to handle button click
+  const handleClick = (value) => {
+    setClickedValue(value);
+  };
 
-  const [productList, setProductList] = useState([]);
+  // List of waiters
+  const waiters = ["John", "Alice", "Bob", "Michael", "Sarah"];
 
-  useEffect(() => {
-    setProductList(products);
-  }, [products]);
+  // Function to handle button click
+  const handleClickforWaiter = (waiterName) => {
+    setClickedWaiter(waiterName);
+  };
 
-  useEffect(() => {
-    dispatch(onGetProducts());
-  }, [dispatch]);
-
-  const columns = useMemo(
-    () => [
-      {
-        header: "#",
-        enableSorting: false,
-        cell: () => {
-          return <input type="checkbox" className="form-check-input" />;
-        },
-      },
-      {
-        header: "Product",
-        accessorKey: "name",
-        enableColumnFilter: false,
-        cell: (cell) => (
-          <>
-            <div className="d-flex align-items-center">
-              <div className="flex-shrink-0 me-3">
-                <div className="avatar-sm bg-light rounded p-1">
-                  <img
-                     src = {process.env.REACT_APP_API_URL + "/images/products/" + cell.row.original.image}
-                    alt=""
-                    className="img-fluid d-block"
-                  />
-                </div>
-              </div>
-              <div className="flex-grow-1">
-                <h5 className="fs-14 mb-1">
-                  <a
-                    href="apps-ecommerce-product-details"
-                    className="text-body"
-                  >
-                    {" "}
-                    {cell.getValue()}
-                  </a>
-                </h5>
-                <p className="text-muted mb-0">
-                  Category :{" "}
-                  <span className="fw-medium">
-                    {" "}
-                    {cell.row.original.category}
-                  </span>
-                </p>
-              </div>
-            </div>
-          </>
-        ),
-      },
-      {
-        header: "Stock",
-        accessorKey: "stock",
-        enableColumnFilter: false,
-      },
-      {
-        header: "Price",
-        accessorKey: "price",
-        enableColumnFilter: false,
-        cell: (cell) => {
-          return <Price {...cell} />;
-        },
-      },
-      {
-        header: "Orders",
-        accessorKey: "orders",
-        enableColumnFilter: false,
-      },
-      {
-        header: "Rating",
-        accessorKey: "rating",
-        enableColumnFilter: false,
-        cell: (cell) => {
-          return <Rating {...cell} />;
-        },
-      },
-      {
-        header: "Published",
-        accessorKey: "publishedDate",
-        enableColumnFilter: false,
-        cell: (cell) => {
-          return <Published {...cell} />;
-        },
-      },
-      {
-        header: "Action",
-        cell: (cell) => {
-          return (
-            <UncontrolledDropdown>
-              <DropdownToggle
-                href="#"
-                className="btn btn-soft-secondary btn-sm"
-                tag="button"
-              >
-                <i className="ri-more-fill" />
-              </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-end">
-                <DropdownItem href="apps-ecommerce-product-details">
-                  <i className="ri-eye-fill align-bottom me-2 text-muted"></i>{" "}
-                  View
-                </DropdownItem>
-
-                <DropdownItem href="apps-ecommerce-add-product">
-                  <i className="ri-pencil-fill align-bottom me-2 text-muted"></i>{" "}
-                  Edit
-                </DropdownItem>
-
-                <DropdownItem divider />
-
-                <DropdownItem
-                  href="#"
-                  data-bs-toggle="modal"
-                  data-bs-target="#removeItemModal"
-                >
-                  <i className="ri-delete-bin-fill align-bottom me-2 text-muted"></i>{" "}
-                  Delete
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
-          );
-        },
-      },
-    ],
-    []
-  );
+  // Generate 20 buttons with values 1 to 20
+  const buttons = [];
+  for (let i = 1; i <= 20; i++) {
+    buttons.push(
+      <button
+        key={i}
+        className="btn btn-primary rounded-0 mx-1 my-2"
+        onClick={() => handleClick(i)}
+      >
+        {i}
+      </button>
+    );
+  }
 
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb title="Seller Details" pageTitle="Ecommerce" />
+          <BreadCrumb
+            dine="Dine In"
+            takeAway="Take Away"
+            delivery="Delivery"
+            merge="Merge"
+            transfar="Transfar"
+            runing="Runing"
+          />
+
           <Row>
-            <div className="col-xxl-3">
-              <Card>
-                <CardBody className="p-4">
-                  <div>
-                    <div className="flex-shrink-0 avatar-md mx-auto">
-                      <div className="avatar-title bg-light rounded">
-                        <img src={Img2} alt="" height="50" />
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#45A14E" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {clickedWaiter}
+                      </p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6>{clickedValue}</h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <Link
+                    to="/for-kot"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      kot
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/for-invoice"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      settlements
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettingKot(!forSettingKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FD5432" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FE9900" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <p className="m-0 fs-5">1</p>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        i am for waiter name and i am checkin for next line
+                      </p>
+                      <h6>23456.00</h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <p className="m-0 fs-5">132</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#45A14E" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {clickedWaiter}
+                      </p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6>{clickedValue}</h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <Link
+                    onClick={() => setForKot(!forKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      kot
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/for-invoice"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      settlements
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettingKot(!forSettingKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FD5432" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#45A14E" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {clickedWaiter}
+                      </p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6>{clickedValue}</h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <Link
+                    onClick={() => setForKot(!forKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      kot
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/for-invoice"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      settlements
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettingKot(!forSettingKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FD5432" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FE9900" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <p className="m-0 fs-5">1</p>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        i am for waiter name and i am checkin for next line
+                      </p>
+                      <h6>23456.00</h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <p className="m-0 fs-5">132</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#45A14E" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {clickedWaiter}
+                      </p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6>{clickedValue}</h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <Link
+                    onClick={() => setForKot(!forKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      kot
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/for-invoice"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      settlements
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettingKot(!forSettingKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FD5432" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FE9900" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <p className="m-0 fs-5">1</p>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        i am for waiter name and i am checkin for next line
+                      </p>
+                      <h6>23456.00</h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <p className="m-0 fs-5">132</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#45A14E" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {clickedWaiter}
+                      </p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6>{clickedValue}</h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <Link
+                    onClick={() => setForKot(!forKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      kot
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/for-invoice"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      settlements
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettingKot(!forSettingKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FD5432" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FE9900" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <p className="m-0 fs-5">1</p>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        i am for waiter name and i am checkin for next line
+                      </p>
+                      <h6>23456.00</h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <p className="m-0 fs-5">132</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#45A14E" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        {clickedWaiter}
+                      </p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6>{clickedValue}</h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <Link
+                    onClick={() => setForKot(!forKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      kot
+                    </span>
+                  </Link>
+
+                  <Link
+                    to="/for-invoice"
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      settlements
+                    </span>
+                  </Link>
+
+                  <Link
+                    onClick={() => setForSettingKot(!forSettingKot)}
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </Link>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0   p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FD5432" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: "#FE9900" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <h6>1</h6>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      ></p>
+                      <h6 className="m-0 px-1"></h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <h6></h6>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+
+            <Col sm={6} md={4} lg={3} xl={2} className="mb-2 mx-0  p-1">
+              <div
+                className="d-flex flex-column"
+                style={{ backgroundColor: " #7487DE" }}
+              >
+                <div
+                  className="p-0 mb-0 text-white"
+                  style={{
+                    height: "60px",
+                    borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                  }}
+                >
+                  <div className="d-flex">
+                    <div
+                      className="w-25 d-flex align-items-center justify-content-center"
+                      style={{
+                        borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                        height: "60px",
+                      }}
+                    >
+                      <p className="m-0 fs-5">1</p>
+                    </div>
+                    <div className="w-50 text-center py-1 px-1 ">
+                      <p
+                        className="m-0 py-1  text-truncate"
+                        style={{
+                          whiteSpace: "nowrap",
+                          overflow: "hidden",
+                          textOverflow: "ellipsis",
+                          fontSize: "12px",
+                        }}
+                      >
+                        i am for waiter name and i am checkin for next line
+                      </p>
+                      <h6>23456.00</h6>
+                    </div>
+
+                    <div
+                      style={{
+                        borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                      className="w-25 d-flex align-items-center justify-content-center"
+                    >
+                      <p className="m-0 fs-5">132</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="d-flex justify-content-around mt-0">
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "kot";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaTicketAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000, // Ensures this element shows on top
+                      }}
+                    >
+                      kot
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Invoice";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaFileAlt />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Invoice
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Bill";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaRupeeSign />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Payment
+                    </span>
+                  </div>
+
+                  <div
+                    className="text-white cursor-pointer w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                    style={{
+                      borderLeft: "1px solid rgba(255, 255, 255, 0.5)",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.remove("d-none");
+                      e.currentTarget.querySelector(".hover-text").textContent =
+                        "Settings";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget
+                        .querySelector(".hover-text")
+                        .classList.add("d-none");
+                    }}
+                  >
+                    <FaList />
+                    <span
+                      className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                      style={{
+                        bottom: "-40px",
+                        border: "1px solid rgba(0, 0, 0, 0.1)",
+                        padding: "5px 10px",
+                        fontSize: "0.8rem",
+                        zIndex: 1000,
+                      }}
+                    >
+                      Settings
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </Col>
+          </Row>
+
+          {/* this is for settlement */}
+          {forSettlement && (
+            <div
+              className="d-flex align-items-center justify-content-center position-fixed"
+              style={{
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                zIndex: 5000,
+              }}
+            >
+              <div
+                className="d-flex  flex-column bg-white pb-4"
+                style={{
+                  borderRadius: "5px",
+                  width: "450px",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <h5 className="py-3 px-1 bg-danger text-white">Payment Mode</h5>
+                <div
+                  className="d-flex align-items-center justify-content-between "
+                  style={{ padding: "2px 5px", gap: "5px" }}
+                >
+                  <div
+                    className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                    style={{ height: "100px", backgroundColor: "#1F9642" }}
+                  >
+                    Cash
+                  </div>
+                  <div
+                    className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                    style={{ height: "100px", backgroundColor: "#FFBD00" }}
+                  >
+                    Cash
+                  </div>
+                  <div
+                    className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                    style={{ height: "100px", backgroundColor: "#0A97BB" }}
+                  >
+                    Cash
+                  </div>
+                </div>
+                <div
+                  className="d-flex align-items-center justify-content-between "
+                  style={{ padding: "2px 5px", gap: "5px" }}
+                >
+                  <div
+                    className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                    style={{ height: "100px", backgroundColor: "#0172F0" }}
+                  >
+                    Cash
+                  </div>
+                  <div
+                    className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                    style={{ height: "100px", backgroundColor: "#030507" }}
+                  >
+                    Multi Payment
+                  </div>
+                  <div
+                    onClick={() => setForSettlement(!forSettlement)}
+                    className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                    style={{ height: "100px", backgroundColor: "#DB433F" }}
+                  >
+                    Cancel
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* this is for the setting of the table and kot */}
+
+          {forSettingKot && (
+            <div
+              className="d-flex align-items-center justify-content-center position-fixed"
+              style={{
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                zIndex: 5000,
+              }}
+            >
+              <div
+                className="d-flex  flex-column bg-white  pb-4 "
+                style={{
+                  width: "700px",
+                  height: "80vh",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <div
+                  className=" p-1  d-flex justify-content-between align-items-center  mb-2"
+                  style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+                >
+                  <p className="p-0 m-0 text-white">KOT Details Table no 8</p>
+                  <p
+                    className="m-0 p-2 color-dark cursor-pointer"
+                    onClick={() => setForSettingKot(false)}
+                  >
+                    x
+                  </p>
+                </div>
+
+                <div
+                  className="px-2"
+                  style={{
+                    maxHeight: "70vh",
+                    scrollbarWidth: "none",
+                    msOverflowStyle: "none",
+                    overflowY: "scroll",
+                    gap: "1px",
+                  }}
+                >
+                  <div className="p-1">
+                    <div
+                      className="d-flex justify-content-between align-items-center px-2"
+                      style={{
+                        fontSize: "14px",
+                        backgroundColor: "#F3F3F3",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-center">
+                        KOT/7 - 04/12/2024 12:30:32
+                      </div>
+                      <div
+                        className="d-flex align-items-center justify-content-center   "
+                        style={{ gap: "5px" }}
+                      >
+                        <p
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#0074FF",
+                            color: "white",
+                            padding: "3px 5px",
+                            margin: 0,
+                          }}
+                        >
+                          <FiEdit className="pe-1" /> Void items
+                        </p>
+                        <p
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#FDBE05",
+                            color: "black",
+                            padding: "3px 5px",
+                            margin: 0,
+                          }}
+                        >
+                          <FiEdit /> Transfar
+                        </p>
                       </div>
                     </div>
-                    <div className="mt-4 text-center">
-                      <h5 className="mb-1">Force Medicines</h5>
-                      <p className="text-muted">Since 1987</p>
-                    </div>
-                    <div className="table-responsive">
-                      <Table className="table mb-0 table-borderless">
-                        <tbody>
+                    <div
+                      className="table-responsive "
+                      style={{
+                        maxHeight: "35vh",
+                        overflowY: "scroll",
+                        gap: "1px",
+                      }}
+                    >
+                      <table class="table  table-striped  table-hover table-light  ">
+                        <thead>
                           <tr>
-                            <th>
-                              <span className="fw-medium">Owner Name</span>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              SL
                             </th>
-                            <td>David Marshall</td>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Item Name
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Quantity
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody style={{ fontSize: "12px" }}>
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
                           </tr>
                           <tr>
-                            <th>
-                              <span className="fw-medium">Company Type</span>
-                            </th>
-                            <td>Partnership</td>
-                          </tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
                           <tr>
-                            <th>
-                              <span className="fw-medium">Email</span>
-                            </th>
-                            <td>forcemedicines@gamil.com</td>
-                          </tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
                           <tr>
-                            <th>
-                              <span className="fw-medium">Website</span>
-                            </th>
-                            <td>
-                              <Link to="#" className="link-primary">
-                                www.forcemedicines.com
-                              </Link>
-                            </td>
-                          </tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
                           <tr>
-                            <th>
-                              <span className="fw-medium">Contact No.</span>
-                            </th>
-                            <td>+(123) 9876 654 321</td>
-                          </tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
                           <tr>
-                            <th>
-                              <span className="fw-medium">Fax</span>
-                            </th>
-                            <td>+1 999 876 5432</td>
-                          </tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
                           <tr>
-                            <th>
-                              <span className="fw-medium">Location</span>
-                            </th>
-                            <td>United Kingdom</td>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
                           </tr>
                         </tbody>
-                      </Table>
+                      </table>
                     </div>
-                  </div>
-                </CardBody>
-                <CardBody className="border-top border-top-dashed p-4">
-                  <div>
-                    <h6 className="text-muted text-uppercase fw-semibold mb-4">
-                      Customer Reviews
-                    </h6>
-                    <div>
-                      <div>
-                        <div className="bg-light px-3 py-2 rounded-2 mb-2">
-                          <div className="d-flex align-items-center">
-                            <div className="flex-grow-1">
-                              <div className="fs-16 align-middle text-warning">
-                                <i className="ri-star-fill"></i>
-                                <i className="ri-star-fill"></i>
-                                <i className="ri-star-fill"></i>
-                                <i className="ri-star-fill"></i>
-                                <i className="ri-star-half-fill"></i>
-                              </div>
-                            </div>
-                            <div className="flex-shrink-0">
-                              <h6 className="mb-0">4.5 out of 5</h6>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="text-center">
-                          <div className="text-muted">
-                            Total <span className="fw-medium">5.50k</span>{" "}
-                            reviews
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="mt-3">
-                        <Row className="align-items-center g-2">
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0">5 star</h6>
-                            </div>
-                          </div>
-                          <div className="col">
-                            <div className="p-1">
-                              <div className="progress animated-progess progress-sm">
-                                <Progress
-                                  bar
-                                  color="success"
-                                  value="50.16"
-                                ></Progress>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0 text-muted">2758</h6>
-                            </div>
-                          </div>
-                        </Row>
-
-                        <Row className="align-items-center g-2">
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0">4 star</h6>
-                            </div>
-                          </div>
-                          <div className="col">
-                            <div className="p-1">
-                              <div className="progress animated-progess progress-sm">
-                                <Progress
-                                  bar
-                                  color="success"
-                                  value="29.32"
-                                ></Progress>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0 text-muted">1063</h6>
-                            </div>
-                          </div>
-                        </Row>
-
-                        <Row className="align-items-center g-2">
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0">3 star</h6>
-                            </div>
-                          </div>
-                          <div className="col">
-                            <div className="p-1">
-                              <div className="progress animated-progess progress-sm">
-                                <Progress
-                                  bar
-                                  color="warning"
-                                  value="18.12"
-                                ></Progress>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0 text-muted">997</h6>
-                            </div>
-                          </div>
-                        </Row>
-
-                        <Row className="align-items-center g-2">
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0">2 star</h6>
-                            </div>
-                          </div>
-                          <div className="col">
-                            <div className="p-1">
-                              <div className="progress animated-progess progress-sm">
-                                <Progress
-                                  bar
-                                  color="success"
-                                  value="4.98"
-                                ></Progress>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0 text-muted">227</h6>
-                            </div>
-                          </div>
-                        </Row>
-
-                        <Row className="align-items-center g-2">
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0">1 star</h6>
-                            </div>
-                          </div>
-                          <div className="col">
-                            <div className="p-1">
-                              <div className="progress animated-progess progress-sm">
-                                <Progress
-                                  bar
-                                  color="danger"
-                                  value="7.42"
-                                ></Progress>
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-auto">
-                            <div className="p-1">
-                              <h6 className="mb-0 text-muted">408</h6>
-                            </div>
-                          </div>
-                        </Row>
-                      </div>
-                    </div>
-                  </div>
-                </CardBody>
-                <CardBody className="p-4 border-top border-top-dashed">
-                  <h6 className="text-muted text-uppercase fw-semibold mb-4">
-                    Products Reviews
-                  </h6>
-
-                  <ReviewSlider />
-
-                  <div className="text-center mt-3">
-                    <Link to="#" className="link-primary">
-                      View All Reviews{" "}
-                      <i className="ri-arrow-right-line align-bottom ms-1"></i>
-                    </Link>
-                  </div>
-                </CardBody>
-                <CardBody className="p-4 border-top border-top-dashed">
-                  <h6 className="text-muted text-uppercase fw-semibold mb-4">
-                    Contact Support
-                  </h6>
-                  <form action="#">
-                    <div className="mb-3">
-                      <textarea
-                        className="form-control"
-                        id="exampleFormControlTextarea1"
-                        rows="4"
-                        placeholder="Enter your messages..."
-                      ></textarea>
-                    </div>
-                    <div className="text-end">
-                      <button type="submit" className="btn btn-primary">
-                        <i className="ri-mail-send-line align-bottom me-1"></i>{" "}
-                        Send Messages
-                      </button>
-                    </div>
-                  </form>
-                </CardBody>
-              </Card>
-            </div>
-
-            <div className="col-xxl-9">
-              <Revenue />
-
-              <Row className="g-4 mb-3">
-                <div className="col-sm-auto">
-                  <div>
-                    <Link
-                      to="/apps-ecommerce-add-product"
-                      className="btn btn-success"
+                    <div
+                      className="  d-flex align-items-center justify-content-between p-1 "
+                      style={{ backgroundColor: "#E6E6E6", fontSize: "12px" }}
                     >
-                      <i className="ri-add-line align-bottom me-1"></i> Add New
-                    </Link>
+                      <p className="p-0 m-0">Total Items </p>
+                      <p className="p-0 m-0">03</p>
+                    </div>
                   </div>
-                </div>
-                <div className="col-sm">
-                  <div className="d-flex justify-content-sm-end">
-                    <div className="search-box ms-2">
-                      <input
-                        type="text"
-                        className="form-control"
-                        placeholder="Search Products..."
-                      />
-                      <i className="ri-search-line search-icon"></i>
+                  <div className="p-1">
+                    <div
+                      className="d-flex justify-content-between align-items-center px-2"
+                      style={{
+                        fontSize: "14px",
+                        backgroundColor: "#F3F3F3",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-center">
+                        KOT/7 - 04/12/2024 12:30:32
+                      </div>
+                      <div
+                        className="d-flex align-items-center justify-content-center   "
+                        style={{ gap: "5px" }}
+                      >
+                        <p
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#0074FF",
+                            color: "white",
+                            padding: "3px 5px",
+                            margin: 0,
+                          }}
+                        >
+                          <FiEdit className="pe-1" /> Void items
+                        </p>
+                        <p
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#FDBE05",
+                            color: "black",
+                            padding: "3px 5px",
+                            margin: 0,
+                          }}
+                        >
+                          <FiEdit /> Transfar
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className="table-responsive "
+                      style={{
+                        maxHeight: "35vh",
+                        overflowY: "scroll",
+                        gap: "1px",
+                      }}
+                    >
+                      <table class="table  table-striped  table-hover table-light  ">
+                        <thead>
+                          <tr>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              SL
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Item Name
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Quantity
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody style={{ fontSize: "12px" }}>
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div
+                      className="  d-flex align-items-center justify-content-between p-1 "
+                      style={{ backgroundColor: "#E6E6E6", fontSize: "12px" }}
+                    >
+                      <p className="p-0 m-0">Total Items </p>
+                      <p className="p-0 m-0">03</p>
+                    </div>
+                  </div>{" "}
+                  <div className="p-1">
+                    <div
+                      className="d-flex justify-content-between align-items-center px-2"
+                      style={{
+                        fontSize: "14px",
+                        backgroundColor: "#F3F3F3",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-center">
+                        KOT/7 - 04/12/2024 12:30:32
+                      </div>
+                      <div
+                        className="d-flex align-items-center justify-content-center   "
+                        style={{ gap: "5px" }}
+                      >
+                        <p
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#0074FF",
+                            color: "white",
+                            padding: "3px 5px",
+                            margin: 0,
+                          }}
+                        >
+                          <FiEdit className="pe-1" /> Void items
+                        </p>
+                        <p
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#FDBE05",
+                            color: "black",
+                            padding: "3px 5px",
+                            margin: 0,
+                          }}
+                        >
+                          <FiEdit /> Transfar
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className="table-responsive "
+                      style={{
+                        maxHeight: "35vh",
+                        overflowY: "scroll",
+                        gap: "1px",
+                      }}
+                    >
+                      <table class="table  table-striped  table-hover table-light  ">
+                        <thead>
+                          <tr>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              SL
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Item Name
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Quantity
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody style={{ fontSize: "12px" }}>
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>{" "}
+                          <tr>
+                            <td>12</td>
+                            <td>pizza paratha taste</td>
+                            <td>125.00</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                    <div
+                      className="  d-flex align-items-center justify-content-between p-1 "
+                      style={{ backgroundColor: "#E6E6E6", fontSize: "12px" }}
+                    >
+                      <p className="p-0 m-0">Total Items </p>
+                      <p className="p-0 m-0">03</p>
                     </div>
                   </div>
                 </div>
-              </Row>
-              <Card>
-                <CardBody>
-                  <div
-                    className="table-card gridjs-border-none pb-2"
-                  >
-                    <TableContainer
-                      columns={columns}
-                      data={(productList || [])}
-                      isGlobalFilter={false}
-                      isAddUserList={false}
-                      customPageSize={10}
-                      divClass="table-responsive"
-                      tableClass="mb-0 table-borderless"
-                      theadClass="table-light text-muted"
-                    />
-                  </div>
-                </CardBody>
-              </Card>
+              </div>
             </div>
-          </Row>
+          )}
+
+          {/* this is for kot */}
+          {forKot && (
+            <div
+              className="d-flex align-items-center justify-content-center position-fixed"
+              style={{
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                backgroundColor: "rgba(0, 0, 0, 0.5)",
+                zIndex: 5000,
+              }}
+            >
+              <div
+                className="d-flex  flex-column bg-white  pb-4 "
+                style={{
+                  width: "700px",
+                  boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+                }}
+              >
+                <div
+                  className=" p-1  d-flex justify-content-between align-items-center  mb-2"
+                  style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+                >
+                  <p className="p-0 m-0 text-white">Select PAX and CAPTAIN</p>
+                  <p
+                    className="m-0 p-2 color-dark cursor-pointer"
+                    onClick={() => setForKot(false)}
+                  >
+                    x
+                  </p>
+                </div>
+                <div className="mt-1 p-1">
+                  <div>
+                    <p className="m-0 p-1">Select PAX</p>
+                    <div className="d-flex flex-wrap">{buttons}</div>
+                  </div>
+                  <div className="my-2">
+                    <p className="m-0 p-1">Select CAPTAIN</p>
+                    <div className="d-flex flex-wrap">
+                      {" "}
+                      {waiters.map((waiter, index) => (
+                        <div key={index} className="col-md-3 mx-1">
+                          <button
+                            style={{ backgroundColor: "#FFBD00" }}
+                            className="text-dark w-100 m-1 rounded-0 py-3  border-0"
+                            onClick={() => handleClickforWaiter(waiter)}
+                          >
+                            {waiter}
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                    {clickedWaiter && (
+                      <p className="mt-3">You clicked on: {clickedWaiter}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
         </Container>
       </div>
     </React.Fragment>

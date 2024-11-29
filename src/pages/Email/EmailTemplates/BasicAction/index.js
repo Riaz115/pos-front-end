@@ -18,7 +18,6 @@ const index = () => {
   const [Counters, setCounters] = useState([]);
   const [forShowEditCounter, setForShowEditCoutner] = useState(false);
   const [counterName, setCounterName] = useState("");
-  const [counterId, setCounterId] = useState("");
 
   //this is for get id
   const { id } = useParams();
@@ -31,14 +30,14 @@ const index = () => {
   };
 
   //this is for get data from my hook
-  const { myUrl } = UseRiazHook();
+  const { myUrl, counterId, setCounterId } = UseRiazHook();
 
   //this is for get counters
   const forGetAllCountersofRestaurent = async () => {
-    const url = `${myUrl}//getAllCountersofRestaurent/${id}`;
+    const url = `${myUrl}/getAllCountersofRestaurent/${id}`;
 
     try {
-      const response = await fetch(url, options);
+      const response = await fetch(url);
       const data = await response.json();
 
       if (response.ok) {
@@ -54,7 +53,7 @@ const index = () => {
     }
   };
 
-  //this is for call only once time
+  //this is for call only once time for all counter
   useEffect(() => {
     forGetAllCountersofRestaurent();
   }, []);
@@ -128,6 +127,34 @@ const index = () => {
     }
   };
 
+  //this is for delete counter of restaurent
+  const forDeleteCounter = async (id) => {
+    const url = `${myUrl}/delete/${id}/counter`;
+    const options = {
+      method: "DELETE",
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.msg);
+        forGetAllCountersofRestaurent();
+      } else {
+        console.log("err data", data);
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log("there is error in the delete restaurent function", err);
+    }
+  };
+
+  //this is for get counter id
+  const forGetCounterId = (id) => {
+    localStorage.setItem("counterid", id);
+    setCounterId(id);
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -141,11 +168,13 @@ const index = () => {
                     border: "1px solid black",
                     borderRadius: "10px",
                     padding: "10px",
-                  }}>
+                  }}
+                >
                   <h2>{counter.counterName}</h2>
                   <div
                     className="d-flex align-items-center justify-content-center my-2 p-2"
-                    style={{ gap: "10px" }}>
+                    style={{ gap: "10px" }}
+                  >
                     <button
                       onClick={() => toggleEditCounter(counter._id)}
                       style={{
@@ -154,20 +183,36 @@ const index = () => {
                         borderRadius: "20px",
                         backgroundColor: "black",
                         color: "white",
-                      }}>
+                      }}
+                    >
                       Edit
                     </button>
                     <Link
-                      to={`/counter/${counter._id}/counterData`}
+                      to={`/area/${counter._id}/tables`}
+                      onClick={() => forGetCounterId(counter._id)}
                       style={{
                         textDecoration: "none",
                         padding: "5px 30px",
                         borderRadius: "20px",
                         backgroundColor: "black",
                         color: "white",
-                      }}>
+                      }}
+                    >
                       Open
                     </Link>
+
+                    <button
+                      onClick={() => forDeleteCounter(counter._id)}
+                      style={{
+                        textDecoration: "none",
+                        padding: "5px 30px",
+                        borderRadius: "20px",
+                        backgroundColor: "black",
+                        color: "white",
+                      }}
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
               </Col>
@@ -179,7 +224,8 @@ const index = () => {
           <ModalHeader
             className="bg-light p-3"
             id="exampleModalLabel"
-            toggle={toggleEditCounter}>
+            toggle={toggleEditCounter}
+          >
             Add Counter
           </ModalHeader>
           <form className="tablelist-form">
@@ -204,14 +250,16 @@ const index = () => {
                 <button
                   type="button"
                   className="btn btn-danger"
-                  onClick={toggleEditCounter}>
+                  onClick={toggleEditCounter}
+                >
                   Close
                 </button>
                 <button
                   type="submit"
                   onClick={handleEditCounterSubmit}
                   className="btn btn-primary px-2"
-                  id="add-btn">
+                  id="add-btn"
+                >
                   Add Counter
                 </button>
               </div>

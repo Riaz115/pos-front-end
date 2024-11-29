@@ -1,311 +1,1564 @@
-import React,{useState} from 'react';
-import { Link } from 'react-router-dom';
-import { Card, CardBody, CardHeader, Col, Container, Input, Label, Row } from 'reactstrap';
-import BreadCrumb from '../../../Components/Common/BreadCrumb';
-
-//Import Flatepicker
-import Flatpickr from "react-flatpickr";
-import Select from "react-select";
-import { CKEditor } from "@ckeditor/ckeditor5-react";
-import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
-
-import Dropzone from "react-dropzone";
-
-//Import Images
-import avatar3 from "../../../assets/images/users/avatar-3.jpg";
-import avatar4 from "../../../assets/images/users/avatar-4.jpg";
+import React, { useEffect, useState } from "react";
+import { Container, Row, Col, Input, Label } from "reactstrap";
+import {
+  FaTicketAlt,
+  FaFileAlt,
+  FaRupeeSign,
+  FaExchangeAlt,
+} from "react-icons/fa";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import { FiEdit } from "react-icons/fi";
+import { UseRiazHook } from "../../../RiazStore/RiazStore";
+import { toast } from "react-toastify";
 
 const CreateProject = () => {
-  document.title="Create Project | Velzon - React Admin & Dashboard Template";
+  const [allTables, setAllTables] = useState([]);
+  const [forSettlement, setForSettlement] = useState(false);
+  const [forSettingKot, setForSettingKot] = useState(false);
+  const [allKotsIds, setAllKotsIds] = useState([]);
+  const [tableData, setTableData] = useState({});
+  const [allKots, setAllKots] = useState([]);
+  const [tableId, setTableId] = useState("");
+  const [callSettleFunction, setCallSettleFunction] = useState(false);
+  const [forMultiPaymentOpen, setForMultiPaymentOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(null);
+  const [payDetail, setPayDetail] = useState("");
+  const [forLoading, setForLoading] = useState(false);
 
-    const SingleOptions = [
-        { value: 'Watches', label: 'Watches' },
-        { value: 'Headset', label: 'Headset' },
-        { value: 'Sweatshirt', label: 'Sweatshirt' },
-        { value: '20% off', label: '20% off' },
-        { value: '4 star', label: '4 star' },
-      ];
+  //this is for getting data from the my hook
+  const {
+    myUrl,
+    userData,
+    setPersons,
+    restData,
+    counterId,
+    restId,
+    token,
+    setForTableId,
+    forTableData,
+    forTableId,
+  } = UseRiazHook();
 
-    const [selectedMulti, setselectedMulti] = useState(null);
+  //this is for getting id from url of counter
+  const { id } = useParams();
 
-    function handleMulti(selectedMulti) {
-    setselectedMulti(selectedMulti);
-    }  
-    
-    //Dropzone file upload
-    const [selectedFiles, setselectedFiles] = useState([]);
-  
-    function handleAcceptedFiles(files) {
-      files.map(file =>
-        Object.assign(file, {
-          preview: URL.createObjectURL(file),
-          formattedSize: formatBytes(file.size),
-        })
-      );
-      setselectedFiles(files);
+  //this is for naviagate
+  const navigate = useNavigate();
+
+  //this is for getting all tables
+  const forGetAllTables = async () => {
+    const url = `${myUrl}/forget/all/tables/${restId}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        const filteredTAblesforTakeAway = data.allTables.filter(
+          (table) =>
+            table?.Counter?.id === id &&
+            table.tableType === "take-away" &&
+            table?.currentOrder?.status !== "empty"
+        );
+
+        setAllTables(filteredTAblesforTakeAway);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log("there is error in the get all tables function", err);
     }
+  };
 
-        /**
-     * Formats the size
-     */
-    function formatBytes(bytes, decimals = 2) {
-        if (bytes === 0) return "0 Bytes";
-        const k = 1024;
-        const dm = decimals < 0 ? 0 : decimals;
-        const sizes = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"];
+  //this is for control rendering of for get all tables function
+  useEffect(() => {
+    forGetAllTables();
+  }, []);
 
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
+  //this is for add takeAway order
+  const forAddTakeAwayTable = async () => {
+    let tableType = "take-away";
+    let tableData = {
+      tableType,
+    };
+    const url = `${myUrl}/add/table/${id}/take-away`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+      body: JSON.stringify(tableData),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("ok data", data?.savedTable?._id);
+        navigate(`/for-kot/${data?.savedTable?._id}`);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log("there is error in the add take away table function", err);
     }
-    return (
-        <React.Fragment>
-            <div className="page-content">           
-                <Container fluid>
-                    <BreadCrumb title="Create Project" pageTitle="Projects" />
-                    <Row>
-                        <Col lg={8}>
-                            <Card>
-                                <CardBody>
-                                    <div className="mb-3">
-                                        <Label className="form-label" htmlFor="project-title-input">Project Title</Label>
-                                        <Input type="text" className="form-control" id="project-title-input"
-                                            placeholder="Enter project title" />
-                                    </div>
+  };
 
-                                    <div className="mb-3">
-                                        <Label className="form-label" htmlFor="project-thumbnail-img">Thumbnail Image</Label>
-                                        <Input className="form-control" id="project-thumbnail-img" type="file" accept="image/png, image/gif, image/jpeg" />
-                                    </div>
+  //this is for color of tables based on status
+  const getStatusColor = (status) => {
+    switch (status) {
+      case "empty":
+        return "#45A14E"; // Green for empty
+      case "running":
+        return "#FE9900"; // Orange for running
+      case "invoiced":
+        return "#FD5432"; // Red for invoiced
+      default:
+        return ""; // Default color if no match
+    }
+  };
 
-                                    <div className="mb-3">
-                                        <Label className="form-label">Project Description</Label>
-                                        <CKEditor
-                                            editor={ClassicEditor}
-                                            data="<p>Hello from CKEditor 5!</p>"
-                                            onReady={(editor) => {
-                                                // You can store the "editor" and use when it is needed.
-                                                
-                                            }}
-                                            onChange={(editor) => {
-                                                editor.getData();
-                                            }}
-                                            />
-                                    </div>
+  //this is for getting table data
+  const forGettingTableData = async (id) => {
+    setForTableId(id);
+    setForLoading(true);
+    const url = `${myUrl}/getdata/${id}/table`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setAllKotsIds(data.tableData.currentOrder.kots);
+        setTableData(data.tableData);
+        const kotUrl = `${myUrl}/getall/kots`;
+        const responseKot = await fetch(kotUrl);
+        const dataKot = await responseKot.json();
+        if (responseKot.ok) {
+          let allKots = dataKot.allKots;
+          let filterKots = allKots.filter((kot) =>
+            data?.tableData?.currentOrder?.kots.includes(kot._id)
+          );
+          setAllKots(filterKots);
+          setForLoading(false);
+        } else {
+          console.log("err data of the kots", err);
+          setForLoading(false);
+        }
+      } else {
+        console.log("err data", data);
+        setForLoading(false);
+      }
+    } catch (err) {
+      console.log("there is error in the get table data for edit", err);
+      setForLoading(false);
+    }
+  };
 
-                                    <Row>
-                                        <Col lg={4}>
-                                            <div className="mb-3 mb-lg-0">
-                                                <Label htmlFor="choices-priority-input" className="form-label">Priority</Label>
-                                                <select className="form-select" data-choices data-choices-search-false
-                                                    id="choices-priority-input">
-                                                    <option defaultValue="High">High</option>
-                                                    <option value="Medium">Medium</option>
-                                                    <option value="Low">Low</option>
-                                                </select>
-                                            </div>
-                                        </Col>
-                                        <Col lg={4}>
-                                            <div className="mb-3 mb-lg-0">
-                                                <Label htmlFor="choices-status-input" className="form-label">Status</Label>
-                                                <select className="form-select" data-choices data-choices-search-false
-                                                    id="choices-status-input">
-                                                    <option defaultValue="Inprogress">Inprogress</option>
-                                                    <option value="Completed">Completed</option>
-                                                </select>
-                                            </div>
-                                        </Col>
-                                        <Col lg={4}>
-                                            <div>
-                                                <Label htmlFor="datepicker-deadline-input" className="form-label">Deadline</Label>
-                                                <Flatpickr
-                                                    className="form-control"
-                                                    options={{
-                                                    dateFormat: "d M, Y"
-                                                    }}
-                                                    placeholder="Selact Date"
-                                                />
-                                            </div>
-                                        </Col>
-                                    </Row>
-                                </CardBody>
-                            </Card>
-                            <Card>
-                                <CardHeader >
-                                    <h5 className="card-title mb-0">Attached files</h5>
-                                </CardHeader>
-                                <CardBody>
-                                    <div>
-                                        <p className="text-muted">Add Attached files here.</p>
+  //this is for settlements
+  const forSettleMents = (id) => {
+    setTableId(id);
+    setForSettlement(!forSettlement);
+    forGettingTableData(id);
+  };
 
-                                        <Dropzone
-                                            onDrop={acceptedFiles => {
-                                            handleAcceptedFiles(acceptedFiles);
-                                            }}
-                                        >
-                                            {({ getRootProps, getInputProps }) => (
-                                            <div className="dropzone dz-clickable">
-                                                <div
-                                                className="dz-message needsclick"
-                                                {...getRootProps()}
-                                                >
-                                                <div className="mb-3">
-                                                    <i className="display-4 text-muted ri-upload-cloud-2-fill" />
-                                                </div>
-                                                <h5>Drop files here or click to upload.</h5>
-                                                </div>
-                                            </div>
-                                            )}
-                                        </Dropzone>
+  //this is forj settle the order of the table
+  const forSettleTheOrderOfTable = async (typ, metod) => {
+    let paymentData = {};
+    if (typ === "multi") {
+      if (inputValue === null) {
+        toast.error("please enter amount ");
+      } else {
+        paymentData = {
+          paymentMethod: metod,
+          amount: inputValue,
+          detail: payDetail,
+          frontEndType: typ,
+        };
 
-                                        <ul className="list-unstyled mb-0" id="dropzone-preview">
-                                        
-                                        {selectedFiles.map((f, i) => {
-                                            return (
-                                                <Card
-                                                className="mt-1 mb-0 shadow-none border dz-processing dz-image-preview dz-success dz-complete"
-                                                key={i + "-file"}
-                                                >
-                                                <div className="p-2">
-                                                    <Row className="align-items-center">
-                                                    <Col className="col-auto">
-                                                        <img
-                                                        data-dz-thumbnail=""
-                                                        height="80"
-                                                        className="avatar-sm rounded bg-light"
-                                                        alt={f.name}
-                                                        src={f.preview}
-                                                        />
-                                                    </Col>
-                                                    <Col>
-                                                        <Link
-                                                        to="#"
-                                                        className="text-muted font-weight-bold"
-                                                        >
-                                                        {f.name}
-                                                        </Link>
-                                                        <p className="mb-0">
-                                                        <strong>{f.formattedSize}</strong>
-                                                        </p>
-                                                    </Col>
-                                                    </Row>
-                                                </div>
-                                                </Card>
-                                            );
-                                            })}
-                                        </ul>
+        const url = `${myUrl}/add/${tableId}/saveorder`;
 
-                                    </div>
-                                </CardBody>
-                            </Card>
+        const options = {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: token,
+          },
+          body: JSON.stringify(paymentData),
+        };
 
-                            <div className="text-end mb-4">
-                                <button type="submit" className="btn btn-danger w-sm me-1">Delete</button>
-                                <button type="submit" className="btn btn-secondary w-sm me-1">Draft</button>
-                                <button type="submit" className="btn btn-success w-sm">Create</button>
-                            </div>
-                        </Col>
+        try {
+          const response = await fetch(url, options);
+          const data = await response.json();
+          if (response.ok) {
+            forGetAllTables();
+            if (data?.table?.currentOrder?.remainAmount === 0) {
+              setForMultiPaymentOpen(false);
+            }
+            forGettingTableData(tableId);
+          } else {
+            console.log(" err data ", data);
+            setTableData(data?.table);
+          }
+        } catch (err) {
+          console.log("there is error in the for add parcerl function", err);
+        }
+      }
+    } else {
+      paymentData = {
+        paymentMethod: metod,
+        frontEndType: typ,
+      };
+      const url = `${myUrl}/add/${tableId}/saveorder`;
 
-                        <Col lg={4}>
-                            <div className="card">
-                                <div className="card-header">
-                                    <h5 className="card-title mb-0">Privacy</h5>
-                                </div>
-                                <CardBody>
-                                    <div>
-                                        <Label htmlFor="choices-privacy-status-input" className="form-label">Status</Label>
-                                        <select className="form-select" data-choices data-choices-search-false
-                                            id="choices-privacy-status-input">
-                                            <option defaultValue="Private">Private</option>
-                                            <option value="Team">Team</option>
-                                            <option value="Public">Public</option>
-                                        </select>
-                                    </div>
-                                </CardBody>
-                            </div>
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: token,
+        },
+        body: JSON.stringify(paymentData),
+      };
 
-                            <div className="card">
-                                <div className="card-header">
-                                    <h5 className="card-title mb-0">Tags</h5>
-                                </div>
-                                <CardBody>
-                                    <div className="mb-3">
-                                        <Label htmlFor="choices-categories-input" className="form-label">Categories</Label>
-                                        <select className="form-select" data-choices data-choices-search-false
-                                            id="choices-categories-input">
-                                            <option defaultValue="Designing">Designing</option>
-                                            <option value="Development">Development</option>
-                                        </select>
-                                    </div>
+      try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        if (response.ok) {
+          console.log("data", data);
+          forGetAllTables();
+          setForSettlement(false);
+          forGettingTableData(tableId);
+        } else {
+          console.log(" err data ", data);
+        }
+      } catch (err) {
+        console.log("there is error in the for add parcerl function", err);
+      }
+    }
+  };
 
-                                    <div>
-                                        <Label htmlFor="choices-text-input" className="form-label">Skills</Label>
-                                        <Select
-                                            value={selectedMulti}
-                                            isMulti={true}                                                            
-                                            onChange={() => {
-                                                handleMulti();
-                                            }}
-                                            options={SingleOptions}
-                                        />
-                                    </div>
-                                </CardBody>
-                            </div>
+  //this is for click on the payment method
+  const forClickOnPaymentMethod = (typ, metod) => {
+    forSettleTheOrderOfTable(typ, metod);
+    setCallSettleFunction(false);
+  };
 
-                            <Card>
-                                <CardHeader>
-                                    <h5 className="card-title mb-0">Members</h5>
-                                </CardHeader>
-                                <CardBody>
-                                    <div className="mb-3">
-                                        <Label htmlFor="choices-lead-input" className="form-label">Team Lead</Label>
-                                        <select className="form-select" data-choices data-choices-search-false
-                                            id="choices-lead-input">
-                                            <option defaultValue="Brent Gonzalez">Brent Gonzalez</option>
-                                            <option value="Darline Williams">Darline Williams</option>
-                                            <option value="Sylvia Wright">Sylvia Wright</option>
-                                            <option value="Ellen Smith">Ellen Smith</option>
-                                            <option value="Jeffrey Salazar">Jeffrey Salazar</option>
-                                            <option value="Mark Williams">Mark Williams</option>
-                                        </select>
-                                    </div>
+  //this is for multi payment
+  const formultiPayment = () => {
+    setForMultiPaymentOpen(true);
+    setForSettlement(false);
+    forGettingTableData(tableId);
+  };
 
-                                    <div>
-                                        <Label className="form-label">Team Members</Label>
-                                        <div className="avatar-group">
-                                            <Link to="#" className="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Brent Gonzalez">
-                                                <div className="avatar-xs">
-                                                    <img src={avatar3} alt="" className="rounded-circle img-fluid" />
-                                                </div>
-                                            </Link>
-                                            <Link to="#" className="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Sylvia Wright">
-                                                <div className="avatar-xs">
-                                                    <div className="avatar-title rounded-circle bg-secondary">
-                                                        S
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                            <Link to="#" className="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Ellen Smith">
-                                                <div className="avatar-xs">
-                                                    <img src={avatar4} alt="" className="rounded-circle img-fluid" />
-                                                </div>
-                                            </Link>
-                                            <Link to="#" className="avatar-group-item" data-bs-toggle="tooltip" data-bs-trigger="hover" data-bs-placement="top" title="Add Members">
-                                                <div className="avatar-xs" data-bs-toggle="modal" data-bs-target="#inviteMembersModal">
-                                                    <div className="avatar-title fs-16 rounded-circle bg-light border-dashed border text-primary">
-                                                        +
-                                                    </div>
-                                                </div>
-                                            </Link>
-                                        </div>
-                                    </div>
-                                </CardBody>
-                            </Card>
-                        </Col>
-                    </Row>
-                </Container>
+  //this is for the settle of table with the pre method
+  useEffect(() => {
+    if (callSettleFunction && tableId) {
+      forSettleTheOrderOfTable();
+      setCallSettleFunction(false);
+    }
+  });
+
+  return (
+    <React.Fragment>
+      <div className="page-content">
+        <Col sm={12}>
+          <div className="d-flex align-items-center justify-content-between mt-0 ">
+            <div style={{ gap: "5px" }}>
+              <Link
+                to={`/area/${id}/tables`}
+                style={{
+                  backgroundColor: "#F3F3F9",
+                  color: "black",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                All Tables
+              </Link>
+              <Link
+                to={`/take-away/table/${id}`}
+                style={{
+                  backgroundColor: "#F3F3F9",
+                  color: "black",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                Take Away Parcel
+              </Link>
+
+              <Link
+                to={`/delivery/tables/${id}`}
+                style={{
+                  backgroundColor: "#F3F3F9",
+                  color: "black",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                Home Delivery
+              </Link>
             </div>
-        </React.Fragment>
-    );
+          </div>
+        </Col>
+        <hr></hr>
+
+        <Container fluid>
+          <Col sm={12}>
+            <div className="d-flex flex-wrap align-items-center justify-content-between mt-0">
+              <div
+                className="d-flex flex-wrap col-12 col-md-8 col-lg-9"
+                style={{ gap: "5px" }}
+              >
+                {" "}
+                <h5>All Take Away Orders</h5>
+              </div>
+
+              <div className="col-12 col-lg-3 col-md-4 d-flex flex-wrap justify-content-end">
+                <Link
+                  onClick={forAddTakeAwayTable}
+                  style={{
+                    backgroundColor: "blue",
+                    color: "white",
+                    textDecoration: "none",
+                    textAlign: "center",
+                    fontSize: "14px",
+                  }}
+                  className="mx-1 px-2 py-1"
+                >
+                  New Order
+                </Link>
+              </div>
+            </div>
+          </Col>
+
+          {allTables.length === 0 ? (
+            <h3 className="text-center mt-3">There is no running table</h3>
+          ) : (
+            <Row className="my-3">
+              {allTables.map((item, index) => (
+                <Col sm={6} md={4} xl={3} className="mb-2 mx-0 p-1" key={index}>
+                  <div
+                    className="d-flex flex-column"
+                    style={{
+                      backgroundColor: getStatusColor(item.currentOrder.status),
+                    }}
+                  >
+                    <div
+                      className="p-0 mb-0 text-white"
+                      style={{
+                        height: "60px",
+                        borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
+                      }}
+                    >
+                      <div className="d-flex">
+                        <div
+                          className="d-flex align-items-center justify-content-center"
+                          style={{
+                            borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                            height: "60px",
+                            width: "30%",
+                          }}
+                        >
+                          <p>TA-{item.tableNo}</p>
+                        </div>
+                        <div
+                          className="text-center py-1 px-1"
+                          style={{
+                            width: "70%",
+                          }}
+                        >
+                          <p
+                            className="m-0 py-1 text-truncate"
+                            style={{
+                              whiteSpace: "nowrap",
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              fontSize: "12px",
+                            }}
+                          >
+                            {item?.currentOrder?.guest?.name}{" "}
+                            {item?.currentOrder?.guest?.phone}
+                          </p>
+                          <p>
+                            {restData.currencyPosition === "before"
+                              ? `${
+                                  restData.restCurrencySymbol
+                                }${item.currentOrder.totalAmount.toFixed(
+                                  restData.precision
+                                )}`
+                              : `${item.currentOrder.totalAmount.toFixed(
+                                  restData.precision
+                                )}${restData.restCurrencySymbol}`}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="d-flex justify-content-around mt-0">
+                      <Link
+                        to={`/for-kot/${item._id}`}
+                        className="text-white w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                        style={{
+                          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                          cursor:
+                            item.currentOrder.status === "invoiced"
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            item.currentOrder.status === "invoiced" ? 0.6 : 1,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (item.currentOrder.status === "invoiced") {
+                            e.currentTarget
+                              .querySelector(".not-allowed-icon")
+                              .classList.remove("d-none");
+                          } else {
+                            e.currentTarget
+                              .querySelector(".hover-text")
+                              .classList.remove("d-none");
+                            e.currentTarget.querySelector(
+                              ".hover-text"
+                            ).textContent = "kot";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget
+                            .querySelector(".hover-text")
+                            .classList.add("d-none");
+                          e.currentTarget
+                            .querySelector(".not-allowed-icon")
+                            .classList.add("d-none");
+                        }}
+                      >
+                        {/* Not allowed icon */}
+                        <div
+                          className="not-allowed-icon position-absolute top-50 start-50 translate-middle d-none"
+                          style={{
+                            width: "1.5rem",
+                            height: "1.5rem",
+                            border: "2px solid red",
+                            borderRadius: "50%",
+                            color: "red",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "1.2rem",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            &#x2F;
+                          </span>
+                        </div>
+
+                        <FaTicketAlt />
+                        <span
+                          className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                          style={{
+                            bottom: "-40px",
+                            border: "1px solid rgba(0, 0, 0, 0.1)",
+                            padding: "5px 10px",
+                            fontSize: "0.8rem",
+                            zIndex: 1000,
+                          }}
+                        >
+                          kot
+                        </span>
+                      </Link>
+
+                      <Link
+                        to={
+                          item.currentOrder.status !== "empty" &&
+                          item.currentOrder.status !== "invoiced"
+                            ? `/for-invoice/${item._id}`
+                            : "#"
+                        }
+                        onClick={(e) => {
+                          if (
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                          ) {
+                            e.preventDefault();
+                          }
+                        }}
+                        className="text-white w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                        style={{
+                          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                          cursor:
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                              ? 0.6
+                              : 1,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                          ) {
+                            e.currentTarget
+                              .querySelector(".not-allowed-icon")
+                              .classList.remove("d-none");
+                          } else {
+                            e.currentTarget
+                              .querySelector(".hover-text")
+                              .classList.remove("d-none");
+                            e.currentTarget.querySelector(
+                              ".hover-text"
+                            ).textContent = "Invoice";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget
+                            .querySelector(".hover-text")
+                            .classList.add("d-none");
+                          e.currentTarget
+                            .querySelector(".not-allowed-icon")
+                            .classList.add("d-none");
+                        }}
+                      >
+                        {/* Not allowed icon */}
+                        <div
+                          className="not-allowed-icon position-absolute top-50 start-50 translate-middle d-none"
+                          style={{
+                            width: "1.5rem",
+                            height: "1.5rem",
+                            border: "2px solid red",
+                            borderRadius: "50%",
+                            color: "red",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "1.2rem",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            &#x2F;
+                          </span>
+                        </div>
+
+                        <FaFileAlt />
+                        <span
+                          className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                          style={{
+                            bottom: "-40px",
+                            border: "1px solid rgba(0, 0, 0, 0.1)",
+                            padding: "5px 10px",
+                            fontSize: "0.8rem",
+                            zIndex: 1000,
+                          }}
+                        >
+                          Invoice
+                        </span>
+                      </Link>
+
+                      <Link
+                        onClick={(e) => {
+                          setTableId(item._id);
+                          if (item.currentOrder.status === "invoiced") {
+                            if (
+                              restData?.payemtPreOrPost === "pre" &&
+                              item?.currentOrder?.paymentMethod
+                            ) {
+                              setCallSettleFunction(true);
+                            } else {
+                              forSettleMents(item._id);
+                            }
+                          }
+                        }}
+                        className="text-white w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                        style={{
+                          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                          cursor:
+                            item.currentOrder.status !== "invoiced"
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            item.currentOrder.status !== "invoiced" ? 0.6 : 1,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (item.currentOrder.status !== "invoiced") {
+                            e.currentTarget
+                              .querySelector(".not-allowed-icon")
+                              .classList.remove("d-none");
+                          } else {
+                            e.currentTarget
+                              .querySelector(".hover-text")
+                              .classList.remove("d-none");
+                            e.currentTarget.querySelector(
+                              ".hover-text"
+                            ).textContent = "Settlement";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget
+                            .querySelector(".hover-text")
+                            .classList.add("d-none");
+                          e.currentTarget
+                            .querySelector(".not-allowed-icon")
+                            .classList.add("d-none");
+                        }}
+                      >
+                        {/* Not allowed icon */}
+                        <div
+                          className="not-allowed-icon position-absolute top-50 start-50 translate-middle d-none"
+                          style={{
+                            width: "1.5rem",
+                            height: "1.5rem",
+                            border: "2px solid red",
+                            borderRadius: "50%",
+                            color: "red",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "1.2rem",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            &#x2F;
+                          </span>
+                        </div>
+
+                        <FaRupeeSign />
+                        <span
+                          className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                          style={{
+                            bottom: "-40px",
+                            border: "1px solid rgba(0, 0, 0, 0.1)",
+                            padding: "5px 10px",
+                            fontSize: "0.8rem",
+                            zIndex: 1000,
+                          }}
+                        >
+                          SettleMent
+                        </span>
+                      </Link>
+
+                      <Link
+                        onClick={(e) => {
+                          if (
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                          ) {
+                            e.preventDefault();
+                          } else {
+                            forGettingTableData(item._id);
+                            setForSettingKot(true);
+                          }
+                        }}
+                        className="text-white w-25 py-1 d-flex align-items-center justify-content-center position-relative"
+                        style={{
+                          borderRight: "1px solid rgba(255, 255, 255, 0.5)",
+                          cursor:
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                              ? "not-allowed"
+                              : "pointer",
+                          opacity:
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                              ? 0.6
+                              : 1,
+                        }}
+                        onMouseEnter={(e) => {
+                          if (
+                            item.currentOrder.status === "empty" ||
+                            item.currentOrder.status === "invoiced"
+                          ) {
+                            e.currentTarget
+                              .querySelector(".not-allowed-icon")
+                              .classList.remove("d-none");
+                          } else {
+                            e.currentTarget
+                              .querySelector(".hover-text")
+                              .classList.remove("d-none");
+                            e.currentTarget.querySelector(
+                              ".hover-text"
+                            ).textContent = "Settings";
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget
+                            .querySelector(".hover-text")
+                            .classList.add("d-none");
+                          e.currentTarget
+                            .querySelector(".not-allowed-icon")
+                            .classList.add("d-none");
+                        }}
+                      >
+                        {/* Not allowed icon */}
+                        <div
+                          className="not-allowed-icon position-absolute top-50 start-50 translate-middle d-none"
+                          style={{
+                            width: "1.5rem",
+                            height: "1.5rem",
+                            border: "2px solid red",
+                            borderRadius: "50%",
+                            color: "red",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                          }}
+                        >
+                          <span
+                            style={{
+                              fontSize: "1.2rem",
+                              fontWeight: "bold",
+                            }}
+                          >
+                            &#x2F;
+                          </span>
+                        </div>
+
+                        <FaFileAlt />
+                        <span
+                          className="hover-text position-absolute start-50 translate-middle-x bg-white text-dark p-1 d-none"
+                          style={{
+                            bottom: "-40px",
+                            border: "1px solid rgba(0, 0, 0, 0.1)",
+                            padding: "5px 10px",
+                            fontSize: "0.8rem",
+                            zIndex: 1000,
+                          }}
+                        >
+                          Settings
+                        </span>
+                      </Link>
+                    </div>
+                  </div>
+                </Col>
+              ))}
+            </Row>
+          )}
+        </Container>
+      </div>
+
+      {/* this is for the setting of the table and kot */}
+      {forSettingKot && (
+        <div
+          className="d-flex align-items-center justify-content-center position-fixed"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 5000,
+          }}
+        >
+          <div
+            className="d-flex  flex-column bg-white  pb-4 "
+            style={{
+              width: "700px",
+              height: "80vh",
+              overflowY: "scroll",
+              scrollbarWidth: "none",
+              msOverflowStyle: "none",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <div
+              className=" p-1  d-flex justify-content-between align-items-center  mb-2"
+              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+            >
+              <p className="p-0 m-0 text-white">
+                KOT Details Table no {tableData.tableNo}
+              </p>
+              <p
+                className="m-0 p-2 color-dark cursor-pointer"
+                onClick={() => setForSettingKot(false)}
+              >
+                x
+              </p>
+            </div>
+
+            {forLoading ? (
+              <div
+                className="d-flex align-items-center justify-content-center"
+                style={{
+                  height: "70vh",
+                  width: "100%",
+                }}
+              >
+                <div
+                  className="spinner-border text-primary"
+                  role="status"
+                  style={{ width: "2.5rem", height: "2.5rem" }}
+                ></div>
+                <p
+                  className="ms-3"
+                  style={{
+                    fontSize: "18px",
+                    color: "#007bff",
+                    fontWeight: "bold",
+                  }}
+                >
+                  Loading kots all items...
+                </p>
+              </div>
+            ) : (
+              allKots.map((item, index) => (
+                <div
+                  className="p-2"
+                  style={{
+                    maxHeight: "70vh",
+                    gap: "1px",
+                  }}
+                >
+                  <div className="p-1">
+                    <div
+                      className="d-flex justify-content-between align-items-center px-2"
+                      style={{
+                        fontSize: "14px",
+                        backgroundColor: "#F3F3F3",
+                      }}
+                    >
+                      <div className="d-flex align-items-center justify-content-center">
+                        KOT/{item.number} - 04/12/2024 12:30:32
+                      </div>
+                      <div
+                        className="d-flex align-items-center justify-content-center   "
+                        style={{ gap: "5px" }}
+                      >
+                        <Link
+                          to={`/kot/${item._id}/void/${forTableId}`}
+                          className="cursor-pointer"
+                          style={{
+                            backgroundColor: "#0074FF",
+                            color: "white",
+                            padding: "3px 5px",
+                            margin: 0,
+                            textDecoration: "none",
+                          }}
+                        >
+                          <FiEdit className="pe-1" /> Void items
+                        </Link>
+                      </div>
+                    </div>
+                    <div
+                      className="table-responsive "
+                      style={{
+                        gap: "1px",
+                      }}
+                    >
+                      <table class="table  table-striped  table-hover table-light  ">
+                        <thead>
+                          <tr>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              SL
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Item Name
+                            </th>
+                            <th
+                              scope="col"
+                              style={{ fontSize: "12px" }}
+                              className="fw-bold"
+                            >
+                              Quantity
+                            </th>
+                          </tr>
+                        </thead>
+                        {item.orderItems.map((item, index) => (
+                          <tbody style={{ fontSize: "12px" }} key={index}>
+                            <tr>
+                              <td>{index + 1}</td>
+                              <td>{item.name}</td>
+                              <td>{item.quantity}</td>
+                            </tr>
+                          </tbody>
+                        ))}
+                      </table>
+                      <div
+                        className="  d-flex align-items-center justify-content-between p-1 "
+                        style={{
+                          backgroundColor: "#E6E6E6",
+                          fontSize: "12px",
+                        }}
+                      >
+                        <p className="p-0 m-0">Total Items </p>
+                        <p className="p-0 m-0">{item.orderItems.length}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* this is for settlement */}
+      {forSettlement && (
+        <div
+          className="d-flex align-items-center justify-content-center position-fixed"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 5000,
+          }}
+        >
+          <div
+            className="d-flex  flex-column bg-white pb-4"
+            style={{
+              borderRadius: "5px",
+              width: "450px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <h5 className="py-3 px-1 bg-danger text-white">Payment Mode</h5>
+            <div
+              className="d-flex align-items-center justify-content-between "
+              style={{ padding: "2px 5px", gap: "5px" }}
+            >
+              <div
+                onClick={() => forClickOnPaymentMethod("single", "cash")}
+                className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                style={{ height: "100px", backgroundColor: "#1F9642" }}
+              >
+                Cash
+              </div>
+              <div
+                onClick={() => forClickOnPaymentMethod("single", "card")}
+                className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                style={{ height: "100px", backgroundColor: "#FFBD00" }}
+              >
+                Card
+              </div>
+              <div
+                onClick={() => forClickOnPaymentMethod("single", "paytm")}
+                className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                style={{ height: "100px", backgroundColor: "#0A97BB" }}
+              >
+                PayTM
+              </div>
+            </div>
+            <div
+              className="d-flex align-items-center justify-content-between "
+              style={{ padding: "2px 5px", gap: "5px" }}
+            >
+              <div
+                onClick={() => forClickOnPaymentMethod("single", "upi")}
+                className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                style={{ height: "100px", backgroundColor: "#0172F0" }}
+              >
+                UPI
+              </div>
+              <div
+                onClick={formultiPayment}
+                className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                style={{ height: "100px", backgroundColor: "#030507" }}
+              >
+                Multi Payment
+              </div>
+              <div
+                onClick={() => setForSettlement(!forSettlement)}
+                className="d-flex align-items-center justify-content-center text-center cursor-pointer fs-5  text-white w-100"
+                style={{ height: "100px", backgroundColor: "#DB433F" }}
+              >
+                Cancel
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* this is for multipayment */}
+      {forMultiPaymentOpen && (
+        <div
+          className="d-flex align-items-center justify-content-center position-fixed"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 5000,
+          }}
+        >
+          <div
+            className="d-flex  flex-column bg-white  pb-4 "
+            style={{
+              width: "900px",
+              height: "80vh",
+              overflowY: "scroll",
+              overflowX: "scroll",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <div
+              className=" p-1  d-flex justify-content-between align-items-center  mb-2"
+              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+            >
+              <p className="p-0 m-0 text-white">Payment</p>
+              <p
+                className="m-0 p-2 color-dark cursor-pointer"
+                onClick={() => setForMultiPaymentOpen(false)}
+              >
+                x
+              </p>
+            </div>
+            <div className="p-2">
+              <div className="m-0 p-0">
+                <button
+                  onClick={() => forClickOnPaymentMethod("multi", "cash")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Cash
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("multi", "card")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Card
+                </button>
+                <button
+                  className="py-1 px-2"
+                  onClick={() => forClickOnPaymentMethod("multi", "advance")}
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Advance
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("multi", "paytm")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  PayTM
+                </button>
+                <button
+                  onClick={() =>
+                    forClickOnPaymentMethod("multi", "check payment")
+                  }
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Check Payment
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("multi", "credit")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Credit
+                </button>
+                <button
+                  onClick={() =>
+                    forClickOnPaymentMethod("multi", "post to room")
+                  }
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Post to room
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("multi", "upi")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  upi
+                </button>
+              </div>
+              <hr className="p-0 m-0"></hr>
+
+              <div
+                className="d-flex"
+                style={{
+                  gap: "10px",
+                  overflowX: "auto",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
+                <div
+                  className="p-0 mt-1 "
+                  style={{
+                    border: "1px solid #B3C8CF",
+                    width: "500px",
+                  }}
+                >
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
+                        Invoice Total
+                      </p>
+                    </div>{" "}
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
+                        {restData.currencyPosition === "before"
+                          ? `${
+                              restData.restCurrencySymbol
+                            }${tableData?.currentOrder?.totalAmount.toFixed(
+                              restData.precision
+                            )}`
+                          : `${tableData?.currentOrder?.totalAmount.toFixed(
+                              restData.precision
+                            )}${restData.restCurrencySymbol}`}{" "}
+                      </p>
+                    </div>{" "}
+                  </div>{" "}
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Amount</p>
+                    </div>{" "}
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        className="px-2 m-0"
+                        style={{
+                          border: "1px solid #B3C8CF",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </div>{" "}
+                  </div>{" "}
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Paid Amount</p>
+                    </div>{" "}
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        className="px-2 m-0"
+                        value={
+                          tableData?.currentOrder?.paidAmount
+                            ? tableData?.currentOrder?.paidAmount
+                            : 0
+                        }
+                        style={{
+                          border: "1px solid #B3C8CF",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </div>{" "}
+                  </div>{" "}
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Return Amount</p>
+                    </div>{" "}
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        value={tableData?.currentOrder?.remainAmount}
+                        className="px-2 m-0"
+                        style={{
+                          border: "1px solid #B3C8CF",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </div>{" "}
+                  </div>{" "}
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Payment Detail</p>
+                    </div>{" "}
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <textarea
+                        onChange={(e) => setPayDetail(e.target.value)}
+                        style={{ border: "1px solid #B3C8CF" }}
+                        className="w-100 p-1"
+                        rows="5"
+                        placeholder="Yahan likhein..."
+                      ></textarea>
+                    </div>{" "}
+                  </div>{" "}
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary"></p>
+                    </div>{" "}
+                    <div className="p-0 w-75"></div>{" "}
+                  </div>{" "}
+                </div>
+
+                <div
+                  className=" text-center p-3"
+                  style={{
+                    width: "300px",
+                  }}
+                >
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(10)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(10).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(10).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(20)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(20).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(20).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(50)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(50).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(50).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(100)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(100).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(100).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                  </div>{" "}
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(200)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(200).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(200).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(500)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(500).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(500).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                  </div>{" "}
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(1000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(1000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(1000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(2000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(2000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(2000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(3000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(3000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(3000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(4000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(4000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(4000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                  </div>{" "}
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(5000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(5000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(5000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(10000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {" "}
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(10000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(10000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}{" "}
+                    </button>
+                  </div>{" "}
+                  <div
+                    className="mt-2 mb-1 d-flex align-items-center  "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      // disabled={forTableData?.currentOrder?.remainAmount > 0}
+                      onClick={() => {
+                        if (tableData?.currentOrder?.remainAmount > 0) {
+                          toast.error("Please pay the total bill");
+                        }
+                      }}
+                      style={{
+                        border: "none",
+                        width: "295px",
+                        backgroundColor: "black",
+                      }}
+                      className="py-2 mx-1 px-4 text-white"
+                    >
+                      {tableData?.currentOrder?.remainAmount > 0
+                        ? "Enter Amount"
+                        : "Payment Complete"}{" "}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </React.Fragment>
+  );
 };
 
 export default CreateProject;

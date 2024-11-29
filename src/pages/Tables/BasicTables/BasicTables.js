@@ -10,12 +10,15 @@ import {
   ModalBody,
   ModalFooter,
   ModalHeader,
+  Label,
 } from "reactstrap";
 import Flatpickr from "react-flatpickr";
 import BreadCrumb from "../../../Components/Common/BreadCrumb";
 import { useParams } from "react-router-dom";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import Loader from "../../../Components/Common/Loader";
+import Select from "react-select";
+import SimpleBar from "simplebar-react";
 
 const BasicTables = () => {
   const [addCatagory, setAddCatagory] = useState(false);
@@ -24,12 +27,31 @@ const BasicTables = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [name, setName] = useState("");
   const [ctgryid, setCtgyid] = useState("");
+  const [maincatagory, setMainCatagory] = useState("");
 
   //this is for getting rest id
   const { id } = useParams();
 
   //this is for getting url
-  const { myUrl } = UseRiazHook();
+  const { myUrl, token } = UseRiazHook();
+
+  //this is for parent catagory
+
+  const mainCatagories = [
+    {
+      options: [
+        { label: "Select Catagory...", value: "Select Catagory" },
+        { label: "Food", value: "food" },
+        { label: "Drinks", value: "drinks" },
+        { label: "Sweets", value: "sweets" },
+      ],
+    },
+  ];
+
+  //this is for select Guest gender
+  function handleSelectMainCatagory(selectedOption) {
+    setMainCatagory(selectedOption.value);
+  }
 
   //this is for show add catagory
   const showForAddCatagory = () => {
@@ -67,7 +89,10 @@ const BasicTables = () => {
   //this is for catch errors
   const catchErrors = () => {
     let isOk = true;
-    if (!name.trim()) {
+    if (!maincatagory.trim()) {
+      isOk = false;
+      toast.error("please select main catagory ");
+    } else if (!name.trim()) {
       isOk = false;
       toast.error("please enter catagory name");
     }
@@ -81,6 +106,7 @@ const BasicTables = () => {
     if (catchErrors()) {
       let formData = {
         name: name,
+        maincatagory,
       };
 
       //this is for add catagory
@@ -90,6 +116,8 @@ const BasicTables = () => {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+
+            Authorization: token,
           },
           body: JSON.stringify(formData),
         };
@@ -122,6 +150,7 @@ const BasicTables = () => {
       const data = await response.json();
       if (response.ok) {
         setName(data.catagory.name);
+        setMainCatagory(data.catagory.maincatagory);
       } else {
         console.log("err data", data);
       }
@@ -143,6 +172,7 @@ const BasicTables = () => {
     if (catchErrors()) {
       let formData = {
         name,
+        maincatagory,
       };
 
       //this is for edit the catagory
@@ -152,6 +182,7 @@ const BasicTables = () => {
           method: "PATCH",
           headers: {
             "Content-Type": "application/json",
+            Authorization: token,
           },
           body: JSON.stringify(formData),
         };
@@ -238,7 +269,8 @@ const BasicTables = () => {
                 <Button
                   className="add-btn bg-dark text-white px-3 py-1 border-none"
                   id="create-btn"
-                  onClick={showForAddCatagory}>
+                  onClick={showForAddCatagory}
+                >
                   <i className="ri-add-line align-bottom me-1"></i> Add Catagory
                 </Button>
               </div>
@@ -253,6 +285,7 @@ const BasicTables = () => {
                     <tr>
                       <th scope="col">Id</th>
                       <th scope="col">Catagory Name</th>
+                      <th scope="col">Main Catagory</th>
                       <th scope="col">Edit</th>
                       <th scope="col">Delete</th>
                     </tr>
@@ -262,14 +295,17 @@ const BasicTables = () => {
                     {isLoading ? (
                       <div
                         className="d-flex align-items-center justify-content-center"
-                        style={{ position: "fixed", left: "50%", top: "50%" }}>
+                        style={{ position: "fixed", left: "50%", top: "50%" }}
+                      >
                         <Loader />{" "}
                       </div>
                     ) : (
                       allCatagories.map((item, index) => (
                         <tr key={index}>
                           <td>{index + 1}</td>
+
                           <td>{item.name}</td>
+                          <td>{item.maincatagory}</td>
 
                           <td>
                             <button
@@ -278,7 +314,8 @@ const BasicTables = () => {
                               style={{
                                 padding: "4px 8px",
                                 backgroundColor: "#E6F7FC",
-                              }}>
+                              }}
+                            >
                               <i className="ri-pencil-fill align-bottom" />
                             </button>
                           </td>
@@ -290,7 +327,8 @@ const BasicTables = () => {
                                 padding: "4px 8px",
                                 backgroundColor: "#FEEDE9",
                                 color: "red",
-                              }}>
+                              }}
+                            >
                               <i className="ri-delete-bin-5-fill align-bottom" />
                             </button>
                           </td>
@@ -309,11 +347,27 @@ const BasicTables = () => {
         <ModalHeader
           className="bg-light p-3"
           id="exampleModalLabel"
-          toggle={showForAddCatagory}>
+          toggle={showForAddCatagory}
+        >
           Add Catagroy
         </ModalHeader>
         <form className="tablelist-form">
           <ModalBody>
+            <div className="mb-3">
+              <Label htmlFor="gender" className="form-label">
+                Select Main Catagory
+              </Label>
+              <Select
+                value={maincatagory}
+                onChange={(selectedOption) =>
+                  handleSelectMainCatagory(selectedOption)
+                }
+                placeholder={maincatagory ? maincatagory : "select Gender"}
+                options={mainCatagories}
+                id="gender"
+              ></Select>
+            </div>
+
             <div className="mb-3">
               <label htmlFor="customername-field" className="form-label">
                 Catagroy Name
@@ -333,13 +387,15 @@ const BasicTables = () => {
               <button
                 type="button"
                 className="btn btn-light"
-                onClick={() => setAddCatagory(false)}>
+                onClick={() => setAddCatagory(false)}
+              >
                 Close
               </button>
               <button
                 onClick={(e) => forHandleSubmit(e)}
                 className="btn btn-primary px-2"
-                id="add-btn">
+                id="add-btn"
+              >
                 Add Catagory
               </button>
             </div>
@@ -353,11 +409,27 @@ const BasicTables = () => {
         <ModalHeader
           className="bg-light p-3"
           id="exampleModalLabel"
-          toggle={forEditCatagory}>
+          toggle={forEditCatagory}
+        >
           Edit Catagroy
         </ModalHeader>
         <form className="tablelist-form">
           <ModalBody>
+            <div className="mb-3">
+              <Label htmlFor="gender" className="form-label">
+                Select Main Catagory
+              </Label>
+              <Select
+                value={maincatagory}
+                onChange={(selectedOption) =>
+                  handleSelectMainCatagory(selectedOption)
+                }
+                placeholder={maincatagory ? maincatagory : "select Gender"}
+                options={mainCatagories}
+                id="gender"
+              ></Select>
+            </div>
+
             <div className="mb-3">
               <label htmlFor="customername-field" className="form-label">
                 Catagroy Name
@@ -378,14 +450,16 @@ const BasicTables = () => {
               <button
                 type="button"
                 className="btn btn-light"
-                onClick={() => setEditCatagory(false)}>
+                onClick={() => setEditCatagory(false)}
+              >
                 Close
               </button>
               <button
                 type="submit"
                 onClick={(e) => forHandleSubmitUpdateCatagory(e)}
                 className="btn btn-primary px-2"
-                id="add-btn">
+                id="add-btn"
+              >
                 Edit Catagory
               </button>
             </div>

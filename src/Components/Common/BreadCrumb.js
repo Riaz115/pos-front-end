@@ -48,25 +48,29 @@ const BreadCrumb = ({
                   <Link
                     to="/dine"
                     className="py-1 px-3 mx-1  text-white  text-decoration-none"
-                    style={{ backgroundColor: " #FD5432" }}>
+                    style={{ backgroundColor: " #FD5432" }}
+                  >
                     {dine}
                   </Link>
                   <Link
                     to="/take-away"
                     className="py-1 px-3 mx-1  text-white text-decoration-none"
-                    style={{ backgroundColor: "#7487DE" }}>
+                    style={{ backgroundColor: "#7487DE" }}
+                  >
                     {takeAway}
                   </Link>
                   <Link
                     to="/delivery"
                     className="py-1 px-3 mx-1  text-white   text-decoration-none"
-                    style={{ backgroundColor: "#45A14E" }}>
+                    style={{ backgroundColor: "#45A14E" }}
+                  >
                     {delivery}
                   </Link>
                   <Link
                     to="/runing"
                     className="py-1 px-3 mx-1  text-white  text-decoration-none"
-                    style={{ backgroundColor: " #FE9900" }}>
+                    style={{ backgroundColor: " #FE9900" }}
+                  >
                     {runing}
                   </Link>
                 </>
@@ -78,13 +82,15 @@ const BreadCrumb = ({
                 <>
                   <Link
                     className="py-1 px-3 mx-1  text-white  text-decoration-none"
-                    style={{ backgroundColor: " #FD5432" }}>
+                    style={{ backgroundColor: " #FD5432" }}
+                  >
                     {merge}
                   </Link>
 
                   <Link
                     className="py-1 px-3 mx-1  text-white   text-decoration-none"
-                    style={{ backgroundColor: " #FE9900" }}>
+                    style={{ backgroundColor: " #FE9900" }}
+                  >
                     {transfar}
                   </Link>
                 </>

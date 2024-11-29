@@ -18,6 +18,7 @@ import { toast } from "react-toastify";
 import isEmail from "validator/lib/isEmail";
 import { UseRiazHook } from "../../RiazStore/RiazStore";
 import { FaTimes } from "react-icons/fa";
+import { use } from "echarts";
 
 const EmailToolbar = () => {
   const [myCountry, setMyCountry] = useState("");
@@ -46,15 +47,17 @@ const EmailToolbar = () => {
   const [restState, setRestState] = useState("");
   const [restWebsite, setRestWebsite] = useState("");
   const [restCurrencySymbol, setRestCurrencySymbol] = useState("");
-  const [serviceChargesType, setServiceChargesType] = useState("");
-  const [deliveryChargesType, setDeliveryCharesType] = useState("");
   const [errors, setErrors] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [serviceChargesAmount, setServiceChargesAmount] = useState("");
+  const [deliveryChargesAmount, setDeliveryChargesAmount] = useState(0);
+  const [typeOfServiceCharges, setTypeOfServiceCharges] = useState("");
+  const [typeOfDeliveryCharges, setTypeOfDeliveryCharges] = useState("");
+  const [gstTexAmount, setGstTexAmount] = useState(0);
+  const [gstTexType, setGstTexType] = useState("");
 
   //this is data from my hook
   const { myUrl, token } = UseRiazHook();
-
-  console.log("token", token);
 
   //this is for states options
   const forStatesOptions = allStatesForTimeZone.map((everyState) => ({
@@ -233,14 +236,31 @@ const EmailToolbar = () => {
       isOk = false;
       newErrors.payemtPreOrPost = "Please Select Pre or Post";
       toast.error("Please Select pre Or post");
-    } else if (!serviceChargesType.trim()) {
+    } else if (!typeOfServiceCharges.trim()) {
       isOk = false;
-      newErrors.serviceChargesType = "Please Fill This Input";
+      newErrors.typeOfServiceCharges = "Please Fill This Input";
+      toast.error("Please select service  charges");
+    } else if (!serviceChargesAmount.trim()) {
+      isOk = false;
+      newErrors.serviceChargesAmount = "Please enter service charges amount";
       toast.error("Please fill services charges input");
-    } else if (!deliveryChargesType.trim()) {
+    } else if (!typeOfDeliveryCharges.trim()) {
       isOk = false;
-      newErrors.deliveryChargesType = "Please Fill This Input";
+      newErrors.typeOfDeliveryCharges =
+        "Please Select type of delivery charges";
+      toast.error("Please select type of delivery charges");
+    } else if (!deliveryChargesAmount.trim()) {
+      isOk = false;
+      newErrors.deliveryChargesAmount = "Please Fill This Input";
       toast.error("Please enter delivery charges");
+    } else if (!gstTexType.trim()) {
+      isOk = false;
+      newErrors.gstTexType = "Please select the food tex type";
+      toast.error("Please select the food tex type");
+    } else if (!gstTexAmount.trim()) {
+      isOk = false;
+      newErrors.gstTexAmount = "Please enter the food tex amount";
+      toast.error("Please enter the food tex amount");
     }
 
     setErrors(newErrors);
@@ -279,8 +299,12 @@ const EmailToolbar = () => {
       formData.append("posTooltip", posTooltip);
       formData.append("menuTooltip", menuTooltip);
       formData.append("payemtPreOrPost", payemtPreOrPost);
-      formData.append("serviceChargesType", serviceChargesType);
-      formData.append("deliveryChargesType", deliveryChargesType);
+      formData.append("typeOfServiceCharges", typeOfServiceCharges);
+      formData.append("serviceChargesAmount", serviceChargesAmount);
+      formData.append("typeOfDeliveryCharges", typeOfDeliveryCharges);
+      formData.append("deliveryChargesAmount", deliveryChargesAmount);
+      formData.append("gstTexType", gstTexType);
+      formData.append("gstTexAmount", gstTexAmount);
 
       //this is function for add restaurent
       const forAddRestToBackend = async () => {
@@ -319,12 +343,14 @@ const EmailToolbar = () => {
     <React.Fragment>
       <div
         className="page-content my-1 px-2 pt-2 pb-4 w-100 "
-        style={{ backgroundColor: "#F3F4F6" }}>
+        style={{ backgroundColor: "#F3F4F6" }}
+      >
         <Container fluid>
           <h2 className="text-muted px-3 py-2">Settings</h2>
           <div
             className=" p-3 rounded-2 "
-            style={{ backgroundColor: "#FFFFFF" }}>
+            style={{ backgroundColor: "#FFFFFF" }}
+          >
             <Row>
               <Col lg={3} md={6} className="my-2">
                 <div>
@@ -335,7 +361,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Name
                   </Label>
                   <Input
@@ -351,7 +378,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restName}
                     </p>
                   )}
@@ -366,7 +394,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Email
                   </Label>
                   <Input
@@ -382,7 +411,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restEmail}
                     </p>
                   )}
@@ -397,12 +427,14 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Restaurent Logo
                     <Button
                       className="py-0 px-2 "
                       onClick={toggleModal}
-                      style={{ margin: "0px", backgroundColor: "#7367F0" }}>
+                      style={{ margin: "0px", backgroundColor: "#7367F0" }}
+                    >
                       show
                     </Button>
                   </Label>
@@ -427,7 +459,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Phone Number
                   </Label>
                   <Input
@@ -443,19 +476,19 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restPhone}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-            </Row>
-            <Row>
               <Col lg={3} md={6} className="my-2">
                 <div className="mb-3">
                   <Label
                     htmlFor="choices-single-no-search"
-                    className="form-label text-muted">
+                    className="form-label text-muted"
+                  >
                     Country
                   </Label>
 
@@ -476,7 +509,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.myCountry}
                     </p>
                   )}
@@ -491,7 +525,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     State
                   </Label>
                   <Input
@@ -507,7 +542,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restState}
                     </p>
                   )}
@@ -522,7 +558,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     city
                   </Label>
                   <Input
@@ -538,7 +575,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restCity}
                     </p>
                   )}
@@ -553,7 +591,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Address
                   </Label>
                   <Input
@@ -569,14 +608,13 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restAddress}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-            </Row>
-            <Row>
               <Col lg={3} md={6} className="my-2">
                 <div>
                   <Label
@@ -586,7 +624,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Website
                   </Label>
                   <Input
@@ -607,7 +646,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Select Date Formate
                   </Label>
                   <Select
@@ -619,14 +659,16 @@ const EmailToolbar = () => {
                       dateFormate ? dateFormate : "select Date Formate"
                     }
                     options={DateFormateOptions}
-                    id="dateFormate"></Select>
+                    id="dateFormate"
+                  ></Select>
                   {errors.dateFormate && (
                     <p
                       style={{
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.dateFormate}
                     </p>
                   )}
@@ -641,7 +683,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Time Zone
                   </Label>
                   <Select
@@ -658,7 +701,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.selectedTimezone}
                     </p>
                   )}
@@ -673,7 +717,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Currency symbol
                   </Label>
                   <Input
@@ -689,14 +734,13 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.restCurrencySymbol}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-            </Row>
-            <Row>
               <Col lg={3} md={6} className="my-2">
                 <div className="mb-3">
                   <Label
@@ -706,7 +750,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Currency Position
                   </Label>
                   <Select
@@ -730,7 +775,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.currencyPosition}
                     </p>
                   )}
@@ -745,7 +791,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Precision
                   </Label>
                   <Select
@@ -765,7 +812,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.precision}
                     </p>
                   )}
@@ -780,7 +828,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Decimal Sepreator
                   </Label>
                   <Select
@@ -805,7 +854,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.decimalSprator}
                     </p>
                   )}
@@ -820,7 +870,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Thousand Sepreator
                   </Label>
                   <Select
@@ -845,14 +896,13 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.thousandSapreater}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-            </Row>
-            <Row>
               <Col lg={3} md={6} className="my-2">
                 <div className="mb-3">
                   <Label
@@ -862,7 +912,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Order Type
                   </Label>
                   <Select
@@ -883,7 +934,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.orderType}
                     </p>
                   )}
@@ -898,7 +950,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Delivery Partner
                   </Label>
                   <Select
@@ -925,7 +978,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.deliveryPartner}
                     </p>
                   )}
@@ -940,7 +994,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Waiter
                   </Label>
                   <Select
@@ -966,7 +1021,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.defalutWaiter}
                     </p>
                   )}
@@ -981,7 +1037,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Customer
                   </Label>
                   <Select
@@ -1007,14 +1064,13 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.defaultCustomer}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-            </Row>
-            <Row>
               <Col lg={3} md={6} className="my-2">
                 <div className="mb-3">
                   <Label
@@ -1024,7 +1080,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Default Payment Method
                   </Label>
                   <Select
@@ -1050,7 +1107,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.defaultPaymentMethod}
                     </p>
                   )}
@@ -1065,7 +1123,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Place Order Tooltip(in POS)
                   </Label>
                   <Select
@@ -1085,7 +1144,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.posTooltip}
                     </p>
                   )}
@@ -1100,7 +1160,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Food Menu Tooltip(in POS)
                   </Label>
                   <Select
@@ -1122,7 +1183,8 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.menuTooltip}
                     </p>
                   )}
@@ -1137,7 +1199,8 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Pre or Post Payment
                   </Label>
                   <Select
@@ -1146,8 +1209,8 @@ const EmailToolbar = () => {
                       setPaymentPreOrPost(selectedOption.value);
                     }}
                     options={[
-                      { value: "show", label: "Show" },
-                      { value: "hide", label: "Hide" },
+                      { value: "pre", label: "Pre" },
+                      { value: "post", label: "Post" },
                     ]}
                     placeholder={
                       payemtPreOrPost
@@ -1161,15 +1224,55 @@ const EmailToolbar = () => {
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
+                      }}
+                    >
                       {errors.payemtPreOrPost}
                     </p>
                   )}
                 </div>
               </Col>{" "}
-            </Row>
-            <Row>
-              <Col md={6} className="my-2">
+              <Col lg={3} md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Service Charges Type
+                  </Label>
+                  <Select
+                    value={typeOfServiceCharges}
+                    onChange={(selectedOption) => {
+                      setTypeOfServiceCharges(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "number", label: "Number" },
+                      { value: "percentage", label: "PercentAge" },
+                    ]}
+                    placeholder={
+                      typeOfServiceCharges
+                        ? typeOfServiceCharges
+                        : "select service charges type"
+                    }
+                  />
+                  {errors.currencyPosition && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.typeOfServiceCharges}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col lg={3} md={6} className="my-2">
                 <div>
                   <Label
                     htmlFor="basiInput"
@@ -1178,24 +1281,137 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
+                    }}
+                  >
                     Service Charge (eg:10% or 10)
                   </Label>
                   <Input
-                    type="text"
+                    type="number"
                     className="form-control"
-                    placeholder="10% or 10"
+                    placeholder="Enter Amount"
                     id="basiInput"
-                    onChange={(e) => setServiceChargesType(e.target.value)}
+                    onChange={(e) => setServiceChargesAmount(e.target.value)}
                   />
-                  {errors.serviceChargesType && (
+                  {errors.serviceChargesAmount && (
                     <p
                       style={{
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
-                      {errors.serviceChargesType}
+                      }}
+                    >
+                      {errors.serviceChargesAmount}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col lg={3} md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Delivery Charges Type
+                  </Label>
+                  <Select
+                    value={typeOfDeliveryCharges}
+                    onChange={(selectedOption) => {
+                      setTypeOfDeliveryCharges(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "number", label: "Number" },
+                      { value: "percentage", label: "PercentAge" },
+                    ]}
+                    placeholder={
+                      typeOfDeliveryCharges
+                        ? typeOfDeliveryCharges
+                        : "Select typeOfDeliveryCharges"
+                    }
+                  />
+                  {errors.typeOfDeliveryCharges && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.typeOfDeliveryCharges}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col lg={3} md={6} className="my-2">
+                <div>
+                  <Label
+                    htmlFor="basiInput"
+                    className="form-label ps-1"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Delivery Charge Amount
+                  </Label>
+                  <Input
+                    type="number"
+                    className="form-control"
+                    placeholder="10 or 10%"
+                    id="basiInput"
+                    onChange={(e) => setDeliveryChargesAmount(e.target.value)}
+                  />
+                  {errors.deliveryChargesAmount && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.deliveryChargesAmount}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Food Tex Type
+                  </Label>
+                  <Select
+                    value={gstTexType}
+                    onChange={(selectedOption) => {
+                      setGstTexType(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "number", label: "Number" },
+                      { value: "percentage", label: "PercentAge" },
+                    ]}
+                    placeholder={gstTexType ? gstTexType : "select Text Type"}
+                  />
+                  {errors.gstTexType && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.gstTexType}
                     </p>
                   )}
                 </div>
@@ -1209,24 +1425,26 @@ const EmailToolbar = () => {
                       fontSize: "15px",
                       color: "#6C667F",
                       fontWeight: "400",
-                    }}>
-                    Delivery Charge (eg:10% or 10)
+                    }}
+                  >
+                    Food Tex Amount
                   </Label>
                   <Input
-                    type="text"
+                    type="number"
                     className="form-control"
                     placeholder="10 or 10%"
                     id="basiInput"
-                    onChange={(e) => setDeliveryCharesType(e.target.value)}
+                    onChange={(e) => setGstTexAmount(e.target.value)}
                   />
-                  {errors.deliveryChargesType && (
+                  {errors.gstTexAmount && (
                     <p
                       style={{
                         color: "red",
                         fontSize: "12px",
                         paddingLeft: "5px",
-                      }}>
-                      {errors.deliveryChargesType}
+                      }}
+                    >
+                      {errors.gstTexAmount}
                     </p>
                   )}
                 </div>
@@ -1238,7 +1456,8 @@ const EmailToolbar = () => {
               <Button
                 type="submit"
                 onClick={(e) => forEditRestSubmit(e)}
-                className="add-btn bg-info  w-100 text-white px-3 py-2 border-none rounded-5">
+                className="add-btn bg-info  w-100 text-white px-3 py-2 border-none rounded-5"
+              >
                 Submit
               </Button>
             </div>
@@ -1252,7 +1471,8 @@ const EmailToolbar = () => {
             style={{ backgroundColor: "#F8F8F8" }}
             close={
               <FaTimes onClick={toggleModal} style={{ cursor: "pointer" }} />
-            }>
+            }
+          >
             <span style={{ flex: 1, fontSize: "20px" }}>Invoice Logo</span>{" "}
             {/* Title */}
           </ModalHeader>
@@ -1261,7 +1481,8 @@ const EmailToolbar = () => {
               display: "flex",
               justifyContent: "center",
               alignItems: "center",
-            }}>
+            }}
+          >
             {restLogo ? (
               <img
                 src={

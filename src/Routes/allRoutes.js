@@ -244,7 +244,6 @@ import FunnelCharts from "../pages/Charts/ApexCharts/FunnelCharts";
 
 const authProtectedRoutes = [
   //my all routes
-  { path: "/all-tables-etc", component: <DashboardAnalytics /> },
   { path: "/my-dashboard", component: <PieCharts /> },
   { path: "/all-catagories/:id", component: <BasicTables /> },
   { path: "/items/:id", component: <ListTables /> },
@@ -262,8 +261,8 @@ const authProtectedRoutes = [
   { path: "/take-away", component: <EcommerceCustomers /> },
   { path: "/delivery", component: <EcommerceCart /> },
   { path: "/runing", component: <MonthGrid /> },
-  { path: "/for-kot", component: <DashboardCrm /> },
-  { path: "/for-invoice", component: <Transactions /> },
+  { path: "/for-kot/:id", component: <DashboardCrm /> },
+  { path: "/for-invoice/:id", component: <Transactions /> },
   { path: "/for-settlement", component: <UiHighlight /> },
   { path: "/all-users", component: <CandidateList /> },
   { path: "/roles", component: <EcommerceCheckout /> },
@@ -283,41 +282,35 @@ const authProtectedRoutes = [
     component: <EcommerceOrderDetail />,
   },
   { path: "/all-deals/:id", component: <Kanbanboard /> },
+  { path: "/area/:id/tables-setting", component: <Calendar /> },
+  { path: "/area/:id/tables", component: <DashboardAnalytics /> },
+  { path: "/area/tables/testing", component: <UiSwiperSlider /> },
+  {
+    path: "/counter-area/:id/tables",
+    component: <EcommerceSellerDetail />,
+  },
+  { path: "/kot/:id/void/:tableid", component: <ToDoList /> },
+  { path: "/kot/:id/transfar/:tableid", component: <Chat /> },
+  {
+    path: "/transfar-table/:counterid",
+    component: <EcommerceAction />,
+  },
+  { path: "/merg-table/:counterid", component: <ProjectOverview /> },
+  { path: "/take-away/table/:id", component: <CreateProject /> },
+  { path: "/delivery/tables/:id", component: <TaskList /> },
+  { path: "/for-kds/for/onlycounter", component: <TaskDetails /> },
+  { path: "/for-kds/for/allrestaurent", component: <CrmContacts /> },
 
   //already routes
 
   { path: "/dashboard", component: <DashboardEcommerce /> },
   { path: "/index", component: <DashboardEcommerce /> },
   { path: "/dashboard-job", component: <DashboardJobs /> },
-  { path: "/apps-calendar", component: <Calendar /> },
 
   // { path: "/apps-ecommerce-add-product", component: <EcommerceAddProduct /> },
 
-  {
-    path: "/counter-area/:id/tables",
-    component: <EcommerceSellerDetail />,
-  },
-
-  { path: "/apps-todo", component: <ToDoList /> },
-
-  //Chat
-  { path: "/apps-chat", component: <Chat /> },
-
-  //EMail
-
-  { path: "/apps-email-ecommerce", component: <EcommerceAction /> },
-
-  //Projects
-
-  { path: "/apps-projects-overview", component: <ProjectOverview /> },
-  { path: "/apps-projects-create", component: <CreateProject /> },
-
-  //Task
-  { path: "/apps-tasks-list-view", component: <TaskList /> },
-  { path: "/apps-tasks-details", component: <TaskDetails /> },
-
   //Crm
-  { path: "/apps-crm-contacts", component: <CrmContacts /> },
+
   { path: "/apps-crm-companies", component: <CrmCompanies /> },
   { path: "/apps-crm-deals", component: <CrmDeals /> },
   { path: "/apps-crm-leads", component: <CrmLeads /> },
@@ -402,7 +395,7 @@ const authProtectedRoutes = [
   { path: "/advance-ui-nestable", component: <UiNestableList /> },
   { path: "/advance-ui-animation", component: <UiAnimation /> },
   { path: "/advance-ui-tour", component: <UiTour /> },
-  { path: "/advance-ui-swiper", component: <UiSwiperSlider /> },
+
   { path: "/advance-ui-ratings", component: <UiRatings /> },
 
   // Widgets
