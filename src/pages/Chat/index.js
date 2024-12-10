@@ -197,6 +197,7 @@ const Chat = () => {
           id: item._id,
           name: item.name,
           price: item.price,
+          items: item.items,
           quantity: item.quantity,
           totalPrice: item.price * item.quantity,
           modifier: item.modifier || null,

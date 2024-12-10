@@ -1,945 +1,937 @@
 import React, { useEffect, useState, useCallback, useMemo } from "react";
-import { Link } from "react-router-dom";
-
-// Import Images
-import multiUser from '../../assets/images/users/multi-user.jpg';
-
+import { Link, useParams } from "react-router-dom";
+BreadCrumb;
 import {
   Col,
   Container,
   Row,
-  Card,
-  CardHeader,
-  CardBody,
-  ModalBody,
-  Label,
-  Input,
-  Modal,
-  ModalHeader,
-  Form,
-  ModalFooter,
   Button,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  FormFeedback
+  Table,
+  Form,
+  Input,
+  Label,
 } from "reactstrap";
+import { UseRiazHook } from "../../RiazStore/RiazStore";
 import BreadCrumb from "../../Components/Common/BreadCrumb";
-import DeleteModal from "../../Components/Common/DeleteModal";
-import { isEmpty } from "lodash";
-
-//Import actions
-import {
-  getCompanies as onGetCompanies,
-  addNewCompanies as onAddNewCompanies,
-  updateCompanies as onUpdateCompanies,
-  deleteCompanies as onDeleteCompanies,
-} from "../../slices/thunks";
-//redux
-import { useSelector, useDispatch } from "react-redux";
-import TableContainer from "../../Components/Common/TableContainer";
-
-// Formik
-import * as Yup from "yup";
-import { useFormik } from "formik";
-
-import Loader from "../../Components/Common/Loader";
-import { toast ,ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-
-// Export Modal
-import ExportCSVModal from "../../Components/Common/ExportCSVModal";
-import { createSelector } from "reselect";
+import Pagination from "../../Components/Common/Pagination";
+import Flatpickr from "react-flatpickr";
+import { method } from "lodash";
 
 const CrmCompanies = () => {
-  const dispatch = useDispatch();
-  const selectLayoutState = (state) => state.Crm;
-  const crmcompaniesData = createSelector(
-    selectLayoutState,
-    (state) => ({
-      companies: state.companies,
-      isCompaniesSuccess: state.isCompaniesSuccess,
-      error: state.error,
-    })
+  const [guestOrders, setGuestOrders] = useState([]);
+  const [guestData, setGuestData] = useState({});
+  const [currentPage, setCurrentPage] = useState(1);
+  const [guestFilterOrders, setGuestFilterOrders] = useState([]);
+  const [forMultiPaymentOpen, setForMultiPaymentOpen] = useState(false);
+  const [inputValue, setInputValue] = useState(null);
+  const [payDetail, setPayDetail] = useState("");
+  const [creditOrderData, setCreditOrderData] = useState({});
+  const [orderid, setOrderId] = useState("");
+
+  //this is for getting the guest from the url
+  const { id } = useParams();
+
+  //this is for getting data from the useRiazHook
+  const { restData, myUrl, token } = UseRiazHook();
+
+  //this is for pagination
+  const perPageData = 50;
+  const indexOfLast = currentPage * perPageData;
+  const indexOfFirst = indexOfLast - perPageData;
+
+  //this is for page current data
+  const currentdata = useMemo(
+    () => guestOrders?.slice(indexOfFirst, indexOfLast),
+    [indexOfFirst, indexOfLast]
   );
-  // Inside your component
-  const {
-    companies, isCompaniesSuccess, error
-  } = useSelector(crmcompaniesData);
 
+  //this is for first time load and set data
   useEffect(() => {
-    if (companies && !companies.length) {
-      dispatch(onGetCompanies());
-    }
-  }, [dispatch, companies]);
+    setGuestFilterOrders(guestOrders.slice(0, perPageData));
+  }, [guestOrders]);
 
+  //this is for set current data of page
   useEffect(() => {
-    setCompany(companies);
-  }, [companies]);
+    setGuestFilterOrders(currentdata);
+  }, [currentdata]);
 
-  useEffect(() => {
-    if (!isEmpty(companies)) {
-      setCompany(companies);
-      setIsEdit(false);
-    }
-  }, [companies]);
+  //this is for search from guests
+  const OnchangeHandler = (e, type) => {
+    let value;
 
-
-  const [isEdit, setIsEdit] = useState(false);
-  const [company, setCompany] = useState([]);
-
-  //delete Company
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [deleteModalMulti, setDeleteModalMulti] = useState(false);
-
-  const [modal, setModal] = useState(false);
-
-  const industrytype = [
-    {
-      options: [
-        { label: "Select industry type", value: "Select industry type" },
-        { label: "Computer Industry", value: "Computer Industry" },
-        { label: "Chemical Industries", value: "Chemical Industries" },
-        { label: "Health Services", value: "Health Services" },
-        {
-          label: "Telecommunications Services",
-          value: "Telecommunications Services",
-        },
-        {
-          label: "Textiles: Clothing, Footwear",
-          value: "Textiles: Clothing, Footwear",
-        },
-      ],
-    },
-  ];
-
-  const toggle = useCallback(() => {
-    if (modal) {
-      setModal(false);
-      setCompany(null);
-    } else {
-      setModal(true);
-    }
-  }, [modal]);
-
-  // Delete Data
-  const handleDeleteCompany = () => {
-    if (company) {
-      dispatch(onDeleteCompanies(company._id));
-      setDeleteModal(false);
-    }
-  };
-
-  const onClickDelete = (company) => {
-    setCompany(company);
-    setDeleteModal(true);
-  };
-
-  // Add Data
-  const handleCompanyClicks = () => {
-    setCompany("");
-    setIsEdit(false);
-    toggle();
-  };
-
-  // validation
-  const validation = useFormik({
-    // enableReinitialize : use this flag when initial values needs to be changed
-    enableReinitialize: true,
-
-    initialValues: {
-      // img: (company && company.img) || '',
-      name: (company && company.name) || '',
-      owner: (company && company.owner) || '',
-      industry_type: (company && company.industry_type) || '',
-      star_value: (company && company.star_value) || '',
-      location: (company && company.location) || '',
-      employee: (company && company.employee) || '',
-      website: (company && company.website) || '',
-      contact_email: (company && company.contact_email) || '',
-      since: (company && company.since) || '',
-    },
-    validationSchema: Yup.object({
-      name: Yup.string().required("Please Enter Company Name"),
-      owner: Yup.string().required("Please Enter Owner name"),
-      industry_type: Yup.string().required("Please Enter Industry Type"),
-      star_value: Yup.string().required("Please Enter Rating"),
-      location: Yup.string().required("Please Enter Location"),
-      employee: Yup.string().required("Please Enter Employee"),
-      website: Yup.string().required("Please Enter Website"),
-      contact_email: Yup.string().required("Please Enter Contact Email"),
-      since: Yup.string().required("Please Enter Since"),
-    }),
-    onSubmit: (values) => {
-      if (isEdit) {
-        const updateCompany = {
-          _id: company ? company._id : 0,
-          // img: values.img,
-          name: values.name,
-          owner: values.owner,
-          industry_type: values.industry_type,
-          star_value: values.star_value,
-          location: values.location,
-          employee: values.employee,
-          website: values.website,
-          contact_email: values.contact_email,
-          since: values.since,
-        };
-        // update Company
-        dispatch(onUpdateCompanies(updateCompany));
-        validation.resetForm();
-      } else {
-        const newCompany = {
-          _id: (Math.floor(Math.random() * (30 - 20)) + 20).toString(),
-          // img: values["img"],
-          name: values["name"],
-          owner: values["owner"],
-          industry_type: values["industry_type"],
-          star_value: values["star_value"],
-          location: values["location"],
-          employee: values["employee"],
-          website: values["website"],
-          contact_email: values["contact_email"],
-          since: values["since"]
-        };
-        // save new Company
-        dispatch(onAddNewCompanies(newCompany));
-        validation.resetForm();
+    if (type === "date") {
+      value = e[0]?.toLocaleDateString("en-GB");
+      if (value) {
+        const filteredByDate = guestOrders.filter((order) => {
+          const invoiceDate = new Date(order.orderDate).toLocaleDateString(
+            "en-GB"
+          );
+          return invoiceDate === value;
+        });
+        setGuestFilterOrders(filteredByDate.slice(0, perPageData));
       }
-      toggle();
-    },
-  });
-
-  // Update Data
-  const handleCompanyClick = useCallback((arg) => {
-    const company = arg;
-
-    setCompany({
-      _id: company._id,
-      // img: company.img,
-      name: company.name,
-      owner: company.owner,
-      industry_type: company.industry_type,
-      star_value: company.star_value,
-      location: company.location,
-      employee: company.employee,
-      website: company.website,
-      contact_email: company.contact_email,
-      since: company.since
-    });
-
-    setIsEdit(true);
-    toggle();
-  }, [toggle]);
-
-  // Node API 
-  // useEffect(() => {
-  //   if (isCompaniesCreated) {
-  //     setCompany(null);
-  //     dispatch(onGetCompanies());
-  //   }
-  // }, [
-  //   dispatch,
-  //   isCompaniesCreated,
-  // ]);
-
-  // Checked All
-  const checkedAll = useCallback(() => {
-    const checkall = document.getElementById("checkBoxAll");
-    const ele = document.querySelectorAll(".companyCheckBox");
-
-    if (checkall.checked) {
-      ele.forEach((ele) => {
-        ele.checked = true;
-      });
-    } else {
-      ele.forEach((ele) => {
-        ele.checked = false;
-      });
+    } else if (type === "invoice") {
+      value = e.target.value;
+      if (value) {
+        const filteredByTable = guestOrders.filter((order) =>
+          order?.orderNo?.toLowerCase().includes(value.toLowerCase())
+        );
+        setGuestFilterOrders(filteredByTable.slice(0, perPageData));
+      }
     }
-    deleteCheckbox();
+    if (!value) {
+      setGuestFilterOrders(guestOrders.slice(indexOfFirst, indexOfLast));
+    }
+
+    setCurrentPage(1);
+  };
+
+  //this is for getting guest all debit orders
+  const forGettingGuestAllDebitOrders = async () => {
+    const url = `${myUrl}/getforallorders/${id}/credit`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setGuestOrders(data.allCreditOrders);
+        setGuestFilterOrders(data.allCreditOrders);
+        setGuestData(data.gusetOrderData);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all debit orders of the geust function",
+        err
+      );
+    }
+  };
+
+  //this is for controll rendering of getting all debit orders function
+  useEffect(() => {
+    forGettingGuestAllDebitOrders();
   }, []);
 
-  // Delete Multiple
-  const [selectedCheckBoxDelete, setSelectedCheckBoxDelete] = useState([]);
-  const [isMultiDeleteButton, setIsMultiDeleteButton] = useState(false);
+  //this is for the date
+  const formatDateTime = (date, format) => {
+    const d = new Date(date);
 
-  const deleteMultiple = () => {
-    const checkall = document.getElementById("checkBoxAll");
-    selectedCheckBoxDelete.forEach((element) => {
-      dispatch(onDeleteCompanies(element.value));
-      setTimeout(() => { toast.clearWaitingQueue(); }, 3000);
-    });
-    setIsMultiDeleteButton(false);
-    checkall.checked = false;
+    const day = d.getDate(); // No leading zero
+    const month = d.getMonth() + 1; // No leading zero, Months are 0-indexed
+    const year = d.getFullYear();
+
+    let formattedDate;
+    switch (format) {
+      case "D/M/Y":
+        formattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        formattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        formattedDate = `${year}/${month}/${day}`;
+        break;
+      default:
+        formattedDate = d.toLocaleDateString(); // Default fallback
+    }
+
+    return `${formattedDate} `;
   };
 
-  const deleteCheckbox = () => {
-    const ele = document.querySelectorAll(".companyCheckBox:checked");
-    ele.length > 0 ? setIsMultiDeleteButton(true) : setIsMultiDeleteButton(false);
-    setSelectedCheckBoxDelete(ele);
+  //this is for date formate
+  const dateFormatMapper = (format) => {
+    switch (format) {
+      case "D/M/Y":
+        return "d/m/Y";
+      case "M/D/Y":
+        return "m/d/Y";
+      case "Y/M/D":
+        return "Y/m/d";
+      default:
+        return "d/m/Y"; // Default format
+    }
   };
 
-  // Column
-  const columns = useMemo(
-    () => [
-      {
-        header: <input type="checkbox" className="form-check-input" id="checkBoxAll" onClick={() => checkedAll()} />,
-        cell: (cell) => {
-          return <input type="checkbox" className="companyCheckBox form-check-input" value={cell.getValue()} onChange={() => deleteCheckbox()} />;
-        },
-        id: '#',
-        accessorKey: "id",
-        enableColumnFilter: false,
-        enableSorting: false,
+  //this is for getting single order data of guest credit orders
+  const forGettingSingleCreditOrderOfGuest = async (orderid) => {
+    const url = `${myUrl}/getsingle/${orderid}/creditorder/data/${id}`;
+    const options = {
+      method: "GET",
+      headers: {
+        authorization: token,
       },
-      {
-        header: "Company Name",
-        accessorKey: "name",
-        enableColumnFilter: false,
-        cell: (cell) => (
-          <>
-            <div className="d-flex align-items-center">
-              <div className="flex-shrink-0">
-                {cell.row.original.image_src ? <img
-                  src={process.env.REACT_APP_API_URL + "/images/" + cell.row.original.image_src}
-                  alt=""
-                  className="avatar-xxs rounded-circle"
-                /> :
-                  <div className="flex-shrink-0 avatar-xs me-2">
-                    <div className="avatar-title bg-success-subtle text-success rounded-circle fs-13">
-                      {cell.getValue().charAt(0)}
-                    </div>
-                  </div>
-                }
-              </div>
-              <div className="flex-grow-1 ms-2 name">
-                {cell.getValue()}
-              </div>
-            </div>
-          </>
-        ),
-      },
-      {
-        header: "Owner",
-        accessorKey: "owner",
-        enableColumnFilter: false,
-      },
-      {
-        header: "Industry Type",
-        accessorKey: "industry_type",
-        enableColumnFilter: false,
-      },
-      {
-        header: "Rating",
-        accessorKey: "star_value",
-        enableColumnFilter: false,
-        cell: (cell) => (
-          <>
-            {cell.getValue()}{" "}<i className="ri-star-fill text-warning align-bottom"></i>
-          </>
-        ),
-      },
-      {
-        header: "Location",
-        accessorKey: "location",
-        enableColumnFilter: false,
-      },
-      {
-        header: "Action",
-        cell: (cell) => {
-          return (
-            <ul className="list-inline hstack gap-2 mb-0">
-              <li className="list-inline-item edit" title="Call">
-                <Link to="#" className="text-muted d-inline-block">
-                  <i className="ri-phone-line fs-16"></i>
-                </Link>
-              </li>
-              <li className="list-inline-item edit" title="Message">
-                <Link to="#" className="text-muted d-inline-block">
-                  <i className="ri-question-answer-line fs-16"></i>
-                </Link>
-              </li>
-              <li className="list-inline-item" title="View">
-                <Link to="#"
-                  onClick={() => { const companyData = cell.row.original; setInfo(companyData); }}
-                >
-                  <i className="ri-eye-fill align-bottom text-muted"></i>
-                </Link>
-              </li>
-              <li className="list-inline-item" title="Edit">
-                <Link className="edit-item-btn" to="#"
-                  onClick={() => { const companyData = cell.row.original; handleCompanyClick(companyData); }}
-                >
-                  <i className="ri-pencil-fill align-bottom text-muted"></i>
-                </Link>
-              </li>
-              <li className="list-inline-item" title="Delete">
-                <Link
-                  className="remove-item-btn"
-                  onClick={() => { const companyData = cell.row.original; onClickDelete(companyData); }}
-                  to="#"
-                >
-                  <i className="ri-delete-bin-fill align-bottom text-muted"></i>
-                </Link>
-              </li>
-            </ul>
-          );
-        },
-      },
-    ],
-    [handleCompanyClick, checkedAll]
-  );
+    };
 
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        setCreditOrderData(data.orderData);
+        if (data.orderData?.creditAmount <= 0) {
+          setForMultiPaymentOpen(false);
+        }
+      } else {
+        console.log("err data", err);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all single credit order of guest function",
+        err
+      );
+    }
+  };
 
-  // SideBar Company Deatail
-  const [info, setInfo] = useState([]);
+  //this is for click on pay button
+  const forClickOnPayButton = (id) => {
+    setOrderId(id);
+    setForMultiPaymentOpen(true);
+    forGettingSingleCreditOrderOfGuest(id);
+  };
 
-  // Export Modal
-  const [isExportCSV, setIsExportCSV] = useState(false);
+  //this is for paying credit amount of single invoice of guest
+  const forClickOnPaymentMethod = async (type) => {
+    const paymentData = {
+      paymentMethod: type,
+      amount: inputValue,
+      detail: payDetail,
+    };
 
-  document.title = "Companies | Velzon - React Admin & Dashboard Template";
+    const url = `${myUrl}/forpay/singlecreditorder/${orderid}/guest/${id}`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+      body: JSON.stringify(paymentData),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        forGettingSingleCreditOrderOfGuest(orderid);
+        forGettingGuestAllDebitOrders();
+
+        console.log("ok data", data);
+      } else {
+        console.log("err data", err);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the pay single invoice credit of guest  function",
+        err
+      );
+    }
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
-        <ExportCSVModal
-          show={isExportCSV}
-          onCloseClick={() => setIsExportCSV(false)}
-          data={companies}
-        />
-
-        <DeleteModal
-          show={deleteModal}
-          onDeleteClick={handleDeleteCompany}
-          onCloseClick={() => setDeleteModal(false)}
-        />
-
-        <DeleteModal
-          show={deleteModalMulti}
-          onDeleteClick={() => {
-            deleteMultiple();
-            setDeleteModalMulti(false);
-          }}
-          onCloseClick={() => setDeleteModalMulti(false)}
-        />
-
         <Container fluid>
-          <BreadCrumb title="Companies" pageTitle="CRM" />
+          <BreadCrumb credit={`Credit Detail Of Guest ${guestData.name}`} />
 
+          <div
+            className="mt-0 d-flex align-items-center justify-content-start "
+            style={{ gap: "30px" }}
+          >
+            <h5>
+              Name : <span className="text-bold">{guestData?.name}</span>
+            </h5>
+            <h5>
+              Phone : <span className="text-bold">{guestData?.phone}</span>
+            </h5>
+          </div>
+          <hr />
           <Row>
-            <Col lg={12}>
-              <Card>
-                <CardHeader>
-                  <div className="d-flex align-items-center flex-wrap gap-2">
-                    <div className="flex-grow-1">
-                      <button className="btn btn-info add-btn" onClick={() => { setIsEdit(false); toggle(); }}>
-                        <i className="ri-add-fill me-1 align-bottom"></i> Add Company
-                      </button>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <div className="hstack text-nowrap gap-2">
-                        {isMultiDeleteButton && <button className="btn btn-soft-danger"
-                          onClick={() => setDeleteModalMulti(true)}
-                        ><i className="ri-delete-bin-2-line"></i></button>}
-                        <button className="btn btn-secondary">
-                          <i className="ri-filter-2-line me-1 align-bottom"></i>{" "}
-                          Filters
-                        </button>
-                        <button className="btn btn-soft-primary" onClick={() => setIsExportCSV(true)}>Export</button>
-                        <UncontrolledDropdown>
-                          <DropdownToggle
-                            href="#"
-                            className="btn btn-soft-info btn-icon"
-                            tag="button"
-                          >
-                            <i className="ri-more-2-fill"></i>
-                          </DropdownToggle>
-                          <DropdownMenu className="dropdown-menu-end">
-                            <DropdownItem className="dropdown-item" href="#">
-                              All
-                            </DropdownItem>
-                            <DropdownItem className="dropdown-item" href="#">
-                              Last Week
-                            </DropdownItem>
-                            <DropdownItem className="dropdown-item" href="#">
-                              Last Month
-                            </DropdownItem>
-                            <DropdownItem className="dropdown-item" href="#">
-                              Last Year
-                            </DropdownItem>
-                          </DropdownMenu>
-                        </UncontrolledDropdown>
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
-              </Card>
+            <Col md={6} xs={12} className="mb-3">
+              <Label for="kotType" style={{ fontWeight: "bold" }}>
+                Invoice No
+              </Label>
+              <Input
+                type="number"
+                id="kotType"
+                onChange={(e) => OnchangeHandler(e, "invoice")}
+                placeholder="Enter mobile number"
+              />
             </Col>
-            <Col xxl={9}>
-              <Card id="companyList">
-               
-                <CardBody className="pt-0">
-                  <div>
-                    {isCompaniesSuccess && companies.length ? (
-                      <TableContainer
-                        columns={columns}
-                        data={(companies || [])}
-                        isGlobalFilter={true}
-                        isAddUserList={false}
-                        customPageSize={7}
-                        className="custom-header-css"
-                        divClass="table-responsive table-card mb-2"
-                        tableClass="align-middle table-nowrap"
-                        theadClass="table-light"
-                        handleCompanyClick={handleCompanyClicks}
-                        isCompaniesFilter={true}
-                        SearchPlaceholder='Search for company...'
-                      />
-                    ) : (<Loader error={error} />)
-                    }
-                  </div>
-                  <Modal id="showModal" isOpen={modal} toggle={toggle} centered size="lg">
-                    <ModalHeader className="bg-info-subtle p-3" toggle={toggle}>
-                      {!!isEdit ? "Edit Company" : "Add Company"}
-                    </ModalHeader>
-                    <Form className="tablelist-form" onSubmit={(e) => {
-                      e.preventDefault();
-                      validation.handleSubmit();
-                      return false;
-                    }}>
-                      <ModalBody>
-                        <input type="hidden" id="id-field" />
-                        <Row className="g-3">
 
-
-                          <Col lg={12}>
-                            <div className="text-center">
-                              <div className="position-relative d-inline-block">
-                                <div className="position-absolute bottom-0 end-0">
-                                  <Label htmlFor="company-logo-input" className="mb-0">
-                                    <div className="avatar-xs cursor-pointer">
-                                      <div className="avatar-title bg-light border rounded-circle text-muted">
-                                        <i className="ri-image-fill"></i>
-                                      </div>
-                                    </div>
-                                  </Label>
-                                  <Input name="img" className="form-control d-none" id="company-logo-input" type="file"
-                                    accept="image/png, image/gif, image/jpeg"
-                                    onChange={validation.handleChange}
-                                    onBlur={validation.handleBlur}
-                                    value={validation.values.img || ""}
-                                    invalid={
-                                      validation.touched.img && validation.errors.img ? true : false
-                                    }
-                                  />
-                                </div>
-                                <div className="avatar-lg p-1">
-                                  <div className="avatar-title bg-light rounded-circle">
-                                    <img src={multiUser} alt="multiUser" id="companylogo-img" className="avatar-md rounded-circle object-fit-cover" />
-                                  </div>
-                                </div>
-                              </div>
-                              <h5 className="fs-13 mt-3">Company Logo</h5>
-                            </div>
-                          </Col>
-
-                          <Col lg={12}>
-                            <div>
-                              <Label
-                                htmlFor="name-field"
-                                className="form-label"
-                              >
-                                Name
-                              </Label>
-
-                              <Input
-                                name="name"
-                                id="customername-field"
-                                className="form-control"
-                                placeholder="Enter Company Name"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.name || ""}
-                                invalid={
-                                  validation.touched.name && validation.errors.name ? true : false
-                                }
-                              />
-                              {validation.touched.name && validation.errors.name ? (
-                                <FormFeedback type="invalid">{validation.errors.name}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={6}>
-                            <div>
-                              <Label
-                                htmlFor="owner-field"
-                                className="form-label"
-                              >
-                                Owner Name
-                              </Label>
-                              <Input
-                                name="owner"
-                                id="owner-field"
-                                className="form-control"
-                                placeholder="Enter Owner Name"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.owner || ""}
-                                invalid={
-                                  validation.touched.owner && validation.errors.owner ? true : false
-                                }
-                              />
-                              {validation.touched.owner && validation.errors.owner ? (
-                                <FormFeedback type="invalid">{validation.errors.owner}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={6}>
-                            <div>
-                              <Label
-                                htmlFor="industry_type-field"
-                                className="form-label"
-                              >
-                                Industry Type
-                              </Label>
-
-                              <Input
-                                name="industry_type"
-                                type="select"
-                                className="form-select"
-                                id="industry_type-field"
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={
-                                  validation.values.industry_type || ""
-                                }
-                              >
-                                {industrytype.map((item, key) => (
-                                  <React.Fragment key={key}>
-                                    {item.options.map((item, key) => (<option value={item.value} key={key}>{item.label}</option>))}
-                                  </React.Fragment>
-                                ))}
-                              </Input>
-                              {validation.touched.industry_type &&
-                                validation.errors.industry_type ? (
-                                <FormFeedback type="invalid">
-                                  {validation.errors.industry_type}
-                                </FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={4}>
-                            <div>
-                              <Label
-                                htmlFor="star_value-field"
-                                className="form-label"
-                              >
-                                Rating
-                              </Label>
-                              <Input
-                                name="star_value"
-                                id="star_value-field"
-                                className="form-control"
-                                placeholder="Enter Rating"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.star_value || ""}
-                                invalid={
-                                  validation.touched.star_value && validation.errors.star_value ? true : false
-                                }
-                              />
-                              {validation.touched.star_value && validation.errors.star_value ? (
-                                <FormFeedback type="invalid">{validation.errors.star_value}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={4}>
-                            <div>
-                              <Label
-                                htmlFor="location-field"
-                                className="form-label"
-                              >
-                                location
-                              </Label>
-                              <Input
-                                name="location"
-                                id="star_value-field"
-                                className="form-control"
-                                placeholder="Enter Location"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.location || ""}
-                                invalid={
-                                  validation.touched.location && validation.errors.location ? true : false
-                                }
-                              />
-                              {validation.touched.location && validation.errors.location ? (
-                                <FormFeedback type="invalid">{validation.errors.location}</FormFeedback>
-                              ) : null}
-
-                            </div>
-                          </Col>
-                          <Col lg={4}>
-                            <div>
-                              <Label
-                                htmlFor="employee-field"
-                                className="form-label"
-                              >
-                                Employee
-                              </Label>
-                              <Input
-                                name="employee"
-                                id="employee-field"
-                                className="form-control"
-                                placeholder="Enter employee"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.employee || ""}
-                                invalid={
-                                  validation.touched.employee && validation.errors.employee ? true : false
-                                }
-                              />
-                              {validation.touched.employee && validation.errors.employee ? (
-                                <FormFeedback type="invalid">{validation.errors.employee}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={6}>
-                            <div>
-                              <Label
-                                htmlFor="website-field"
-                                className="form-label"
-                              >
-                                Website
-                              </Label>
-                              <Input
-                                name="website"
-                                id="website-field"
-                                className="form-control"
-                                placeholder="Enter website"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.website || ""}
-                                invalid={
-                                  validation.touched.website && validation.errors.website ? true : false
-                                }
-                              />
-                              {validation.touched.website && validation.errors.website ? (
-                                <FormFeedback type="invalid">{validation.errors.website}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={6}>
-                            <div>
-                              <Label
-                                htmlFor="contact_email-field"
-                                className="form-label"
-                              >
-                                Contact Email
-                              </Label>
-                              <Input
-                                name="contact_email"
-                                id="contact_email-field"
-                                className="form-control"
-                                placeholder="Enter Contact email"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.contact_email || ""}
-                                invalid={
-                                  validation.touched.contact_email && validation.errors.contact_email ? true : false
-                                }
-                              />
-                              {validation.touched.contact_email && validation.errors.contact_email ? (
-                                <FormFeedback type="invalid">{validation.errors.contact_email}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                          <Col lg={12}>
-                            <div>
-                              <Label
-                                htmlFor="since-field"
-                                className="form-label"
-                              >
-                                Since
-                              </Label>
-                              <Input
-                                name="since"
-                                id="since-field"
-                                className="form-control"
-                                placeholder="Enter since"
-                                type="text"
-                                validate={{
-                                  required: { value: true },
-                                }}
-                                onChange={validation.handleChange}
-                                onBlur={validation.handleBlur}
-                                value={validation.values.since || ""}
-                                invalid={
-                                  validation.touched.since && validation.errors.since ? true : false
-                                }
-                              />
-                              {validation.touched.since && validation.errors.since ? (
-                                <FormFeedback type="invalid">{validation.errors.since}</FormFeedback>
-                              ) : null}
-                            </div>
-                          </Col>
-                        </Row>
-                      </ModalBody>
-                      <ModalFooter>
-                        <div className="hstack gap-2 justify-content-end">
-                          <Button color="light" onClick={() => { setModal(false); }} > Close </Button>
-                          <Button type="submit" color="success" id="add-btn" >  {!!isEdit ? "Update" : "Add Company"} </Button>
-                        </div>
-                      </ModalFooter>
-                    </Form>
-                  </Modal>
-                  <ToastContainer closeButton={false} limit={1} />
-                </CardBody>
-              </Card>
-            </Col>
-            <Col xxl={3}>
-              <Card id="company-view-detail">
-                <CardBody className="text-center">
-                  <div className="position-relative d-inline-block">
-                    <div className="avatar-md">
-                      <div className="avatar-title bg-light rounded-circle">
-                        <img src={process.env.REACT_APP_API_URL + "/images/" + (info.image_src || "brands/mail_chimp.png")} alt="" className="avatar-sm rounded-circle object-fit-cover" />
-                      </div>
-                    </div>
-                  </div>
-                  <h5 className="mt-3 mb-1">{info.name || "Syntyce Solution"}</h5>
-                  <p className="text-muted">{info.owner || "Michael Morris"}</p>
-
-                  <ul className="list-inline mb-0">
-                    <li className="list-inline-item avatar-xs">
-                      <Link
-                        to="#"
-                        className="avatar-title bg-success-subtle text-success fs-15 rounded"
-                      >
-                        <i className="ri-global-line"></i>
-                      </Link>
-                    </li>{" "}
-                    <li className="list-inline-item avatar-xs">
-                      <Link
-                        to="#"
-                        className="avatar-title bg-danger-subtle text-danger fs-15 rounded"
-                      >
-                        <i className="ri-mail-line"></i>
-                      </Link>
-                    </li>{" "}
-                    <li className="list-inline-item avatar-xs">
-                      <Link
-                        to="#"
-                        className="avatar-title bg-warning-subtle text-warning fs-15 rounded"
-                      >
-                        <i className="ri-question-answer-line"></i>
-                      </Link>
-                    </li>
-                  </ul>
-                </CardBody>
-                <div className="card-body">
-                  <h6 className="text-muted text-uppercase fw-semibold mb-3">
-                    Information
-                  </h6>
-                  <p className="text-muted mb-4">
-                    A company incurs fixed and variable costs such as the
-                    purchase of raw materials, salaries and overhead, as
-                    explained by AccountingTools, Inc. Business owners have the
-                    discretion to determine the actions.
-                  </p>
-                  <div className="table-responsive table-card">
-                    <table className="table table-borderless mb-0">
-                      <tbody>
-                        <tr>
-                          <td className="fw-medium">
-                            Industry Type
-                          </td>
-                          <td>{info.industry_type || "Chemical Industries"}</td>
-                        </tr>
-                        <tr>
-                          <td className="fw-medium">
-                            Location
-                          </td>
-                          <td>{info.location || "Damascus, Syria"}</td>
-                        </tr>
-                        <tr>
-                          <td className="fw-medium">
-                            Employee
-                          </td>
-                          <td>{info.employee || "10-50"}</td>
-                        </tr>
-                        <tr>
-                          <td className="fw-medium">
-                            Rating
-                          </td>
-                          <td>
-                            {info.star_value || "4.0"}{" "}
-                            <i className="ri-star-fill text-warning align-bottom"></i>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="fw-medium">
-                            Website
-                          </td>
-                          <td>
-                            <Link
-                              to="#"
-                              className="link-primary text-decoration-underline"
-                            >
-                              {info.website || "www.syntycesolution.com"}
-                            </Link>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td className="fw-medium">
-                            Contact Email
-                          </td>
-                          <td>{info.contact_email || "info@syntycesolution.com"}</td>
-                        </tr>
-                        <tr>
-                          <td className="fw-medium">
-                            Since
-                          </td>
-                          <td>{info.since || "1995"}</td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              </Card>
+            <Col md={6} xs={12} className="mb-3">
+              <Label for="kotDate" style={{ fontWeight: "bold" }}>
+                Order Date
+              </Label>
+              <Flatpickr
+                className="form-control"
+                id="datepicker-publish-input"
+                placeholder="Select date or search"
+                onChange={(e) => OnchangeHandler(e, "date")}
+                options={{
+                  altInput: true,
+                  altFormat: "F j, Y",
+                  dateFormat: dateFormatMapper(restData.dateFormate),
+                }}
+              />
             </Col>
           </Row>
+
+          <hr />
+
+          {/* Table Section */}
+          <div className="table-responsive mt-4">
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>#Invoice No</th>
+                  <th>Total Amount</th>
+                  <th>Paid Amount</th>
+                  <th>CreditAmount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+
+              <tbody>
+                {guestFilterOrders.map((item, index) => (
+                  <tr key={index}>
+                    <td>
+                      {item?.orderDate
+                        ? formatDateTime(item?.orderDate, restData?.dateFormate)
+                        : "Empty"}
+                    </td>
+                    <td>{item.orderNo}</td>
+
+                    <td>
+                      {restData.currencyPosition === "before"
+                        ? `${
+                            restData.restCurrencySymbol
+                          }${item.totalAmount.toFixed(restData.precision)}`
+                        : `${item.totalAmount.toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </td>
+                    <td>
+                      {restData.currencyPosition === "before"
+                        ? `${
+                            restData.restCurrencySymbol
+                          }${item.paidAmount.toFixed(restData.precision)}`
+                        : `${item.paidAmount.toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </td>
+                    <td>
+                      {restData.currencyPosition === "before"
+                        ? `${
+                            restData.restCurrencySymbol
+                          }${item.creditAmount.toFixed(restData.precision)}`
+                        : `${item.creditAmount.toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </td>
+                    <td>
+                      <div className="hstack gap-3 flex-wrap">
+                        <Link
+                          onClick={() => {
+                            forClickOnPayButton(item.orderid);
+                          }}
+                          className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
+                          style={{
+                            padding: "4px 8px",
+                            backgroundColor: "#E6F7FC",
+                          }}
+                        >
+                          Pay Credit
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+
+            <div className="my-3 p-3">
+              <Pagination
+                perPageData={perPageData}
+                data={guestOrders}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+              />
+            </div>
+          </div>
         </Container>
       </div>
+
+      {/* this is for multipayment */}
+      {forMultiPaymentOpen && (
+        <div
+          className="d-flex align-items-center justify-content-center position-fixed"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 1000,
+          }}
+        >
+          <div
+            className="d-flex  flex-column bg-white  pb-4 "
+            style={{
+              width: "900px",
+              height: "80vh",
+              overflowY: "scroll",
+              overflowX: "scroll",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <div
+              className=" p-1  d-flex justify-content-between align-items-center  mb-2"
+              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+            >
+              <p className="p-0 m-0 text-white">
+                Payment credit amount of {guestData?.name}
+              </p>
+              <p
+                className="m-0 p-2 color-dark cursor-pointer"
+                onClick={() => setForMultiPaymentOpen(false)}
+              >
+                x
+              </p>
+            </div>
+            <div className="px-2">
+              <div className="d-flex align-items-center justify-content-between">
+                <div>
+                  Geust Total Credti :
+                  {restData.currencyPosition === "before"
+                    ? `${restData.restCurrencySymbol}${
+                        guestData?.totalCredit?.toFixed(restData.precision) || 0
+                      }`
+                    : `${
+                        guestData?.totalCredit?.toFixed(restData.precision) || 0
+                      }${restData.restCurrencySymbol}`}
+                </div>
+                <div>
+                  <span className="px-1">
+                    Invoice No: {creditOrderData?.orderNo}
+                  </span>
+                  <span className="px-1">
+                    {" "}
+                    Credit Amount :
+                    {restData.currencyPosition === "before"
+                      ? `${restData.restCurrencySymbol}${
+                          creditOrderData?.creditAmount?.toFixed(
+                            restData.precision
+                          ) || 0
+                        }`
+                      : `${
+                          creditOrderData?.creditAmount?.toFixed(
+                            restData.precision
+                          ) || 0
+                        }${restData.restCurrencySymbol}`}
+                  </span>
+                  <span className="px-1">
+                    {" "}
+                    Paid Amount :{" "}
+                    {restData.currencyPosition === "before"
+                      ? `${restData.restCurrencySymbol}${
+                          creditOrderData?.paidAmount?.toFixed(
+                            restData.precision
+                          ) || 0
+                        }`
+                      : `${
+                          creditOrderData?.paidAmount?.toFixed(
+                            restData.precision
+                          ) || 0
+                        }${restData.restCurrencySymbol}`}
+                  </span>
+                  <span className="px-1">
+                    {" "}
+                    Total Amount:
+                    {restData.currencyPosition === "before"
+                      ? `${restData.restCurrencySymbol}${
+                          creditOrderData?.totalAmount?.toFixed(
+                            restData.precision
+                          ) || 0
+                        }`
+                      : `${
+                          creditOrderData?.totalAmount?.toFixed(
+                            restData.precision
+                          ) || 0
+                        }${restData.restCurrencySymbol}`}
+                  </span>
+                </div>
+              </div>
+
+              <hr className="p-0 m-0"></hr>
+
+              <div className="m-0 py-1 px-0">
+                <button
+                  onClick={() => forClickOnPaymentMethod("cash")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Cash
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("card")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Card
+                </button>
+                <button
+                  className="py-1 px-2"
+                  onClick={() => forClickOnPaymentMethod("advance")}
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Advance
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("paytm")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  PayTM
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("check payment")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Check Payment
+                </button>
+
+                <button
+                  onClick={() => forClickOnPaymentMethod("post to room")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  Post to room
+                </button>
+                <button
+                  onClick={() => forClickOnPaymentMethod("upi")}
+                  className="py-1 px-2"
+                  style={{
+                    backgroundColor: "#0A97BA",
+                    margin: "1px",
+                    border: "none",
+                    color: "white",
+                    fontSize: "14px",
+                    fontWeight: "400",
+                  }}
+                >
+                  upi
+                </button>
+              </div>
+
+              <hr className="p-0 m-0"></hr>
+
+              <div
+                className="d-flex"
+                style={{
+                  gap: "10px",
+                  overflowX: "auto",
+                  scrollbarWidth: "none",
+                  msOverflowStyle: "none",
+                }}
+              >
+                <div
+                  className="p-0 mt-1 "
+                  style={{
+                    border: "1px solid #B3C8CF",
+                    width: "500px",
+                  }}
+                >
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
+                        Credit Total
+                      </p>
+                    </div>
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
+                        {restData.currencyPosition === "before"
+                          ? `${restData.restCurrencySymbol}${
+                              creditOrderData?.creditAmount?.toFixed(
+                                restData.precision
+                              ) || 0
+                            }`
+                          : `${
+                              creditOrderData?.creditAmount?.toFixed(
+                                restData.precision
+                              ) || 0
+                            }${restData.restCurrencySymbol}`}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Amount</p>
+                    </div>
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        value={inputValue}
+                        onChange={(e) => setInputValue(e.target.value)}
+                        className="px-2 m-0"
+                        placeholder="enter amount"
+                        style={{
+                          border: "1px solid #B3C8CF",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Return Amount</p>
+                    </div>
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <input
+                        type="number"
+                        value={creditOrderData?.creditAmount}
+                        className="px-2 m-0"
+                        style={{
+                          border: "1px solid #B3C8CF",
+                          borderRadius: "5px",
+                        }}
+                      />
+                    </div>
+                  </div>
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary">Payment Detail</p>
+                    </div>
+                    <div
+                      className="p-2 w-75"
+                      style={{
+                        borderBottom: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <textarea
+                        onChange={(e) => setPayDetail(e.target.value)}
+                        style={{ border: "1px solid #B3C8CF" }}
+                        className="w-100 p-1"
+                        rows="5"
+                        placeholder="Enter payment Description..."
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div className="p-0 w-100 d-flex">
+                    <div
+                      className="p-2 w-25"
+                      style={{
+                        borderRight: "1px solid #B3C8CF",
+                      }}
+                    >
+                      <p className="p-0 m-0 text-secondary"></p>
+                    </div>
+                    <div className="p-0 w-75"></div>
+                  </div>
+                </div>
+
+                <div
+                  className=" text-center p-3"
+                  style={{
+                    width: "300px",
+                  }}
+                >
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(10)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(10).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(10).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(20)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(20).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(20).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(50)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(50).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(50).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(100)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(100).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(100).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(200)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(200).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(200).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(500)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(500).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(500).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(1000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(1000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(1000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(2000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(2000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(2000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(3000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(3000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(3000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(4000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(4000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(4000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                  </div>
+                  <div
+                    className="my-2 d-flex align-items-center "
+                    style={{ width: "300px" }}
+                  >
+                    <button
+                      onClick={() => setInputValue(5000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(5000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(5000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                    <button
+                      onClick={() => setInputValue(10000)}
+                      style={{ border: "none", width: "140px" }}
+                      className="bg-success py-2 mx-1 px-4 text-white"
+                    >
+                      {restData.currencyPosition === "before"
+                        ? `${restData.restCurrencySymbol}${(10000).toFixed(
+                            restData.precision
+                          )}`
+                        : `${(10000).toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </button>
+                  </div>
+                  <div
+                    className="mt-2 mb-1 d-flex align-items-center  "
+                    style={{ width: "300px" }}
+                  >
+                    {/* <button
+                      // disabled={forTableData?.currentOrder?.remainAmount > 0}
+                      onClick={() => {
+                        if (tableData?.currentOrder?.remainAmount > 0) {
+                          toast.error("Please pay the total bill");
+                        }
+                      }}
+                      style={{
+                        border: "none",
+                        width: "295px",
+                        backgroundColor: "black",
+                      }}
+                      className="py-2 mx-1 px-4 text-white"
+                    >
+                      {tableData?.currentOrder?.remainAmount > 0
+                        ? "Enter Amount"
+                        : "Payment Complete"}
+                    </button> */}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </React.Fragment>
   );
 };

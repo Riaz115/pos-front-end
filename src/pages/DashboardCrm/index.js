@@ -8,7 +8,7 @@ import {
   FaRegEdit,
   FaTrash,
 } from "react-icons/fa";
-
+import { AiFillPrinter } from "react-icons/ai";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { UseRiazHook } from "../../RiazStore/RiazStore";
 import { toast } from "react-toastify";
@@ -32,6 +32,9 @@ const DashboardCrm = () => {
   const [inputValue, setInputValue] = useState(null);
   const [payDetail, setPayDetail] = useState("");
   const [newTableData, setNewTableData] = useState([]);
+  const [showPrint, setShowPrint] = useState(false);
+  const [kotData, setKotData] = useState({});
+  const [forPrint, setForPrint] = useState(false);
 
   //this is for show guest function
   const {
@@ -130,15 +133,6 @@ const DashboardCrm = () => {
     }
   }, []);
 
-  //this is for get all filter catagories
-  const filterCategories = (mainCategory) => {
-    setSelectedCategory(mainCategory);
-    const filtered = catagories.filter(
-      (item) => item.maincatagory === mainCategory
-    );
-    setFilteredCategories(filtered);
-  };
-
   //this is for get all menu items
   const forGetAllMenuItems = async () => {
     const url = `${myUrl}/get-all-menuitems/${restId}`;
@@ -157,6 +151,16 @@ const DashboardCrm = () => {
         err
       );
     }
+  };
+
+  //this is for get all filter catagories
+  const filterCategories = (mainCategory) => {
+    forGetAllMenuItems();
+    setSelectedCategory(mainCategory);
+    const filtered = catagories.filter(
+      (item) => item.maincatagory === mainCategory
+    );
+    setFilteredCategories(filtered);
   };
 
   //this is for controll rendering of get all items
@@ -210,6 +214,7 @@ const DashboardCrm = () => {
         {
           ...item,
           quantity: 1,
+
           totalPrice: totalPrice,
           modifier: [], // Initialize with an empty array or null
         },
@@ -250,79 +255,6 @@ const DashboardCrm = () => {
     }, 0);
   };
 
-  // //this is forj settle the order of the table
-  // const forSettleTheOrderOfTable = async (paymentMethod) => {
-  //   if (!paymentMethod) {
-  //     toast.error("Please select a payment method.");
-  //     return;
-  //   }
-
-  //   let paymentData = {
-  //     paymentMethod: paymentMethod,
-  //   };
-
-  //   const url = `${myUrl}/add/${id}/savepaymentmethod`;
-  //   const options = {
-  //     method: "POST",
-  //     headers: {
-  //       "Content-Type": "application/json",
-  //       Authorization: token,
-  //     },
-  //     body: JSON.stringify(paymentData),
-  //   };
-
-  //   try {
-  //     const response = await fetch(url, options);
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       const orderData = {
-  //         orderItems: selectedItems.map((item) => ({
-  //           id: item._id,
-  //           name: item.name,
-  //           price: item.price,
-  //           quantity: item.quantity,
-  //           totalPrice: item.price * item.quantity,
-  //           modifier: item.modifier || null,
-  //         })),
-  //         guestData,
-  //       };
-
-  //       // Submit the KOT data
-  //       const orderUrl = `${myUrl}/add/${id}/kot/${restId}`;
-  //       const orderOptions = {
-  //         method: "POST",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //           Authorization: token,
-  //         },
-  //         body: JSON.stringify(orderData),
-  //       };
-
-  //       const orderResponse = await fetch(orderUrl, orderOptions);
-  //       if (orderResponse.ok) {
-  //         setSelectedItems([]);
-  //         localStorage.removeItem(`selectedItems_${id}`);
-  //         setPersons("");
-  //         localStorage.removeItem("person");
-  //         // Navigate to relevant page
-  //         if (tableData?.tableType === "dine-in") {
-  //           navigate(`/area/${counterId}/tables`);
-  //         } else if (tableData?.tableType === "take-away") {
-  //           navigate(`/take-away/table/${counterId}`);
-  //         } else if (tableData?.tableType === "delivery") {
-  //           navigate(`/delivery/tables/${counterId}`);
-  //         }
-  //       } else {
-  //         console.log("Error in submitting KOT data", orderResponse);
-  //       }
-  //     } else {
-  //       console.log("Error: ", data);
-  //     }
-  //   } catch (err) {
-  //     console.log("Error: ", err);
-  //   }
-  // };
-
   //this is for catch errors for add order
   const CatchErrorForAddOrder = () => {
     let isOk = true;
@@ -347,6 +279,19 @@ const DashboardCrm = () => {
     return isOk;
   };
 
+  //this is for on click on the kot buttons
+  const forClickOnKotPrintEtc = () => {
+    setShowPrint(false);
+    setForPrint(false);
+    if (tableData?.tableType === "dine-in") {
+      navigate(`/area/${counterId}/tables`);
+    } else if (tableData?.tableType === "take-away") {
+      navigate(`/take-away/table/${counterId}`);
+    } else if (tableData?.tableType === "delivery") {
+      navigate(`/delivery/tables/${counterId}`);
+    }
+  };
+
   //this is for add data to add order
   const forAddOrderSubmit = (e) => {
     e.preventDefault();
@@ -360,6 +305,7 @@ const DashboardCrm = () => {
             id: item._id,
             name: item.name,
             price: item.price,
+            items: item.items,
             quantity: item.quantity,
             totalPrice: item.price * item.quantity,
             modifier: item.modifier || null,
@@ -383,17 +329,15 @@ const DashboardCrm = () => {
             const response = await fetch(url, options);
             const data = await response.json();
             if (response.ok) {
+              console.log("data", data);
+              setKotData(data.newKOT);
               setSelectedItems([]);
               localStorage.removeItem(`selectedItems_${id}`);
               setPersons("");
               localStorage.removeItem("person");
-              if (tableData?.tableType === "dine-in") {
-                navigate(`/area/${counterId}/tables`);
-              } else if (tableData?.tableType === "take-away") {
-                navigate(`/take-away/table/${counterId}`);
-              } else if (tableData?.tableType === "delivery") {
-                navigate(`/delivery/tables/${counterId}`);
-              }
+              forGettingTableData();
+              setForSettlement(false);
+              setShowPrint(true);
             } else {
               console.log("Error: ", data);
             }
@@ -442,23 +386,26 @@ const DashboardCrm = () => {
               localStorage.removeItem(`selectedItems_${id}`);
               setPersons("");
               localStorage.removeItem("person");
-              if (tableData?.tableType === "dine-in") {
-                navigate(`/area/${counterId}/tables`);
-              } else if (tableData?.tableType === "take-away") {
-                navigate(`/take-away/table/${counterId}`);
-              } else if (tableData?.tableType === "delivery") {
-                navigate(`/delivery/tables/${counterId}`);
+              console.log("kot data with ruaz", data);
+              setForMultiPaymentOpen(false);
+              setKotData(data.myNewKOT);
+              setForSettlement(false);
+              if (forPrint) {
+                setShowPrint(true);
+              } else {
+                forClickOnKotPrintEtc();
               }
             }
           } else {
+            console.log("data", data);
             setNewTableData(data?.table);
+            toast.error(data.msg);
             console.log(" err data ", data.table.currentOrder);
 
             getDataforEditTable();
-            console.log("table data", tableData);
           }
         } catch (err) {
-          console.log("there is error in the for add parcerl function", err);
+          console.log("there is error in the payment method", err);
         }
       }
     } else {
@@ -467,6 +414,7 @@ const DashboardCrm = () => {
           id: item._id,
           name: item.name,
           price: item.price,
+          items: item.items,
           quantity: item.quantity,
           totalPrice: item.price * item.quantity,
           modifier: item.modifier || null,
@@ -475,6 +423,7 @@ const DashboardCrm = () => {
         paymentMethod: metod,
         frontEndType: typ,
       };
+
       const url = `${myUrl}/add/${id}/kot/${restId}`;
       const options = {
         method: "POST",
@@ -489,17 +438,17 @@ const DashboardCrm = () => {
         const response = await fetch(url, options);
         const data = await response.json();
         if (response.ok) {
+          setKotData(data.myNewKOT);
           setNewTableData(data?.table);
           setSelectedItems([]);
           localStorage.removeItem(`selectedItems_${id}`);
           setPersons("");
           localStorage.removeItem("person");
-          if (tableData?.tableType === "dine-in") {
-            navigate(`/area/${counterId}/tables`);
-          } else if (tableData?.tableType === "take-away") {
-            navigate(`/take-away/table/${counterId}`);
-          } else if (tableData?.tableType === "delivery") {
-            navigate(`/delivery/tables/${counterId}`);
+          setForSettlement(false);
+          if (forPrint) {
+            setShowPrint(true);
+          } else {
+            forClickOnKotPrintEtc();
           }
         } else {
           setNewTableData(data?.table);
@@ -616,50 +565,6 @@ const DashboardCrm = () => {
     getDataforEditTable();
     forSettleTheOrderOfTable();
     console.log("table data", tableData);
-  };
-
-  //this is for click on the multipayment submit button
-  const forClickOnSubmitClickOfMultipayment = async () => {
-    const url = `${myUrl}/add/${id}/kot/${restId}`;
-
-    const options = {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: token,
-      },
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      if (response.ok) {
-        console.log("data", data);
-        console.log("table data", tableData);
-        forGettingTableData();
-        getDataforEditTable();
-        if (forTableData?.currentOrder?.remainAmount === 0) {
-          setSelectedItems([]);
-          localStorage.removeItem(`selectedItems_${id}`);
-          setPersons("");
-          localStorage.removeItem("person");
-          if (tableData?.tableType === "dine-in") {
-            navigate(`/area/${counterId}/tables`);
-          } else if (tableData?.tableType === "take-away") {
-            navigate(`/take-away/table/${counterId}`);
-          } else if (tableData?.tableType === "delivery") {
-            navigate(`/delivery/tables/${counterId}`);
-          }
-        }
-      } else {
-        console.log(" err data ", data);
-
-        getDataforEditTable();
-        console.log("table data", tableData);
-      }
-    } catch (err) {
-      console.log("there is error in the for add parcerl function", err);
-    }
   };
 
   return (
@@ -974,17 +879,36 @@ const DashboardCrm = () => {
                 >
                   Tables
                 </button>
-                <Link
-                  style={{
-                    backgroundColor: "#D59E00",
-                    color: "black",
-                    textDecoration: "none",
-                    textAlign: "center",
-                  }}
-                  className="w-100 py-3"
-                >
-                  KOT Print
-                </Link>
+                {tableData?.tableType === "delivery" ? (
+                  <Link
+                    style={{
+                      backgroundColor: "#D59E00",
+                      color: "black",
+                      textDecoration: "none",
+                      textAlign: "center",
+                    }}
+                    className="w-100 py-3"
+                  >
+                    Rider
+                  </Link>
+                ) : (
+                  <Link
+                    onClick={(e) => {
+                      setForPrint(true);
+                      forAddOrderSubmit(e);
+                    }}
+                    style={{
+                      backgroundColor: "#D59E00",
+                      color: "black",
+                      textDecoration: "none",
+                      textAlign: "center",
+                    }}
+                    className="w-100 py-3"
+                  >
+                    KOT Print
+                  </Link>
+                )}
+
                 <button
                   onClick={(e) => forAddOrderSubmit(e)}
                   style={{
@@ -1061,7 +985,6 @@ const DashboardCrm = () => {
                   <FaGlassWhiskey /> Drinks
                 </div>
                 <div
-                  // onClick={() => filterCategories("sweets")}
                   onClick={forGetAllDeals}
                   style={{ backgroundColor: "#F5B800" }}
                   className=" text-center py-2 w-100 cursor-pointer"
@@ -1313,7 +1236,7 @@ const DashboardCrm = () => {
             width: "100%",
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 5000,
+            zIndex: 999,
           }}
         >
           <div
@@ -1338,127 +1261,155 @@ const DashboardCrm = () => {
                 x
               </p>
             </div>
-            <div className="p-2">
-              <div className="m-0 p-0">
-                <button
-                  onClick={() => forClickOnPaymentMethod("multi", "cash")}
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Cash
-                </button>
-                <button
-                  onClick={() => forClickOnPaymentMethod("multi", "card")}
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Card
-                </button>
-                <button
-                  className="py-1 px-2"
-                  onClick={() => forClickOnPaymentMethod("multi", "advance")}
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Advance
-                </button>
-                <button
-                  onClick={() => forClickOnPaymentMethod("multi", "paytm")}
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  PayTM
-                </button>
-                <button
-                  onClick={() =>
-                    forClickOnPaymentMethod("multi", "check payment")
-                  }
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Check Payment
-                </button>
-                <button
-                  onClick={() => forClickOnPaymentMethod("multi", "credit")}
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Credit
-                </button>
-                <button
-                  onClick={() =>
-                    forClickOnPaymentMethod("multi", "post to room")
-                  }
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  Post to room
-                </button>
-                <button
-                  onClick={() => forClickOnPaymentMethod("multi", "upi")}
-                  className="py-1 px-2"
-                  style={{
-                    backgroundColor: "#0A97BA",
-                    margin: "1px",
-                    border: "none",
-                    color: "white",
-                    fontSize: "14px",
-                    fontWeight: "400",
-                  }}
-                >
-                  upi
-                </button>
+            <div className="p-2 ">
+              <div className="d-flex align-items-center justify-content-between">
+                <div className="m-0 p-0 ">
+                  <button
+                    onClick={() => forClickOnPaymentMethod("multi", "cash")}
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Cash
+                  </button>
+                  <button
+                    onClick={() => forClickOnPaymentMethod("multi", "card")}
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Card
+                  </button>
+                  <button
+                    className="py-1 px-2"
+                    onClick={() => forClickOnPaymentMethod("multi", "advance")}
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Advance
+                  </button>
+                  <button
+                    onClick={() => forClickOnPaymentMethod("multi", "paytm")}
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    PayTM
+                  </button>
+                  <button
+                    onClick={() =>
+                      forClickOnPaymentMethod("multi", "check payment")
+                    }
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Check Payment
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (forTableData?.currentOrder.guest) {
+                        forClickOnPaymentMethod("multi", "credit");
+                      } else {
+                        toast.error(
+                          "please select guest for this debit amount"
+                        );
+                      }
+                    }}
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Credit
+                  </button>
+                  <button
+                    onClick={() =>
+                      forClickOnPaymentMethod("multi", "post to room")
+                    }
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Post to room
+                  </button>
+                  <button
+                    onClick={() => forClickOnPaymentMethod("multi", "upi")}
+                    className="py-1 px-2"
+                    style={{
+                      backgroundColor: "#0A97BA",
+                      margin: "1px",
+                      border: "none",
+                      color: "white",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    upi
+                  </button>
+                </div>{" "}
+                <div>
+                  <button
+                    onClick={() => {
+                      guestSearchChangeState();
+                      forGettingTableData();
+                    }}
+                    className="py-1 px-2 "
+                    style={{
+                      backgroundColor: "#F5B800",
+                      marginLeft: "auto",
+                      border: "none",
+                      fontSize: "14px",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Guest
+                  </button>
+                </div>
               </div>
-              <hr className="p-0 m-0"></hr>
 
+              <hr className="p-0 m-0"></hr>
               <div
                 className="d-flex"
                 style={{
@@ -1859,6 +1810,177 @@ const DashboardCrm = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* this is for the print kot */}
+      {showPrint && (
+        <div
+          className="d-flex align-items-center justify-content-center position-fixed"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 5000,
+          }}
+        >
+          <div
+            className="d-flex  flex-column bg-white  pb-4 "
+            style={{
+              width: "400px",
+              maxHeight: "500px",
+              overflowY: "auto",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <div
+              className=" p-1  d-flex justify-content-end align-items-center  mb-2"
+              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+            >
+              <p
+                className="m-0 px-2 py-1 color-dark cursor-pointer "
+                onClick={forClickOnKotPrintEtc}
+              >
+                x
+              </p>
+            </div>
+            <div className="mt-1 p-1">
+              <div className="m-0">
+                <h4 className="text-center m-0 p-0">KOT</h4>
+                <div
+                  style={{
+                    borderTop: "1px dotted #000",
+                    marginTop: "5px", // adjust spacing as needed
+                  }}
+                ></div>
+              </div>
+              <div className="d-flex align-items-center justify-content-evenly my-2">
+                <p className="p-0 m-0">KOT NO ({kotData?.kotNo})</p>
+                <p className="p-0 m-0">
+                  Invoice NO{" "}
+                  <span className="text-bold">({kotData?.kotOrderNo})</span>{" "}
+                </p>
+              </div>
+              <div
+                style={{
+                  borderTop: "1px dotted #000",
+                }}
+              ></div>
+            </div>
+            <div className="p-1">
+              <table className="table  table-hover table-light  ">
+                <thead>
+                  <tr>
+                    <th scope="col " style={{ border: "1px solid black" }}>
+                      #
+                    </th>
+                    <th scope="col" style={{ border: "1px solid black" }}>
+                      Name
+                    </th>
+                    <th scope="col" style={{ border: "1px solid black" }}>
+                      Qty
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {kotData?.orderItems?.map((item, index) => (
+                    <React.Fragment key={index}>
+                      <tr>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "7px",
+                          }}
+                        >
+                          {index + 1}
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "7px",
+                          }}
+                        >
+                          <strong>{item.name}</strong>
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid black",
+                            padding: "7px",
+                          }}
+                        >
+                          {item.quantity}
+                        </td>
+                      </tr>
+
+                      {/* Check if the item has sub-items (deal) */}
+                      {item.items &&
+                        item.items.length > 0 &&
+                        item.items.map((subItem, subIndex) => (
+                          <tr key={`${index}-${subIndex}`}>
+                            <td
+                              style={{
+                                border: "1px solid black",
+                                padding: "7px",
+                              }}
+                            >
+                              {index + 1}.{subIndex + 1}
+                            </td>
+                            <td
+                              style={{
+                                border: "1px solid black",
+                                padding: "7px",
+                              }}
+                            >
+                              {subItem.name}
+                            </td>
+                            <td
+                              style={{
+                                border: "1px solid black",
+                                padding: "7px",
+                              }}
+                            >
+                              {subItem.qty}
+                            </td>
+                          </tr>
+                        ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className="d-flex align-items-center justify-content-end px-2">
+              <button
+                onClick={forClickOnKotPrintEtc}
+                style={{
+                  backgroundColor: "#F5B800",
+                  color: "black",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  border: "none",
+                }}
+                className="px-3 py-1 mx-1"
+              >
+                <AiFillPrinter style={{ marginRight: "5px" }} />
+                Print
+              </button>
+              <button
+                onClick={forClickOnKotPrintEtc}
+                style={{
+                  backgroundColor: "#E84743",
+                  color: "white",
+                  textDecoration: "none",
+                  textAlign: "center",
+                  border: "none",
+                }}
+                className="px-3 py-1 mx-1"
+              >
+                Cancel
+              </button>
             </div>
           </div>
         </div>

@@ -247,10 +247,10 @@ const authProtectedRoutes = [
   { path: "/my-dashboard", component: <PieCharts /> },
   { path: "/all-catagories/:id", component: <BasicTables /> },
   { path: "/items/:id", component: <ListTables /> },
-  { path: "/kots", component: <DashboardProject /> },
-  { path: "/invoice", component: <DashboardCrypto /> },
+  { path: "/restaurent/kots", component: <DashboardProject /> },
+  { path: "/restaurent/invoice", component: <DashboardCrypto /> },
   { path: "/cash-book", component: <GoogleMaps /> },
-  { path: "/credit-book", component: <DashboardNFT /> },
+
   { path: "/collection-report", component: <DashboardCrm /> },
   { path: "/settlements", component: <UiScrollbar /> },
   { path: "/guest/:id", component: <RemixIcons /> },
@@ -298,8 +298,18 @@ const authProtectedRoutes = [
   { path: "/merg-table/:counterid", component: <ProjectOverview /> },
   { path: "/take-away/table/:id", component: <CreateProject /> },
   { path: "/delivery/tables/:id", component: <TaskList /> },
-  { path: "/for-kds/for/onlycounter", component: <TaskDetails /> },
-  { path: "/for-kds/for/allrestaurent", component: <CrmContacts /> },
+  { path: "/for-kds/for/allrestaurent", component: <TaskDetails /> },
+  { path: "/for-kds/for/counter", component: <CrmContacts /> },
+  { path: "/restuarent/manage/kot", component: <BuySell /> },
+  { path: "/counter/:counterid/dashboard", component: <JobOverview /> },
+  { path: "/restaurent/settlements", component: <UiBadges /> },
+  { path: "/:id/credit-book", component: <DashboardNFT /> },
+  { path: "/creditbook/:id/guest", component: <CrmCompanies /> },
+  { path: "/guest/:id/credit/all/pays", component: <InvoiceList /> },
+  {
+    path: "/guest/:id/credit/allpsys/:payid/check",
+    component: <InvoiceDetails />,
+  },
 
   //already routes
 
@@ -311,13 +321,11 @@ const authProtectedRoutes = [
 
   //Crm
 
-  { path: "/apps-crm-companies", component: <CrmCompanies /> },
   { path: "/apps-crm-deals", component: <CrmDeals /> },
   { path: "/apps-crm-leads", component: <CrmLeads /> },
 
   //Invoices
-  { path: "/apps-invoices-list", component: <InvoiceList /> },
-  { path: "/apps-invoices-details", component: <InvoiceDetails /> },
+
   { path: "/apps-invoices-create", component: <InvoiceCreate /> },
 
   //Supports Tickets
@@ -326,7 +334,6 @@ const authProtectedRoutes = [
 
   //transactions
 
-  { path: "/apps-crypto-buy-sell", component: <BuySell /> },
   { path: "/apps-crypto-orders", component: <CryproOrder /> },
   { path: "/apps-crypto-wallet", component: <MyWallet /> },
 
@@ -367,7 +374,6 @@ const authProtectedRoutes = [
 
   // Base Ui
   { path: "/ui-alerts", component: <UiAlerts /> },
-  { path: "/ui-badges", component: <UiBadges /> },
   { path: "/ui-buttons", component: <UiButtons /> },
   { path: "/ui-colors", component: <UiColors /> },
   { path: "/ui-cards", component: <UiCards /> },
@@ -458,7 +464,7 @@ const authProtectedRoutes = [
   { path: "/apps-job-statistics", component: <Statistics /> },
   { path: "/apps-job-lists", component: <JobList /> },
   { path: "/apps-job-grid-lists", component: <JobGrid /> },
-  { path: "/apps-job-details", component: <JobOverview /> },
+
   { path: "/apps-job-candidate-grid", component: <CandidateGrid /> },
   { path: "/apps-job-application", component: <Application /> },
   { path: "/apps-job-new", component: <NewJobs /> },

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Col,
   Container,
@@ -11,35 +11,176 @@ import {
 } from "reactstrap";
 import Flatpickr from "react-flatpickr";
 import BreadCrumb from "../../Components/Common/BreadCrumb";
-
+import { UseRiazHook } from "../../RiazStore/RiazStore";
+import Pagination from "../../Components/Common/Pagination";
+import Select from "react-select";
 const DashboardProject = () => {
+  const [allKots, setAllKots] = useState([]);
+  const [myAllFilteredKots, setMyAllFilterKots] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [tableType, setTableType] = useState("");
+
+  //this is for getting data from my hook
+  const { myUrl, restId, restData } = UseRiazHook();
+
+  //this is for pagination
+  const perPageData = 50;
+  const indexOfLast = currentPage * perPageData;
+  const indexOfFirst = indexOfLast - perPageData;
+
+  //this is for page current data
+  const currentdata = useMemo(
+    () => allKots?.slice(indexOfFirst, indexOfLast),
+    [indexOfFirst, indexOfLast]
+  );
+
+  //this is for first time load and set data
+  useEffect(() => {
+    setMyAllFilterKots(allKots.slice(0, perPageData));
+  }, [allKots]);
+
+  //this is for set current data of page
+  useEffect(() => {
+    setMyAllFilterKots(currentdata);
+  }, [currentdata]);
+
+  //this is for search
+  const OnchangeHandler = (e, type) => {
+    let value;
+
+    if (type === "date") {
+      value = e[0]?.toLocaleDateString("en-GB");
+
+      if (value) {
+        const filteredByDate = allKots.filter((kot) => {
+          const kotDate = new Date(kot.createdAt).toLocaleDateString("en-GB");
+          return kotDate === value;
+        });
+        setMyAllFilterKots(filteredByDate.slice(0, perPageData));
+      }
+    } else if (type === "table") {
+      value = e.target.value;
+
+      if (value) {
+        const filteredByTable = allKots.filter((kot) =>
+          kot.table?.toString().toLowerCase().includes(value.toLowerCase())
+        );
+        setMyAllFilterKots(filteredByTable.slice(0, perPageData));
+      }
+    } else if (type === "tableType") {
+      value = e.target.value;
+
+      if (value) {
+        const filteredByTableType = allKots.filter((kot) =>
+          kot.orderType?.toLowerCase().includes(value.toLowerCase())
+        );
+        setMyAllFilterKots(filteredByTableType.slice(0, perPageData));
+      }
+    } else if (type === "kotno") {
+      value = e.target.value;
+
+      if (value) {
+        const filteredByTable = allKots.filter((kot) =>
+          kot?.kotNo?.toString().toLowerCase().includes(value.toLowerCase())
+        );
+        setMyAllFilterKots(filteredByTable.slice(0, perPageData));
+      }
+    }
+    if (!value) {
+      setMyAllFilterKots(allKots.slice(indexOfFirst, indexOfLast));
+    }
+
+    setCurrentPage(1);
+  };
+
+  //this is for getting all delivered kots
+  const forgettingAllKotsOfRestaurent = async () => {
+    const url = `${myUrl}/get/${restId}/restaurent/all/delivered/kots`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("ok data", data.allKots);
+        setAllKots(data.allKots);
+        setMyAllFilterKots(data.allKots);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log("there is error in the getting all kots function", err);
+    }
+  };
+
+  //this is for controll rendering of getting kots functon
+  useEffect(() => {
+    forgettingAllKotsOfRestaurent();
+  }, []);
+
+  //this is for the date
+  const formatDateTime = (date, format) => {
+    const d = new Date(date);
+
+    const day = d.getDate(); // No leading zero
+    const month = d.getMonth() + 1; // No leading zero, Months are 0-indexed
+    const year = d.getFullYear();
+    const hours = d.getHours();
+    const minutes = String(d.getMinutes()).padStart(2, "0");
+    const ampm = hours >= 12 ? "PM" : "AM";
+    const formattedHours = hours % 12 || 12; // 12-hour format
+
+    let formattedDate;
+    switch (format) {
+      case "D/M/Y":
+        formattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        formattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        formattedDate = `${year}/${month}/${day}`;
+        break;
+      default:
+        formattedDate = d.toLocaleDateString(); // Default fallback
+    }
+
+    return `${formattedDate} ${formattedHours}:${minutes} ${ampm}`;
+  };
+
+  //this is for date formate
+  const dateFormatMapper = (format) => {
+    switch (format) {
+      case "D/M/Y":
+        return "d/m/Y";
+      case "M/D/Y":
+        return "m/d/Y";
+      case "Y/M/D":
+        return "Y/m/d";
+      default:
+        return "d/m/Y"; // Default format
+    }
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
         <Container fluid>
-          <BreadCrumb kot="Manage KOTs" />
+          <BreadCrumb kot={`Manage KOTs of ${restData?.restName}`} />
 
           {/* Search Section */}
           <div className=" p-2 mt-1" style={{ backgroundColor: "#F3F3F9" }}>
-            <div className="d-flex justify-content-between align-items-center mb-3">
-              <h5 className=" mt-2 mb-4">Search Kot</h5>
-              <Button
-                className="btn text-white px-4 py-2 border-0"
-                style={{ backgroundColor: "#5068B8" }}>
-                <i className="ri-search-line align-bottom me-1"></i>
-                Search
-              </Button>
-            </div>
-
             <Form>
               <Row>
                 <Col md={3} xs={12} className="mb-3">
-                  <Label for="kotNumber" style={{ fontWeight: "bold" }}>
+                  <Label for="kotType" style={{ fontWeight: "bold" }}>
                     Kot No
                   </Label>
-                  <Input type="text" id="kotNumber" placeholder="Kot Number" />
+                  <Input
+                    type="text"
+                    id="kotType"
+                    onChange={(e) => OnchangeHandler(e, "kotno")}
+                    placeholder="Enter kot no"
+                  />
                 </Col>
-
                 <Col md={3} xs={12} className="mb-3">
                   <Label for="kotDate" style={{ fontWeight: "bold" }}>
                     Kot Date
@@ -48,14 +189,14 @@ const DashboardProject = () => {
                     className="form-control"
                     id="datepicker-publish-input"
                     placeholder="Select date or search"
+                    onChange={(e) => OnchangeHandler(e, "date")}
                     options={{
                       altInput: true,
                       altFormat: "F j, Y",
-                      dateFormat: "d.m.y",
+                      dateFormat: dateFormatMapper(restData.dateFormate),
                     }}
                   />
                 </Col>
-
                 <Col md={3} xs={12} className="mb-3">
                   <Label for="kotType" style={{ fontWeight: "bold" }}>
                     Table No
@@ -63,20 +204,33 @@ const DashboardProject = () => {
                   <Input
                     type="text"
                     id="kotType"
+                    onChange={(e) => OnchangeHandler(e, "table")}
                     placeholder="Enter table no"
                   />
                 </Col>
-
                 <Col md={3} xs={12} className="mb-3">
-                  <Label for="additionalInfo" style={{ fontWeight: "bold" }}>
-                    Kot Type
-                  </Label>
-                  <Input
-                    type="text"
-                    id="additionalInfo"
-                    placeholder="select kot type"
-                  />
-                </Col>
+                  <div className="mb-3">
+                    <Label for="kotDate" style={{ fontWeight: "bold" }}>
+                      Table Type
+                    </Label>
+                    <Select
+                      value={tableType}
+                      onChange={(selectedOption) => {
+                        setTableType(selectedOption.value);
+                        OnchangeHandler(
+                          { target: { value: selectedOption.value } },
+                          "tableType"
+                        );
+                      }}
+                      options={[
+                        { value: "dine-in", label: "Dine In" },
+                        { value: "take-away", label: "Take Away" },
+                        { value: "delivery", label: "Delivery" },
+                      ]}
+                      placeholder={tableType ? tableType : "select table type"}
+                    />
+                  </div>
+                </Col>{" "}
               </Row>
             </Form>
           </div>
@@ -88,598 +242,43 @@ const DashboardProject = () => {
             <Table striped bordered hover>
               <thead>
                 <tr>
-                  <th>KOTs</th>
+                  <th>#</th>
                   <th>Date</th>
-                  <th>table/parcel no</th>
-                  <th>Waiter</th>
-                  <th>Total items</th>
+                  <th>Counter</th>
+                  <th>table No</th>
+                  <th>table Type</th>
+                  <th>Captain</th>
+                  <th>Total Items</th>
                   <th>Grand total</th>
-                  <th>Action</th>
                 </tr>
               </thead>
+
               <tbody>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>5</td>
-                  <td>ali shan shb</td>
-                  <td>5</td>
-                  <td>3245</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}>
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}>
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                {myAllFilteredKots.map((item, index) => (
+                  <tr key={index}>
+                    <td>{item?.kotNo}</td>
+                    <td>
+                      {formatDateTime(item.createdAt, restData.dateFormate)}
+                    </td>
+                    <td>{item?.Counter?.name}</td>
+                    <td>{item?.table}</td>
+                    <td>{item?.orderType}</td>
+                    <td>{item?.orderTaker}</td>
+                    <td>{item?.totalItem}</td>
+                    <td>{item?.grandTotal}</td>
+                  </tr>
+                ))}
               </tbody>
             </Table>
+          </div>
+
+          <div className="my-3 p-3">
+            <Pagination
+              perPageData={perPageData}
+              data={allKots}
+              currentPage={currentPage}
+              setCurrentPage={setCurrentPage}
+            />
           </div>
         </Container>
       </div>

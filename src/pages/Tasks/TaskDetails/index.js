@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Container, Col, Row } from "reactstrap";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import { toast } from "react-toastify";
+import { intersectSpans } from "@fullcalendar/core/internal";
 
 const TaskDetails = () => {
   const [allRunningKots, setAllRunningKots] = useState([]);
@@ -18,6 +19,7 @@ const TaskDetails = () => {
       const data = await response.json();
       if (response.ok) {
         setAllRunningKots(data.allRunningKots);
+
         const newTimes = data.allRunningKots.map((kot, index) => {
           const now = new Date().getTime();
           const kotTime = new Date(kot.createdAt).getTime();
@@ -168,6 +170,7 @@ const TaskDetails = () => {
                       style={{
                         height: "300px",
                         overflowY: "auto",
+                        overflowX: "auto",
                         msOverflowStyle: "none",
                         scrollbarWidth: "none",
                       }}
@@ -222,76 +225,162 @@ const TaskDetails = () => {
                         </thead>
                         <tbody>
                           {kotItem.orderItems.map((item, index) => (
-                            <tr key={index}>
-                              <td
-                                style={{
-                                  border: "1px solid #DEDEDE",
-                                  backgroundColor:
-                                    index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
-                                  padding: "7px",
-                                }}
-                              >
-                                {index + 1}
-                              </td>
-                              <td
-                                style={{
-                                  border: "1px solid #DEDEDE",
-                                  backgroundColor:
-                                    index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
-                                  padding: "7px",
-                                }}
-                              >
-                                {item.name}
-                              </td>
-                              <td
-                                style={{
-                                  border: "1px solid #DEDEDE",
-                                  backgroundColor:
-                                    index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
-                                  padding: "7px",
-                                }}
-                              >
-                                {item.quantity}
-                              </td>
-                              <td
-                                style={{
-                                  border: "1px solid #DEDEDE",
-                                  backgroundColor:
-                                    index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
-                                  padding: "5px",
-                                }}
-                              >
-                                <button
-                                  disabled={item.status === "Delivered"}
-                                  onClick={() => {
-                                    forUpdateTheStatusOfItem(
-                                      kotItem._id,
-                                      item._id,
-                                      item.status
-                                    );
-                                  }}
+                            <React.Fragment key={index}>
+                              <tr>
+                                <td
                                   style={{
-                                    border: "none",
+                                    border: "1px solid #DEDEDE",
                                     backgroundColor:
-                                      item.status === "Preparing"
-                                        ? "#0A97BB"
-                                        : item.status === "Ready"
-                                        ? "#FFBD00"
-                                        : item.status === "Delivered"
-                                        ? "transparent"
-                                        : "initial",
-                                    fontSize: "14px",
-                                    color:
-                                      item.status === "Preparing"
-                                        ? "white"
-                                        : "black",
+                                      index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
+                                    padding: "7px",
                                   }}
-                                  className="p-1 "
                                 >
-                                  {item.status}...
-                                </button>
-                              </td>
-                            </tr>
+                                  {index + 1}
+                                </td>
+                                <td
+                                  style={{
+                                    border: "1px solid #DEDEDE",
+                                    backgroundColor:
+                                      index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
+                                    padding: "7px",
+                                  }}
+                                >
+                                  <strong>{item.name}</strong>
+                                </td>
+                                <td
+                                  style={{
+                                    border: "1px solid #DEDEDE",
+                                    backgroundColor:
+                                      index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
+                                    padding: "7px",
+                                  }}
+                                >
+                                  {item.quantity}
+                                </td>
+                                <td
+                                  style={{
+                                    border: "1px solid #DEDEDE",
+                                    backgroundColor:
+                                      index % 2 === 0 ? "#F3F3F3" : "#FFBD00",
+                                    padding: "5px",
+                                  }}
+                                >
+                                  <button
+                                    disabled={item.status === "Delivered"}
+                                    onClick={() => {
+                                      forUpdateTheStatusOfItem(
+                                        kotItem._id,
+                                        item._id,
+                                        item.status
+                                      );
+                                    }}
+                                    style={{
+                                      border: "none",
+                                      backgroundColor:
+                                        item.status === "Preparing"
+                                          ? "#0A97BB"
+                                          : item.status === "Ready"
+                                          ? "#FFBD00"
+                                          : item.status === "Delivered"
+                                          ? "transparent"
+                                          : "initial",
+                                      fontSize: "14px",
+                                      color:
+                                        item.status === "Preparing"
+                                          ? "white"
+                                          : "black",
+                                    }}
+                                    className="p-1"
+                                  >
+                                    {item.status}...
+                                  </button>
+                                </td>
+                              </tr>
+
+                              {/* Check if the item has sub-items (deal) */}
+                              {item.items &&
+                                item.items.length > 0 &&
+                                item.items.map((subItem, subIndex) => (
+                                  <tr key={`${index}-${subIndex}`}>
+                                    <td
+                                      style={{
+                                        border: "1px solid #DEDEDE",
+                                        backgroundColor:
+                                          subIndex % 2 === 0
+                                            ? "#EFEFEF"
+                                            : "#FFD700",
+                                        padding: "7px",
+                                      }}
+                                    >
+                                      {index + 1}.{subIndex + 1}
+                                    </td>
+                                    <td
+                                      style={{
+                                        border: "1px solid #DEDEDE",
+                                        backgroundColor:
+                                          subIndex % 2 === 0
+                                            ? "#EFEFEF"
+                                            : "#FFD700",
+                                        padding: "7px",
+                                      }}
+                                    >
+                                      {subItem.name}
+                                    </td>
+                                    <td
+                                      style={{
+                                        border: "1px solid #DEDEDE",
+                                        backgroundColor:
+                                          subIndex % 2 === 0
+                                            ? "#EFEFEF"
+                                            : "#FFD700",
+                                        padding: "7px",
+                                      }}
+                                    >
+                                      {subItem.qty}
+                                    </td>
+                                    <td
+                                      style={{
+                                        border: "1px solid #DEDEDE",
+                                        backgroundColor:
+                                          subIndex % 2 === 0
+                                            ? "#EFEFEF"
+                                            : "#FFD700",
+                                        padding: "5px",
+                                      }}
+                                    >
+                                      <button
+                                        disabled={
+                                          subItem.status === "Delivered"
+                                        }
+                                        onClick={() =>
+                                          forUpdateTheStatusOfItem(
+                                            kotItem._id,
+                                            subItem._id,
+                                            subItem.status
+                                          )
+                                        }
+                                        style={{
+                                          border: "none",
+                                          backgroundColor:
+                                            subItem.status === "Preparing"
+                                              ? "#0A97BB"
+                                              : subItem.status === "Ready"
+                                              ? "#FFBD00"
+                                              : subItem.status === "Delivered"
+                                              ? "transparent"
+                                              : "initial",
+                                          fontSize: "14px",
+                                          color:
+                                            subItem.status === "Preparing"
+                                              ? "white"
+                                              : "black",
+                                        }}
+                                        className="p-1"
+                                      ></button>
+                                    </td>
+                                  </tr>
+                                ))}
+                            </React.Fragment>
                           ))}
                         </tbody>
                       </table>

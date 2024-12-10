@@ -15,6 +15,7 @@ import SimpleBar from "simplebar-react";
 import { toast } from "react-toastify";
 import isEmail from "validator/lib/isEmail";
 import myImage from "../assets/images/users/avatar-1.jpg";
+import Flatpickr from "react-flatpickr";
 
 function AllPopUpsAndOffCanvas() {
   const [name, setName] = useState("");
@@ -25,6 +26,7 @@ function AllPopUpsAndOffCanvas() {
   const [errors, setErrors] = useState({});
   const [age, setAge] = useState("");
   const [gender, setGender] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState("");
 
   //this is show for guest
   const {
@@ -96,33 +98,13 @@ function AllPopUpsAndOffCanvas() {
     let isOk = true;
     let newErrors = {};
 
-    if (!email.trim()) {
-      newErrors.email = "Email is Required";
-      toast.error("Email is Required");
-      isOk = false;
-    } else if (!isEmail(email)) {
-      newErrors.email = "Please Enter Valid Email";
-      toast.error("Please Enter Valid email");
-      isOk = false;
-    } else if (!name.trim()) {
+    if (!name.trim()) {
       newErrors.name = "Name is Required";
       toast.error("Name is Required");
-      isOk = false;
-    } else if (age === "") {
-      newErrors.age = "Age is Required";
-      toast.error("Age is Required");
       isOk = false;
     } else if (phone.length < 11) {
       newErrors.phone = "phone Number should be at least 11 letters";
       toast.error("phone Number should be at least 11 letters");
-      isOk = false;
-    } else if (!address.trim()) {
-      newErrors.address = "Address is Required";
-      toast.error("address is required");
-      isOk = false;
-    } else if (!gender.trim()) {
-      newErrors.gender = "Please Select Gender";
-      toast.error("Please Select Gender");
       isOk = false;
     }
     setErrors(newErrors);
@@ -136,7 +118,7 @@ function AllPopUpsAndOffCanvas() {
         name,
         email,
         phone,
-        age,
+        dateOfBirth,
         address,
         gender,
       };
@@ -187,7 +169,7 @@ function AllPopUpsAndOffCanvas() {
         setName(data.guestPrevData.name);
         setEmail(data.guestPrevData.email);
         setPhone(data.guestPrevData.phone);
-        setAge(data.guestPrevData.age);
+        setDateOfBirth(data.guestPrevData.dateOfBirth);
         setAddress(data.guestPrevData.address);
         setGender(data.guestPrevData.gender);
       } else {
@@ -221,7 +203,7 @@ function AllPopUpsAndOffCanvas() {
         name,
         email,
         phone,
-        age,
+        dateOfBirth,
         gender,
         address,
       };
@@ -295,15 +277,22 @@ function AllPopUpsAndOffCanvas() {
   };
 
   //this is for search from guests
-  const OnchangeHandler = (e) => {
-    let search = e.target.value;
-    if (search) {
+  const OnchangeHandler = (e, type) => {
+    let search;
+    if (type === "string") {
+      search = e.target.value;
       const filteredUsers = allGuests.filter((data) =>
         Object.values(data).some(
           (field) =>
             typeof field === "string" &&
             field.toLowerCase().includes(search.toLowerCase())
         )
+      );
+      setFilterGuests(filteredUsers);
+    } else if (type === "number") {
+      search = e.target.value;
+      const filteredUsers = allGuests.filter((guest) =>
+        guest?.phone?.toString().includes(search)
       );
       setFilterGuests(filteredUsers);
     } else {
@@ -323,7 +312,7 @@ function AllPopUpsAndOffCanvas() {
             width: "100%",
             height: "100%",
             backgroundColor: "rgba(0, 0, 0, 0.5)",
-            zIndex: 12,
+            zIndex: 2000,
           }}
         >
           <div
@@ -388,7 +377,7 @@ function AllPopUpsAndOffCanvas() {
                   type="number"
                   id="kotNumber"
                   placeholder="Mobile Number"
-                  onChange={(e) => OnchangeHandler(e)}
+                  onChange={(e) => OnchangeHandler(e, "string")}
                 />
               </div>
               <div className="d-flex flex-column">
@@ -397,7 +386,7 @@ function AllPopUpsAndOffCanvas() {
                 </Label>
                 <Input
                   type="text"
-                  onChange={(e) => OnchangeHandler(e)}
+                  onChange={(e) => OnchangeHandler(e, "number")}
                   id="kotNumber"
                   placeholder="Guest Name"
                 />
@@ -529,34 +518,6 @@ function AllPopUpsAndOffCanvas() {
               <Row>
                 <Col sm={6} className="mt-2">
                   <div className="mb-3">
-                    <Label
-                      htmlFor="billinginfo-firstName"
-                      className="form-label"
-                    >
-                      Guest Email
-                    </Label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      id="billinginfo-firstName"
-                      placeholder="Enter Email"
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {errors.email && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-                </Col>
-                <Col sm={6} className="mt-2">
-                  <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
                       Guest Name
                     </Label>
@@ -580,30 +541,42 @@ function AllPopUpsAndOffCanvas() {
                     )}
                   </div>
                 </Col>
-
+                <Col sm={6} className="mt-2">
+                  <div className="mb-3">
+                    <Label
+                      htmlFor="billinginfo-firstName"
+                      className="form-label"
+                    >
+                      Guest Email
+                    </Label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      id="billinginfo-firstName"
+                      placeholder="Enter Email"
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </Col>
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
-                      Guest Age
+                      Date Of Birth
                     </Label>
-                    <input
-                      type="number"
+                    <Flatpickr
                       className="form-control"
-                      id="billinginfo-email"
-                      placeholder="Enter Name"
-                      onChange={(e) => setAge(e.target.value)}
+                      id="datepicker-publish-input"
+                      placeholder="Select date or search"
+                      options={{
+                        altInput: true,
+                        altFormat: "F j, Y",
+                      }}
+                      onChange={(selectedDates) => {
+                        if (selectedDates.length > 0) {
+                          setDateOfBirth(selectedDates[0]);
+                        }
+                      }}
                     />
-                    {errors.age && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.age}
-                      </p>
-                    )}
                   </div>
                 </Col>
                 <Col sm={6}>
@@ -644,17 +617,6 @@ function AllPopUpsAndOffCanvas() {
                       placeholder="Enter Address"
                       onChange={(e) => setAddress(e.target.value)}
                     />
-                    {errors.address && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.address}
-                      </p>
-                    )}
                   </div>
                 </Col>
                 <Col sm={6}>
@@ -671,17 +633,6 @@ function AllPopUpsAndOffCanvas() {
                       options={genders}
                       id="gender"
                     ></Select>
-                    {errors.gender && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.gender}
-                      </p>
-                    )}
                   </div>
                 </Col>
               </Row>
@@ -723,77 +674,6 @@ function AllPopUpsAndOffCanvas() {
           <SimpleBar style={{ height: "100vh" }}>
             <div className="px-5 py-3">
               <Row>
-                <Col lg={12}>
-                  <div className="text-center">
-                    <div className="position-relative d-inline-block">
-                      <div className="position-absolute bottom-0 end-0">
-                        <Label htmlFor="company-logo-input" className="mb-0">
-                          <div className="avatar-xs cursor-pointer">
-                            <div className="avatar-title bg-light border rounded-circle text-muted">
-                              <i className="ri-image-fill"></i>
-                            </div>
-                          </div>
-                        </Label>
-                        <Input
-                          name="img"
-                          className="form-control d-none"
-                          id="company-logo-input"
-                          type="file"
-                          accept="image/png, image/gif, image/jpeg"
-                          onChange={(e) => {
-                            const file = e.target.files[0];
-                            setGuestImage(file);
-                          }}
-                        />
-                      </div>
-                      <div className="avatar-lg p-1">
-                        <div className="avatar-title bg-light rounded-circle">
-                          <img
-                            src={
-                              GuestImage
-                                ? URL.createObjectURL(GuestImage)
-                                : myImage
-                            }
-                            alt="multiGuest"
-                            id="companylogo-img"
-                            className="avatar-md rounded-circle object-fit-cover"
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <h5 className="fs-13 mt-3">Guest Image</h5>
-                  </div>
-                </Col>
-
-                <Col sm={6} className="mt-2">
-                  <div className="mb-3">
-                    <Label
-                      htmlFor="billinginfo-firstName"
-                      className="form-label"
-                    >
-                      Guest Email
-                    </Label>
-                    <input
-                      type="email"
-                      value={email}
-                      className="form-control"
-                      id="billinginfo-firstName"
-                      placeholder="Enter Email"
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
-                    {errors.email && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.email}
-                      </p>
-                    )}
-                  </div>
-                </Col>
                 <Col sm={6} className="mt-2">
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
@@ -820,33 +700,44 @@ function AllPopUpsAndOffCanvas() {
                     )}
                   </div>
                 </Col>
-              </Row>
+                <Col sm={6} className="mt-2">
+                  <div className="mb-3">
+                    <Label
+                      htmlFor="billinginfo-firstName"
+                      className="form-label"
+                    >
+                      Guest Email
+                    </Label>
+                    <input
+                      type="email"
+                      value={email}
+                      className="form-control"
+                      id="billinginfo-firstName"
+                      placeholder="Enter Email"
+                      onChange={(e) => setEmail(e.target.value)}
+                    />
+                  </div>
+                </Col>
 
-              <Row>
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
-                      Guest Age
+                      Date Of Birth
                     </Label>
-                    <input
-                      type="number"
-                      value={age}
+                    <Flatpickr
                       className="form-control"
-                      id="billinginfo-email"
-                      placeholder="Enter Name"
-                      onChange={(e) => setAge(e.target.value)}
+                      id="datepicker-publish-input"
+                      placeholder="Select date or search"
+                      options={{
+                        altInput: true,
+                        altFormat: "F j, Y",
+                      }}
+                      onChange={(selectedDates) => {
+                        if (selectedDates.length > 0) {
+                          setDateOfBirth(selectedDates[0]);
+                        }
+                      }}
                     />
-                    {errors.age && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.age}
-                      </p>
-                    )}
                   </div>
                 </Col>
                 <Col sm={6}>
@@ -875,8 +766,7 @@ function AllPopUpsAndOffCanvas() {
                     )}
                   </div>
                 </Col>
-              </Row>
-              <Row>
+
                 <Col sm={6}>
                   <div className="mb-3">
                     <Label htmlFor="billinginfo-email" className="form-label">
@@ -890,17 +780,6 @@ function AllPopUpsAndOffCanvas() {
                       placeholder="Enter Address"
                       onChange={(e) => setAddress(e.target.value)}
                     />
-                    {errors.address && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.address}
-                      </p>
-                    )}
                   </div>
                 </Col>
                 <Col sm={6}>
@@ -917,17 +796,6 @@ function AllPopUpsAndOffCanvas() {
                       options={genders}
                       id="gender"
                     ></Select>
-                    {errors.gender && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.gender}
-                      </p>
-                    )}
                   </div>
                 </Col>
               </Row>

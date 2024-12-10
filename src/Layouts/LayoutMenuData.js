@@ -5,7 +5,7 @@ import { UseRiazHook } from "../RiazStore/RiazStore";
 const Navdata = () => {
   const history = useNavigate();
   //this is for getting data from my hook
-  const { counterId } = UseRiazHook();
+  const { counterId, restId } = UseRiazHook();
 
   //state data
   const [isDashboard, setIsDashboard] = useState(false);
@@ -279,13 +279,19 @@ const Navdata = () => {
         {
           id: "All Catagories",
           label: "All Catagories",
-          link: "/all-catagories",
+          link: `/all-catagories/${restId}`,
+          parentId: "items",
+        },
+        {
+          id: "All Catagories",
+          label: "All Deals",
+          link: `/all-deals/${restId}`,
           parentId: "items",
         },
         {
           id: "All Items",
-          label: "All Items",
-          link: "/items",
+          label: "All Menu Items",
+          link: `/items/${restId}`,
           parentId: "items",
           stateVariables: isProfile,
         },
@@ -307,13 +313,13 @@ const Navdata = () => {
         {
           id: "kot",
           label: "KOT",
-          link: "/kots",
+          link: "/restaurent/kots",
           parentId: "kots",
         },
         {
           id: "manage-kot",
           label: "Manage Kot",
-          link: "/nft-landing",
+          link: "/restuarent/manage/kot",
           parentId: "kots",
         },
       ],
@@ -334,13 +340,7 @@ const Navdata = () => {
       subItems: [
         {
           id: "KDS",
-          label: "Counter KDS",
-          link: "/for-kds/for/onlycounter",
-          parentId: "KDS",
-        },
-        {
-          id: "KDS",
-          label: "Restaurent All KDS",
+          label: "Restaurent KDS",
           link: "/for-kds/for/allrestaurent",
           parentId: "KDS",
         },
@@ -367,13 +367,13 @@ const Navdata = () => {
         {
           id: "invoice",
           label: "Invoice",
-          link: "/invoice",
+          link: "/restaurent/invoice",
           parentId: "invoice",
         },
         {
           id: "edit-invoice",
           label: "Edit Invoice",
-          link: "/ui-badges",
+          link: "/restaurent/settlements",
           parentId: "invoice",
         },
       ],
@@ -394,7 +394,7 @@ const Navdata = () => {
         {
           id: "Counter-Sale",
           label: "Counter-Sale",
-          link: "/advance-ui-nestable",
+          link: `/counter/${counterId}/dashboard`,
           parentId: "Counter",
         },
         {
@@ -427,7 +427,7 @@ const Navdata = () => {
         {
           id: "Credit Book",
           label: "Credit Book",
-          link: "/credit-book",
+          link: `/${restId}/credit-book`,
           parentId: "books",
         },
       ],
@@ -449,7 +449,7 @@ const Navdata = () => {
         {
           id: "guest",
           label: "guest",
-          link: "/guest",
+          link: `/guest/${restId}`,
           parentId: "guest",
         },
       ],

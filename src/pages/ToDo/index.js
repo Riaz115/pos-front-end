@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { Col, Container, Row } from "reactstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { UseRiazHook } from "../../RiazStore/RiazStore";
+import { FaTrash } from "react-icons/fa";
 
 const ToDoList = () => {
   const [kotData, setKotData] = useState({});
@@ -87,16 +88,22 @@ const ToDoList = () => {
 
   //this is for edit the kot and send it to backend
   const forVoidKotItems = async () => {
-    const orderData = {
-      orderItems: kotsAllItems.map((item) => ({
-        id: item._id,
-        name: item.name,
-        price: item.price,
-        quantity: item.quantity,
-        totalPrice: item.price * item.quantity,
-        modifier: item.modifier || null,
-      })),
-    };
+    let orderData = {};
+    if (kotsAllItems) {
+      orderData = {
+        orderItems: kotsAllItems.map((item) => ({
+          id: item._id,
+          name: item.name,
+          price: item.price,
+          items: item.items,
+          quantity: item.quantity,
+          totalPrice: item.price * item.quantity,
+          modifier: item.modifier || null,
+        })),
+      };
+    } else {
+      orderData = {};
+    }
 
     const url = `${myUrl}/edit/${tableid}/kotitems/${id}`;
     const options = {
@@ -124,6 +131,12 @@ const ToDoList = () => {
     } catch (err) {
       console.log("there is error in the edit kot function", err);
     }
+  };
+
+  //this is for remove items from table and select items list
+  const removeSelectedItem = (id) => {
+    const updatedItems = kotsAllItems.filter((item) => item._id !== id);
+    setKotAllItems(updatedItems);
   };
 
   return (
@@ -231,8 +244,23 @@ const ToDoList = () => {
                   <tbody style={{ fontSize: "12px" }}>
                     {kotsAllItems.map((item, index) => (
                       <tr key={index}>
-                        <td>{index + 1}</td>
-                        <td>{item.name}</td>
+                        <td> {index + 1}</td>
+                        <td>
+                          {!checkedItems.includes(item._id) && (
+                            <button
+                              className="mx-1"
+                              style={{
+                                border: "none",
+                                cursor: "pointer",
+                              }}
+                              onClick={() => removeSelectedItem(item._id)}
+                            >
+                              <FaTrash style={{ color: "red" }} />
+                            </button>
+                          )}
+
+                          {item.name}
+                        </td>
                         <td>
                           {checkedItems.includes(item._id) ? (
                             item.quantity

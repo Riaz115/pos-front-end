@@ -16,6 +16,7 @@ const BreadCrumb = ({
   settlementText,
   permissionsText,
   rolesText,
+  credit,
 }) => {
   const location = useLocation();
   const allowedPaths = [
@@ -41,6 +42,7 @@ const BreadCrumb = ({
               <h4>{settlementText}</h4>
               <h4>{permissionsText}</h4>
               <h4>{rolesText}</h4>
+              <h4>{credit}</h4>
 
               {showButtons && (
                 <>

@@ -28,190 +28,8 @@ const PieCharts = () => {
   const [loading, setLoading] = useState(false);
 
   //this is for getting data from the use riaz hook
-  const { restId, myUrl } = UseRiazHook();
+  const { restId, myUrl, restData } = UseRiazHook();
 
-  // //this is for getting all orders of the restaurent
-  // const forGettingRestaurentAllOrders = async () => {
-  //   setLoading(true);
-  //   const url = `${myUrl}/get/${restId}/restaurent/all/orders`;
-  //   try {
-  //     const response = await fetch(url);
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       const today = new Date().toISOString().split("T")[0];
-  //       const todaysOrders = data.myFilterOrders.filter((order) =>
-  //         order.createdAt.startsWith(today)
-  //       );
-
-  //       const myTotalAmount = todaysOrders
-  //         .filter((order) => order.isNoCharge !== "yes")
-  //         .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-  //       setBilledAmount(myTotalAmount);
-
-  //       //yeah agr is no chagre yess
-  //       const noChargeTotalAmount = todaysOrders
-  //         .filter((order) => order.isNoCharge === "yes")
-  //         .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
-  //       setNcCollection(noChargeTotalAmount);
-
-  //       //yeah agr is no for count discount
-  //       const forCountDiscount = todaysOrders.reduce(
-  //         (sum, order) => sum + (order.discount || 0),
-  //         0
-  //       );
-  //       setTotalDiscount(forCountDiscount);
-
-  //       //this is for parcel charges
-  //       const forParcleChargesCount = todaysOrders.reduce(
-  //         (sum, order) => sum + (order.parcel || 0),
-  //         0
-  //       );
-  //       setParcelCharges(forParcleChargesCount);
-
-  //       //this is for counting items data
-  //       let allItemsData = {};
-  //       for (let order of todaysOrders) {
-  //         for (let kotId of order.kots) {
-  //           const kotResponse = await fetch(
-  //             `${myUrl}/get/${restId}/restaurent/all/delivered/kots`
-  //           );
-  //           const kotsData = await kotResponse.json();
-  //           if (kotResponse.ok) {
-  //             kotsData.allKots.map((singleKotData, index) => {
-  //               for (let item of singleKotData.orderItems) {
-  //                 const itemId = item.id;
-  //                 if (!allItemsData[itemId]) {
-  //                   allItemsData[itemId] = {
-  //                     id: item.id, // Use the item id correctly
-  //                     name: item.name, // Use the item name correctly
-  //                     totalQuantity: 0,
-  //                     price: item.price, // Ensure the price is set correctly
-  //                     totalItemPrice: 0,
-  //                   };
-  //                 }
-  //                 allItemsData[itemId].totalQuantity += item.quantity;
-  //                 allItemsData[itemId].totalItemPrice +=
-  //                   item.price * item.quantity;
-  //               }
-  //             });
-  //           }
-  //         }
-  //       }
-  //       const itemsArray = Object.values(allItemsData);
-  //       setMyAllItems(itemsArray);
-  //       // setLoading(false);
-  //     } else {
-  //       console.log("err data", data);
-  //     }
-  //   } catch (err) {
-  //     console.log(
-  //       "there is error in the getting all restaurent orders in dashboard file",
-  //       err
-  //     );
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  // // //this is for getting all kots of the restaurent
-  // // const forGettingAllDeliveredKots = async () => {
-  // //   const url = `${myUrl}/get/${restId}/restaurent/all/delivered/kots`;
-  // //   try {
-  // //     const response = await fetch(url);
-  // //     const data = await response.json();
-  // //     if (response.ok) {
-  // //       console.log("ok data", data);
-  // //     } else {
-  // //       console.log("err data", data);
-  // //     }
-  // //   } catch (err) {
-  // //     console.log(
-  // //       "there is error in the get all delivered kots function in pie chart",
-  // //       err
-  // //     );
-  // //   }
-  // // };
-
-  // // //this is for controll the rendering of getting all kots function
-  // // useEffect(() => {
-  // //   forGettingAllDeliveredKots();
-  // // }, []);
-
-  // //this is for getting all tables
-  // const forGetAllTables = async () => {
-  //   const url = `${myUrl}/forget/all/tables/${restId}`;
-
-  //   try {
-  //     const response = await fetch(url);
-  //     const data = await response.json();
-  //     if (response.ok) {
-  //       const runningAndInvoicedTables = data.allTables.filter(
-  //         (order) =>
-  //           order.currentOrder.status === "running" ||
-  //           order.currentOrder.status === "invoiced"
-  //       );
-
-  //       // Calculate the total amount of the filtered tables
-  //       const newUnBilledAmount = runningAndInvoicedTables.reduce(
-  //         (acc, order) => acc + (order.currentOrder.remainAmount || 0),
-  //         0
-  //       );
-  //       setUnBilledAmount(newUnBilledAmount);
-
-  //       const newPaidAmount = runningAndInvoicedTables.reduce(
-  //         (acc, order) => acc + (order.currentOrder.paidAmount || 0),
-  //         0
-  //       );
-
-  //       setNewBilledAmount(billedAmount + newPaidAmount);
-  //     } else {
-  //       console.log("err data", data);
-  //     }
-  //   } catch (err) {
-  //     console.log("there is error in the get all tables function", err);
-  //   }
-  // };
-
-  // // //this is for controll rendering of getting all restaurents and tables
-  // // useEffect(() => {
-  // //   forGettingRestaurentAllOrders();
-  // //   forGetAllTables();
-  // // }, []);
-
-  // useEffect(() => {
-  //   const fetchData = async () => {
-  //     setLoading(true);
-  //     try {
-  //       // Parallel execution of both functions
-  //       await Promise.all([forGettingRestaurentAllOrders(), forGetAllTables()]);
-
-  //       // // Once both functions are complete, calculate the total
-  //       // const newTotalAmount = billedAmount + unBilledAmount + ncCollection;
-  //       // setTotalAmount(newTotalAmount); // Total amount should set correctly here
-  //     } catch (err) {
-  //       console.error("Error fetching data:", err);
-  //     } finally {
-  //       setLoading(false);
-  //     }
-  //   };
-
-  //   fetchData(); // Call the fetch function
-  // }, []); // Ensure this effect runs only once on initial load
-
-  // //this is for setting total amount
-  // useEffect(() => {
-  //   const newTotalAmount = newBilledAmount + unBilledAmount + ncCollection;
-  //   setTotalAmount(newTotalAmount);
-  // }, [newBilledAmount, unBilledAmount, ncCollection]);
-
-  // useEffect(() => {
-  //   if (!loading) {
-  //     console.log("Billed Amount:", billedAmount);
-  //     console.log("Unbilled Amount:", unBilledAmount);
-  //     console.log("No Charge Collection:", ncCollection);
-  //     console.log("Total Amount:", totalAmount);
-  //   }
-  // }, [billedAmount, unBilledAmount, ncCollection, totalAmount]);
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -311,7 +129,7 @@ const PieCharts = () => {
 
           // Calculate final total amount
           const calculatedTotalAmount =
-            totalBilled + totalUnbilled + totalNoCharge;
+            totalBilled + totalUnbilled + totalNoCharge + totalPaid;
           setTotalAmount(calculatedTotalAmount);
         } else {
           console.error("Error in API responses");
@@ -326,20 +144,14 @@ const PieCharts = () => {
     fetchData();
   }, []);
 
-  // Debugging useEffect
-  useEffect(() => {
-    console.log("Billed Amount:", billedAmount);
-    console.log("Unbilled Amount:", unBilledAmount);
-    console.log("No Charge Collection:", ncCollection);
-    console.log("Total Amount:", totalAmount);
-    console.log("My All Items:", myAllItems);
-  }, [billedAmount, unBilledAmount, ncCollection, totalAmount, myAllItems]);
-
   return (
     <div className="page-content">
       <Container fluid>
         <Row>
-          <div className="mb-3">
+          <Col md={6} className="mb-3">
+            <h3> {restData?.restName} Dashboard</h3>
+          </Col>
+          <Col md={6} className="mb-3">
             <div className="input-group">
               <Flatpickr
                 className="form-control"
@@ -361,7 +173,7 @@ const PieCharts = () => {
                 search
               </Button>
             </div>
-          </div>
+          </Col>
           <Col lg={4}>
             <Card className="card-animate card-height-100">
               <CardBody>

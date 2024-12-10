@@ -1,403 +1,487 @@
-import React, { useState, useEffect, useMemo, useCallback } from "react";
-import {
-  CardBody,
-  Row,
-  Col,
-  Card,
-  Container,
-  CardHeader,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-} from "reactstrap";
-import { Link } from "react-router-dom";
-import * as moment from "moment";
-import CountUp from "react-countup";
+import React, { useState, useEffect, useMemo } from "react";
+import { Row, Col, Container, Label, Input, Table } from "reactstrap";
+import { Link, useParams } from "react-router-dom";
+import Flatpickr from "react-flatpickr";
 import BreadCrumb from "../../Components/Common/BreadCrumb";
-import TableContainer from "../../Components/Common/TableContainer";
-import DeleteModal from "../../Components/Common/DeleteModal";
-
-//Import Icons
-import FeatherIcon from "feather-icons-react";
-
-import { invoiceWidgets } from "../../common/data/invoiceList";
-//Import actions
-import {
-  getInvoices as onGetInvoices,
-  deleteInvoice as onDeleteInvoice,
-} from "../../slices/thunks";
-
-//redux
-import { useSelector, useDispatch } from "react-redux";
-
-import Loader from "../../Components/Common/Loader";
-import { toast, ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
-import { createSelector } from "reselect";
+import Pagination from "../../Components/Common/Pagination";
+import { UseRiazHook } from "../../RiazStore/RiazStore";
 
 const InvoiceList = () => {
-  document.title = "Invoice List  | Velzon - React Admin & Dashboard Template";
+  const [guestData, setGuestData] = useState({});
+  const [allPaysOfGuest, setAllPaysOfGuest] = useState([]);
+  const [allFilterPayOfGuest, setAllFilterPaysOfGuest] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [selectedPayment, setSelectedPayment] = useState(null);
 
-  const dispatch = useDispatch();
+  //this is for getting the guest from the url
+  const { id } = useParams();
 
-  const selectLayoutState = (state) => state.Invoice;
-  const selectinvoiceProperties = createSelector(
-    selectLayoutState,
-    (state) => ({
-      invoices: state.invoices,
-      isInvoiceSuccess: state.isInvoiceSuccess,
-      error: state.error,
-    })
+  //this is for getting data from the useRiazHook
+  const { restData, myUrl, token } = UseRiazHook();
+
+  //this is for pagination
+  const perPageData = 50;
+  const indexOfLast = currentPage * perPageData;
+  const indexOfFirst = indexOfLast - perPageData;
+
+  //this is for page current data
+  const currentdata = useMemo(
+    () => allPaysOfGuest?.slice(indexOfFirst, indexOfLast),
+    [indexOfFirst, indexOfLast]
   );
-  // Inside your component
-  const {
-    invoices, isInvoiceSuccess, error
-  } = useSelector(selectinvoiceProperties);
 
-  //delete invoice
-  const [deleteModal, setDeleteModal] = useState(false);
-  const [deleteModalMulti, setDeleteModalMulti] = useState(false);
-
-  const [invoice, setInvoice] = useState(null);
-
+  //this is for first time load and set data
   useEffect(() => {
-    if (invoices && !invoices.length) {
-      dispatch(onGetInvoices());
-    }
-  }, [dispatch, invoices]);
+    setAllFilterPaysOfGuest(allPaysOfGuest.slice(0, perPageData));
+  }, [allPaysOfGuest]);
 
+  //this is for set current data of page
   useEffect(() => {
-    setInvoice(invoices);
-  }, [invoices]);
+    setAllFilterPaysOfGuest(currentdata);
+  }, [currentdata]);
 
-  // Delete Data
-  const onClickDelete = (invoice) => {
-    setInvoice(invoice);
-    setDeleteModal(true);
-  };
-
-  const handleDeleteInvoice = () => {
-    if (invoice) {
-      dispatch(onDeleteInvoice(invoice._id));
-      setDeleteModal(false);
-    }
-  };
-
-  const handleValidDate = date => {
-    const date1 = moment(new Date(date)).format("DD MMM Y");
-    return date1;
-  };
-
-  const handleValidTime = (time) => {
-    const time1 = new Date(time);
-    const getHour = time1.getUTCHours();
-    const getMin = time1.getUTCMinutes();
-    const getTime = `${getHour}:${getMin}`;
-    var meridiem = "";
-    if (getHour >= 12) {
-      meridiem = "PM";
+  const togglePaymentDetails = (paymentId) => {
+    if (selectedPayment === paymentId) {
+      // If already selected, unselect (hide details)
+      setSelectedPayment(null);
     } else {
-      meridiem = "AM";
+      // Select the payment to show details
+      setSelectedPayment(paymentId);
     }
-    const updateTime = moment(getTime, 'hh:mm').format('hh:mm') + " " + meridiem;
-    return updateTime;
   };
 
+  //this is for search from guests
+  const OnchangeHandler = (e, type) => {
+    let value;
 
-  // Checked All
-  const checkedAll = useCallback(() => {
-    const checkall = document.getElementById("checkBoxAll");
-    const ele = document.querySelectorAll(".invoiceCheckBox");
-
-    if (checkall.checked) {
-      ele.forEach((ele) => {
-        ele.checked = true;
-      });
-    } else {
-      ele.forEach((ele) => {
-        ele.checked = false;
-      });
+    if (type === "date") {
+      value = e[0]?.toLocaleDateString("en-GB");
+      if (value) {
+        const filteredByDate = allPaysOfGuest.filter((order) => {
+          const invoiceDate = new Date(
+            order.amountGivenDate
+          ).toLocaleDateString("en-GB");
+          return invoiceDate === value;
+        });
+        setAllFilterPaysOfGuest(filteredByDate.slice(0, perPageData));
+      }
+    } else if (type === "invoice") {
+      value = e.target.value;
+      if (value) {
+        const filteredByTable = allPaysOfGuest.filter((order) => {
+          const givenAmountStr = String(order?.givenAmount || ""); // Safely convert to string
+          return givenAmountStr.toLowerCase().includes(value.toLowerCase());
+        });
+        setAllFilterPaysOfGuest(filteredByTable.slice(0, perPageData));
+      }
     }
-    deleteCheckbox();
+    if (!value) {
+      setAllFilterPaysOfGuest(allPaysOfGuest.slice(indexOfFirst, indexOfLast));
+    }
+
+    setCurrentPage(1);
+  };
+
+  //this is for getting guest data
+  const forGettingGuestData = async () => {
+    const url = `${myUrl}/getforallorders/${id}/credit`;
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setGuestData(data.gusetOrderData);
+        setAllPaysOfGuest(data?.gusetOrderData?.guestCreditPaidAmounts);
+        setAllFilterPaysOfGuest(data?.gusetOrderData?.guestCreditPaidAmounts);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all debit orders of the geust function",
+        err
+      );
+    }
+  };
+
+  //this is for control rendering of getting user data function
+  useEffect(() => {
+    forGettingGuestData();
   }, []);
 
-  // Delete Multiple
-  const [selectedCheckBoxDelete, setSelectedCheckBoxDelete] = useState([]);
-  const [isMultiDeleteButton, setIsMultiDeleteButton] = useState(false);
+  //this is for the date
+  const formatDateTime = (date, format) => {
+    const d = new Date(date);
 
-  const deleteMultiple = () => {
-    const checkall = document.getElementById("checkBoxAll");
-    selectedCheckBoxDelete.forEach((element) => {
-      dispatch(onDeleteInvoice(element.value));
-      setTimeout(() => { toast.clearWaitingQueue(); }, 3000);
-    });
-    setIsMultiDeleteButton(false);
-    checkall.checked = false;
+    const day = d.getDate(); // No leading zero
+    const month = d.getMonth() + 1; // No leading zero, Months are 0-indexed
+    const year = d.getFullYear();
+
+    let formattedDate;
+    switch (format) {
+      case "D/M/Y":
+        formattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        formattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        formattedDate = `${year}/${month}/${day}`;
+        break;
+      default:
+        formattedDate = d.toLocaleDateString(); // Default fallback
+    }
+
+    return `${formattedDate} `;
   };
 
-  const deleteCheckbox = () => {
-    const ele = document.querySelectorAll(".invoiceCheckBox:checked");
-    ele.length > 0 ? setIsMultiDeleteButton(true) : setIsMultiDeleteButton(false);
-    setSelectedCheckBoxDelete(ele);
+  //this is for date formate
+  const dateFormatMapper = (format) => {
+    switch (format) {
+      case "D/M/Y":
+        return "d/m/Y";
+      case "M/D/Y":
+        return "m/d/Y";
+      case "Y/M/D":
+        return "Y/m/d";
+      default:
+        return "d/m/Y"; // Default format
+    }
   };
-
-  // Invoice Column
-  const columns = useMemo(
-    () => [
-      {
-        header: <input type="checkbox" id="checkBoxAll" className="form-check-input" onClick={() => checkedAll()} />,
-        cell: (cell) => {
-          return <input type="checkbox" className="invoiceCheckBox form-check-input" value={cell.getValue()} onChange={() => deleteCheckbox()} />;
-        },
-        id: '#',
-        accessorKey: "_id",
-        enableColumnFilter: false,
-        enableSorting: false,
-      },
-      {
-        header: "ID",
-        accessorKey: "invoiceId",
-        enableColumnFilter: false,
-        cell: (cell) => {
-          return <Link to="/apps-invoices-details" className="fw-medium link-primary">{cell.getValue()}</Link>;
-        },
-      },
-      {
-        header: "Customer",
-        accessorKey: "name",
-        enableColumnFilter: false,
-        cell: (cell) => (
-          <>
-            <div className="d-flex align-items-center">
-              {cell.row.original.img ? <img
-                src={process.env.REACT_APP_API_URL + "/images/users/" + cell.row.original.img}
-                alt=""
-                className="avatar-xs rounded-circle me-2"
-              /> :
-                <div className="flex-shrink-0 avatar-xs me-2">
-                  <div className="avatar-title bg-success-subtle text-success rounded-circle fs-13">
-                    {cell.row.original.name.charAt(0) + cell.row.original.name.split(" ").slice(-1).toString().charAt(0)}
-                  </div>
-                </div>}
-              {cell.getValue()}
-            </div>
-          </>
-        ),
-      },
-      {
-        header: "EMAIL",
-        accessorKey: "email",
-        enableColumnFilter: false,
-      },
-      {
-        header: "COUNTRY",
-        accessorKey: "country",
-        enableColumnFilter: false,
-      },
-      {
-        header: "DATE",
-        accessorKey: "date",
-        enableColumnFilter: false,
-        cell: (cell) => (
-          <>
-            {handleValidDate(cell.getValue())},{" "}
-            <small className="text-muted">{handleValidTime(cell.getValue())}</small>
-          </>
-        ),
-      },
-      {
-        header: "AMOUNT",
-        accessorKey: "amount",
-        enableColumnFilter: false,
-      },
-      {
-        header: "PAYMENT STATUS",
-        accessorKey: "status",
-        enableColumnFilter: false,
-        cell: (cell) => {
-          switch (cell.getValue()) {
-            case "Paid":
-              return <span className="badge text-uppercase bg-success-subtle text-success"> {cell.getValue()} </span>;
-            case "Unpaid":
-              return <span className="badge text-uppercase bg-warning-subtle text-warning"> {cell.getValue()} </span>;
-            case "Cancel":
-              return <span className="badge text-uppercase bg-danger-subtle text-danger"> {cell.getValue()} </span>;
-            default:
-              return <span className="badge text-uppercase bg-primary-subtle text-primary"> {cell.getValue()} </span>;
-          }
-        }
-      },
-      {
-        header: "Action",
-        cell: (cellProps) => {
-          return (
-            <UncontrolledDropdown >
-              <DropdownToggle
-                href="#"
-                className="btn btn-soft-secondary btn-sm dropdown"
-                tag="button"
-              >
-                <i className="ri-more-fill align-middle"></i>
-              </DropdownToggle>
-              <DropdownMenu className="dropdown-menu-end">
-                <DropdownItem href="/apps-invoices-details">
-                  <i className="ri-eye-fill align-bottom me-2 text-muted"></i>{" "}
-                  View
-                </DropdownItem>
-
-                <DropdownItem href="/apps-invoices-create">
-                  <i className="ri-pencil-fill align-bottom me-2 text-muted"></i>{" "}
-                  Edit
-                </DropdownItem>
-
-                <DropdownItem href="/#">
-                  <i className="ri-download-2-line align-bottom me-2 text-muted"></i>{" "}
-                  Download
-                </DropdownItem>
-
-                <DropdownItem divider />
-
-                <DropdownItem
-                  href="#"
-                  onClick={() => { const invoiceData = cellProps.row.original; onClickDelete(invoiceData); }}
-                >
-                  <i className="ri-delete-bin-fill align-bottom me-2 text-muted"></i>{" "}
-                  Delete
-                </DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
-          );
-        },
-      },
-    ],
-    [checkedAll]
-  );
 
   return (
     <React.Fragment>
       <div className="page-content">
-        <DeleteModal
-          show={deleteModal}
-          onDeleteClick={() => handleDeleteInvoice()}
-          onCloseClick={() => setDeleteModal(false)}
-        />
-        <DeleteModal
-          show={deleteModalMulti}
-          onDeleteClick={() => {
-            deleteMultiple();
-            setDeleteModalMulti(false);
-          }}
-          onCloseClick={() => setDeleteModalMulti(false)}
-        />
-
         <Container fluid>
-          <BreadCrumb title="Invoice List" pageTitle="Invoices" />
-          <Row>
-            {invoiceWidgets.map((invoicewidget, key) => (
-              <React.Fragment key={key}>
-                <Col xl={3} md={6}>
-                  <Card className="card-animate">
-                    <CardBody>
-                      <div className="d-flex align-items-center">
-                        <div className="flex-grow-1">
-                          <p className="text-uppercase fw-medium text-muted mb-0">
-                            {invoicewidget.label}
-                          </p>
-                        </div>
-                        <div className="flex-shrink-0">
-                          <h5
-                            className={
-                              "fs-14 mb-0 text-" + invoicewidget.percentageClass
-                            }
-                          >
-                            <i className="ri-arrow-right-up-line fs-13 align-middle"></i>{" "}
-                            {invoicewidget.percentage}
-                          </h5>
-                        </div>
-                      </div>
-                      <div className="d-flex align-items-end justify-content-between mt-4">
-                        <div>
-                          <h4 className="fs-22 fw-semibold ff-secondary mb-4">
-                            <CountUp
-                              start={0}
-                              prefix={invoicewidget.prefix}
-                              suffix={invoicewidget.suffix}
-                              decimals="2"
-                              end={invoicewidget.counter}
-                              duration={4}
-                              className="counter-value"
-                            />
-                          </h4>
-                          <span className="badge bg-warning me-1">
-                            {invoicewidget.badge}
-                          </span>{" "}
-                          <span className="text-muted">
-                            {" "}
-                            {invoicewidget.caption}
-                          </span>
-                        </div>
-                        <div className="avatar-sm flex-shrink-0">
-                          <span className="avatar-title bg-light rounded fs-3">
-                            <FeatherIcon
-                              icon={invoicewidget.feaIcon}
-                              className="text-success icon-dual-success"
-                            />
-                          </span>
-                        </div>
-                      </div>
-                    </CardBody>
-                  </Card>
-                </Col>
-              </React.Fragment>
-            ))}
-          </Row>
+          <BreadCrumb credit={`All Credit Pays Of Guest ${guestData.name}`} />
 
+          <div
+            className="mt-0 d-flex align-items-center justify-content-start "
+            style={{ gap: "30px" }}
+          >
+            <h5>
+              Name : <span className="text-bold">{guestData?.name}</span>
+            </h5>
+            <h5>
+              Phone : <span className="text-bold">{guestData?.phone}</span>
+            </h5>
+          </div>
+          <hr />
           <Row>
-            <Col lg={12}>
-              <Card id="invoiceList">
-                <CardHeader className="border-0">
-                  <div className="d-flex align-items-center">
-                    <h5 className="card-title mb-0 flex-grow-1">Invoices</h5>
-                    <div className="flex-shrink-0">
-                      <div className='d-flex gap-2 flex-wrap'>
-                        <Link
-                          to={"/apps-invoices-create"}
-                          className="btn btn-secondary me-1"
-                        >
-                          <i className="ri-add-line align-bottom me-1"></i> Create
-                          Invoice
-                        </Link>
-                        {isMultiDeleteButton && <button className="btn btn-danger"
-                          onClick={() => setDeleteModalMulti(true)}
-                        ><i className="ri-delete-bin-2-line"></i></button>}
-                      </div>
-                    </div>
-                  </div>
-                </CardHeader>
+            <Col md={6} xs={12} className="mb-3">
+              <Label for="kotType" style={{ fontWeight: "bold" }}>
+                Enter Amount
+              </Label>
+              <Input
+                type="number"
+                id="kotType"
+                onChange={(e) => OnchangeHandler(e, "invoice")}
+                placeholder="Enter mobile number"
+              />
+            </Col>
 
-                <CardBody className="pt-0">
-                  <div>
-                    {isInvoiceSuccess && invoices.length ? (
-                      <TableContainer
-                        columns={columns}
-                        data={(invoices || [])}
-                        isGlobalFilter={true}
-                        isAddUserList={false}
-                        customPageSize={10}
-                        className="custom-header-css"
-                        theadClass="text-muted text-uppercase"
-                        isInvoiceListFilter={true}
-                        SearchPlaceholder='Search for customer, email, country, status or something...'
-                      />
-                    ) : (<Loader error={error} />)
-                    }
-                  </div>
-                  <ToastContainer closeButton={false} limit={1} />
-                </CardBody>
-              </Card>
+            <Col md={6} xs={12} className="mb-3">
+              <Label for="kotDate" style={{ fontWeight: "bold" }}>
+                Order Date
+              </Label>
+              <Flatpickr
+                className="form-control"
+                id="datepicker-publish-input"
+                placeholder="Select date or search"
+                onChange={(e) => OnchangeHandler(e, "date")}
+                options={{
+                  altInput: true,
+                  altFormat: "F j, Y",
+                  dateFormat: dateFormatMapper(restData.dateFormate),
+                }}
+              />
             </Col>
           </Row>
+
+          <hr />
+
+          {/* Table Section */}
+          <div className="table-responsive mt-4">
+            <Table striped bordered hover>
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Payment Type</th>
+                  <th>Paid Amount</th>
+                  <th>check Detail</th>
+                </tr>
+              </thead>
+
+              {/* <tbody>
+                {allFilterPayOfGuest.map((item, index) => (
+                  <tr key={index}>
+                    <td>{index + 1}</td>
+                    <td>
+                      {item?.amountGivenDate
+                        ? formatDateTime(
+                            item?.amountGivenDate,
+                            restData?.dateFormate
+                          )
+                        : "Empty"}
+                    </td>
+
+                    <td>
+                      {restData.currencyPosition === "before"
+                        ? `${
+                            restData.restCurrencySymbol
+                          }${item.givenAmount.toFixed(restData.precision)}`
+                        : `${item.givenAmount.toFixed(restData.precision)}${
+                            restData.restCurrencySymbol
+                          }`}
+                    </td>
+
+                    <td>
+                      <div className="hstack gap-3 flex-wrap">
+                        <Link
+                          to={`/guest/${id}/credit/allpsys/${item._id}/check`}
+                          className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
+                          style={{
+                            padding: "4px 8px",
+                            backgroundColor: "#E6F7FC",
+                          }}
+                        >
+                          Check Amound Useage
+                        </Link>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody> */}
+              <tbody>
+                {allFilterPayOfGuest.map((item, index) => (
+                  <React.Fragment key={index}>
+                    {/* Parent Row */}
+                    <tr
+                      style={{
+                        border: "1px solid #ddd",
+                        backgroundColor: "#f9f9f9",
+                      }}
+                    >
+                      <td
+                        style={{
+                          padding: "8px",
+                          textAlign: "left",
+                          width: "25%",
+                        }}
+                      >
+                        {item?.amountGivenDate
+                          ? formatDateTime(
+                              item?.amountGivenDate,
+                              restData?.dateFormate
+                            )
+                          : "Empty"}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px",
+                          textAlign: "left",
+                          width: "25%",
+                        }}
+                      >
+                        {item?.paymentType}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px",
+                          textAlign: "left",
+                          width: "25%",
+                        }}
+                      >
+                        {restData.currencyPosition === "before"
+                          ? `${
+                              restData.restCurrencySymbol
+                            }${item.givenAmount.toFixed(restData.precision)}`
+                          : `${item.givenAmount.toFixed(restData.precision)}${
+                              restData.restCurrencySymbol
+                            }`}
+                      </td>
+                      <td
+                        style={{
+                          padding: "8px",
+                          textAlign: "left",
+                          width: "25%",
+                        }}
+                      >
+                        <button
+                          onClick={() => togglePaymentDetails(item._id)}
+                          className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
+                          style={{
+                            padding: "4px 8px",
+                            backgroundColor: "#E6F7FC",
+                            border: "1px solid #ddd",
+                          }}
+                        >
+                          {selectedPayment === item._id
+                            ? "Hide Details"
+                            : "Check Usage"}
+                        </button>
+                      </td>
+                    </tr>
+
+                    {/* Nested Table */}
+                    {selectedPayment === item._id && (
+                      <tr>
+                        <td colSpan="4" style={{ padding: "0" }}>
+                          <table
+                            class="table table-dark table-striped"
+                            style={{
+                              width: "100%",
+                              borderCollapse: "collapse",
+                              tableLayout: "fixed", // Ensures columns have equal width
+                            }}
+                          >
+                            <thead>
+                              <tr
+                                style={{
+                                  backgroundColor: "#f0f0f0",
+                                  border: "1px solid #ddd",
+                                }}
+                              >
+                                <th
+                                  style={{
+                                    padding: "8px",
+                                    textAlign: "left",
+                                    border: "1px solid #ddd",
+                                    width: "25%", // Ensure equal width in nested table
+                                  }}
+                                >
+                                  ID
+                                </th>
+                                <th
+                                  style={{
+                                    padding: "8px",
+                                    textAlign: "left",
+                                    border: "1px solid #ddd",
+                                    width: "25%", // Ensure equal width in nested table
+                                  }}
+                                >
+                                  Invoice No
+                                </th>
+                                <th
+                                  style={{
+                                    padding: "8px",
+                                    textAlign: "left",
+                                    border: "1px solid #ddd",
+                                    width: "25%", // Ensure equal width in nested table
+                                  }}
+                                >
+                                  Paid Amount
+                                </th>
+                                <th
+                                  style={{
+                                    padding: "8px",
+                                    textAlign: "left",
+                                    border: "1px solid #ddd",
+                                    width: "25%", // Ensure equal width in nested table
+                                  }}
+                                >
+                                  Remaining Amount
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {item?.amountUseData?.map((usage, subIndex) => (
+                                <tr
+                                  key={subIndex}
+                                  style={{
+                                    border: "1px solid #ddd",
+                                    backgroundColor:
+                                      subIndex % 2 === 0
+                                        ? "#ffffff"
+                                        : "#f9f9f9",
+                                  }}
+                                  onMouseEnter={(e) =>
+                                    (e.currentTarget.style.backgroundColor =
+                                      "#eaf4ff")
+                                  }
+                                  onMouseLeave={(e) =>
+                                    (e.currentTarget.style.backgroundColor =
+                                      subIndex % 2 === 0
+                                        ? "#ffffff"
+                                        : "#f9f9f9")
+                                  }
+                                >
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      textAlign: "left",
+                                      border: "1px solid #ddd",
+                                    }}
+                                  >
+                                    {index}.{subIndex + 1}
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      textAlign: "left",
+                                      border: "1px solid #ddd",
+                                    }}
+                                  >
+                                    {usage?.orderNo || "N/A"}
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      textAlign: "left",
+                                      border: "1px solid #ddd",
+                                    }}
+                                  >
+                                    {restData.currencyPosition === "before"
+                                      ? `${restData.restCurrencySymbol}${
+                                          usage?.paidCreditAmount?.toFixed(
+                                            restData.precision
+                                          ) || "0.00"
+                                        }`
+                                      : `${
+                                          usage?.remainCreditAmount?.toFixed(
+                                            restData.precision
+                                          ) || "0.00"
+                                        }${restData.restCurrencySymbol}`}
+                                  </td>
+                                  <td
+                                    style={{
+                                      padding: "8px",
+                                      textAlign: "left",
+                                      border: "1px solid #ddd",
+                                    }}
+                                  >
+                                    {restData.currencyPosition === "before"
+                                      ? `${restData.restCurrencySymbol}${
+                                          usage?.remainCreditAmount?.toFixed(
+                                            restData.precision
+                                          ) || "0.00"
+                                        }`
+                                      : `${
+                                          usage?.remainCreditAmount?.toFixed(
+                                            restData.precision
+                                          ) || "0.00"
+                                        }${restData.restCurrencySymbol}`}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </Table>
+
+            <div className="my-3 p-3">
+              <Pagination
+                perPageData={perPageData}
+                data={allPaysOfGuest}
+                currentPage={currentPage}
+                setCurrentPage={setCurrentPage}
+              />
+            </div>
+          </div>
         </Container>
       </div>
     </React.Fragment>

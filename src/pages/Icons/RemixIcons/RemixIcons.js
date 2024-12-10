@@ -15,32 +15,10 @@ import { useParams } from "react-router-dom";
 import Pagination from "../../../Components/Common/Pagination";
 
 const DashboardCrypto = () => {
-  const [allGuests, setAllGuests] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [allFilterGuest, setAllFitlerGuest] = useState([]);
 
   //this is for getting rest id
   const { id } = useParams();
-
-  //this is for getting all guests data
-  const forGettingAllGuests = async () => {
-    const url = `${myUrl}/forgetall/${id}/guests`;
-
-    try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (response.ok) {
-        setAllGuests(data.guests);
-      } else {
-        console.log("err data", data);
-      }
-    } catch (err) {
-      console.log(
-        "there is error in the get all restaurent guest function",
-        err
-      );
-    }
-  };
 
   //this is for controll rendering of all all guest getting data function
   useEffect(() => {
@@ -54,6 +32,12 @@ const DashboardCrypto = () => {
     setGuestId,
     myUrl,
     forDeleteGuest,
+    allGuests,
+    setAllGuests,
+    filteredGuest,
+    setFilterGuests,
+    forGettingAllGuests,
+    restData,
   } = UseRiazHook();
 
   //this is for pagination
@@ -69,18 +53,19 @@ const DashboardCrypto = () => {
 
   //this is for first time load and set data
   useEffect(() => {
-    setAllFitlerGuest(allGuests.slice(0, perPageData));
+    setFilterGuests(allGuests.slice(0, perPageData));
   }, [allGuests]);
 
   //this is for set current data of page
   useEffect(() => {
-    setAllFitlerGuest(currentdata);
+    setFilterGuests(currentdata);
   }, [currentdata]);
 
   //this is for search from guests
-  const OnchangeHandler = (e) => {
-    let search = e.target.value;
-    if (search) {
+  const OnchangeHandler = (e, type) => {
+    let search;
+    if (type === "string") {
+      search = e.target.value;
       const filteredUsers = allGuests.filter((data) =>
         Object.values(data).some(
           (field) =>
@@ -88,10 +73,15 @@ const DashboardCrypto = () => {
             field.toLowerCase().includes(search.toLowerCase())
         )
       );
-      setAllFitlerGuest(filteredUsers.slice(0, perPageData));
-      setCurrentPage(1);
+      setFilterGuests(filteredUsers);
+    } else if (type === "number") {
+      search = e.target.value;
+      const filteredUsers = allGuests.filter((guest) =>
+        guest?.phone?.toString().includes(search)
+      );
+      setFilterGuests(filteredUsers);
     } else {
-      setAllFitlerGuest(allGuests.slice(indexOfFirst, indexOfLast));
+      setFilterGuests(allGuests);
     }
   };
 
@@ -100,6 +90,32 @@ const DashboardCrypto = () => {
     editGuestChangeState(true);
     localStorage.setItem("guestid", id);
     setGuestId(id);
+  };
+
+  //this is for the date
+  const formatDateTime = (date, format) => {
+    const d = new Date(date);
+
+    const day = d.getDate(); // No leading zero
+    const month = d.getMonth() + 1; // No leading zero, Months are 0-indexed
+    const year = d.getFullYear();
+
+    let formattedDate;
+    switch (format) {
+      case "D/M/Y":
+        formattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        formattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        formattedDate = `${year}/${month}/${day}`;
+        break;
+      default:
+        formattedDate = d.toLocaleDateString(); // Default fallback
+    }
+
+    return `${formattedDate} `;
   };
 
   return (
@@ -137,7 +153,7 @@ const DashboardCrypto = () => {
                   <Input
                     type="number"
                     id="kotType"
-                    onChange={(e) => OnchangeHandler(e)}
+                    onChange={(e) => OnchangeHandler(e, "number")}
                     placeholder="Enter mobile number"
                   />
                 </Col>
@@ -148,7 +164,7 @@ const DashboardCrypto = () => {
                   </Label>
                   <Input
                     type="text"
-                    onChange={(e) => OnchangeHandler(e)}
+                    onChange={(e) => OnchangeHandler(e, "string")}
                     id="additionalInfo"
                     placeholder="Enter name"
                   />
@@ -166,7 +182,7 @@ const DashboardCrypto = () => {
                 <tr>
                   <th>#</th>
                   <th>Name</th>
-                  <th>Age</th>
+                  <th>Date Of Birth</th>
                   <th>Gender</th>
                   <th>Address</th>
                   <th>Mobile no</th>
@@ -176,11 +192,18 @@ const DashboardCrypto = () => {
               </thead>
 
               <tbody>
-                {allFilterGuest.map((item, index) => (
-                  <tr>
+                {filteredGuest.map((item, index) => (
+                  <tr key={index}>
                     <td>{index + 1}</td>
                     <td>{item.name}</td>
-                    <td>{item.age}</td>
+                    <td>
+                      {item?.dateOfBirth
+                        ? formatDateTime(
+                            item?.dateOfBirth,
+                            restData?.dateFormate
+                          )
+                        : "Empty"}
+                    </td>
                     <td>{item.gender}</td>
                     <td>{item.address}</td>
                     <td>{item.phone}</td>

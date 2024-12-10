@@ -47,6 +47,10 @@ const DashboardAnalytics = () => {
     token,
     setForTableId,
     forTableId,
+    guestSearchChangeState,
+    forTableData,
+    forGettingTableData,
+    setGuestData,
   } = UseRiazHook();
 
   //this is for open pop up on kot button
@@ -146,7 +150,7 @@ const DashboardAnalytics = () => {
       const response = await fetch(url, options);
       const data = await response.json();
       if (response.ok) {
-        forGettingTableData(tableId);
+        forGetTableData(tableId);
       } else {
         console.log("err data", data);
       }
@@ -170,7 +174,7 @@ const DashboardAnalytics = () => {
   }
 
   //this is for getting table data
-  const forGettingTableData = async (id) => {
+  const forGetTableData = async (id) => {
     setForTableId(id);
     setForLoading(true);
     const url = `${myUrl}/getdata/${id}/table`;
@@ -208,7 +212,7 @@ const DashboardAnalytics = () => {
   const forSettleMents = (id) => {
     setTableId(id);
     setForSettlement(!forSettlement);
-    forGettingTableData(id);
+    forGetTableData(id);
   };
 
   //this is forj settle the order of the table
@@ -243,14 +247,12 @@ const DashboardAnalytics = () => {
             forGetAllTables();
             if (data?.table?.currentOrder?.remainAmount === 0) {
               setForMultiPaymentOpen(false);
+              setGuestData({});
             }
-            forGettingTableData(tableId);
+            forGetTableData(tableId);
           } else {
             console.log(" err data ", data);
             setTableData(data?.table);
-            // if (data?.table?.currentOrder?.remainAmount === 0) {
-            //   setForSettlement(false);
-            // }
           }
         } catch (err) {
           console.log("there is error in the for add parcerl function", err);
@@ -279,7 +281,8 @@ const DashboardAnalytics = () => {
           console.log("data", data);
           forGetAllTables();
           setForSettlement(false);
-          forGettingTableData(tableId);
+          forGetTableData(tableId);
+          setGuestData({});
         } else {
           console.log(" err data ", data);
         }
@@ -427,7 +430,7 @@ const DashboardAnalytics = () => {
   const formultiPayment = () => {
     setForMultiPaymentOpen(true);
     setForSettlement(false);
-    forGettingTableData(tableId);
+    forGetTableData(tableId);
   };
 
   //this is for the settle of table with the pre method
@@ -990,7 +993,7 @@ const DashboardAnalytics = () => {
                           ) {
                             e.preventDefault();
                           } else {
-                            forGettingTableData(item._id);
+                            forGetTableData(item._id);
                             setForSettingKot(true);
                           }
                         }}
@@ -1257,6 +1260,19 @@ const DashboardAnalytics = () => {
                             >
                               <FiEdit className="pe-1" /> Void items
                             </Link>
+                            <Link
+                              to={`/kot/${item._id}/transfar/${forTableId}`}
+                              className="cursor-pointer"
+                              style={{
+                                backgroundColor: "#FE9900",
+                                color: "white",
+                                padding: "3px 5px",
+                                margin: 0,
+                                textDecoration: "none",
+                              }}
+                            >
+                              <FiEdit className="pe-1" /> Transfar
+                            </Link>
                           </div>
                         </div>
                         <div
@@ -1372,7 +1388,7 @@ const DashboardAnalytics = () => {
                 width: "100%",
                 height: "100%",
                 backgroundColor: "rgba(0, 0, 0, 0.5)",
-                zIndex: 5000,
+                zIndex: 1000,
               }}
             >
               <div
@@ -1398,126 +1414,158 @@ const DashboardAnalytics = () => {
                   </p>
                 </div>
                 <div className="p-2">
-                  <div className="m-0 p-0">
-                    <button
-                      onClick={() => forClickOnPaymentMethod("multi", "cash")}
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Cash
-                    </button>
-                    <button
-                      onClick={() => forClickOnPaymentMethod("multi", "card")}
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Card
-                    </button>
-                    <button
-                      className="py-1 px-2"
-                      onClick={() =>
-                        forClickOnPaymentMethod("multi", "advance")
-                      }
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Advance
-                    </button>
-                    <button
-                      onClick={() => forClickOnPaymentMethod("multi", "paytm")}
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      PayTM
-                    </button>
-                    <button
-                      onClick={() =>
-                        forClickOnPaymentMethod("multi", "check payment")
-                      }
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Check Payment
-                    </button>
-                    <button
-                      onClick={() => forClickOnPaymentMethod("multi", "credit")}
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Credit
-                    </button>
-                    <button
-                      onClick={() =>
-                        forClickOnPaymentMethod("multi", "post to room")
-                      }
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      Post to room
-                    </button>
-                    <button
-                      onClick={() => forClickOnPaymentMethod("multi", "upi")}
-                      className="py-1 px-2"
-                      style={{
-                        backgroundColor: "#0A97BA",
-                        margin: "1px",
-                        border: "none",
-                        color: "white",
-                        fontSize: "14px",
-                        fontWeight: "400",
-                      }}
-                    >
-                      upi
-                    </button>
+                  <div className="d-flex align-items-center justify-content-between">
+                    <div className="m-0 p-0">
+                      <button
+                        onClick={() => forClickOnPaymentMethod("multi", "cash")}
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Cash
+                      </button>
+                      <button
+                        onClick={() => forClickOnPaymentMethod("multi", "card")}
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Card
+                      </button>
+                      <button
+                        className="py-1 px-2"
+                        onClick={() =>
+                          forClickOnPaymentMethod("multi", "advance")
+                        }
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Advance
+                      </button>
+                      <button
+                        onClick={() =>
+                          forClickOnPaymentMethod("multi", "paytm")
+                        }
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        PayTM
+                      </button>
+                      <button
+                        onClick={() =>
+                          forClickOnPaymentMethod("multi", "check payment")
+                        }
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Check Payment
+                      </button>
+                      <button
+                        onClick={() => {
+                          if (forTableData?.currentOrder.guest) {
+                            forClickOnPaymentMethod("multi", "credit");
+                          } else {
+                            toast.error(
+                              "please select guest for this debit amount"
+                            );
+                          }
+                        }}
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Credit
+                      </button>
+                      <button
+                        onClick={() =>
+                          forClickOnPaymentMethod("multi", "post to room")
+                        }
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Post to room
+                      </button>
+                      <button
+                        onClick={() => forClickOnPaymentMethod("multi", "upi")}
+                        className="py-1 px-2"
+                        style={{
+                          backgroundColor: "#0A97BA",
+                          margin: "1px",
+                          border: "none",
+                          color: "white",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        upi
+                      </button>
+                    </div>
+
+                    <div>
+                      <button
+                        onClick={() => {
+                          guestSearchChangeState();
+                          forGettingTableData();
+                        }}
+                        className="py-1 px-2 "
+                        style={{
+                          backgroundColor: "#F5B800",
+                          marginLeft: "auto",
+                          border: "none",
+                          fontSize: "14px",
+                          fontWeight: "400",
+                        }}
+                      >
+                        Guest
+                      </button>
+                    </div>
                   </div>
+
                   <hr className="p-0 m-0"></hr>
 
                   <div

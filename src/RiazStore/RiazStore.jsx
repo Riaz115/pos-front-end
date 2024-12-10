@@ -107,26 +107,6 @@ export const MyDataProvider = ({ children }) => {
     allOwnerUserGet();
   }, []);
 
-  //this is for delete the guest
-  const forDeleteGuest = async (id) => {
-    const url = `${myUrl}/delete/${id}/guest`;
-    const options = {
-      method: "DELETE",
-    };
-
-    try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      if (response.ok) {
-        toast.success(data.msg);
-      } else {
-        toast.error(data.msg);
-      }
-    } catch (err) {
-      console.log("there is error in the delete guest function", err);
-    }
-  };
-
   //this is for getting restaurent all data
   const forGettingRestAllData = async () => {
     const url = `${myUrl}/getRestDataforEdit/${restId}`;
@@ -192,6 +172,27 @@ export const MyDataProvider = ({ children }) => {
         "there is error in the get all restaurent guest function",
         err
       );
+    }
+  };
+
+  //this is for delete the guest
+  const forDeleteGuest = async (id) => {
+    const url = `${myUrl}/delete/${id}/guest`;
+    const options = {
+      method: "DELETE",
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        toast.success(data.msg);
+        forGettingAllGuests();
+      } else {
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log("there is error in the delete guest function", err);
     }
   };
 
