@@ -155,34 +155,57 @@ const UiBadges = () => {
     forGettingAllOrdersOfRestaurent();
   }, []);
 
-  //this is for the date
-  const formatDateTime = (date, format) => {
+  //this is for the date and time formate
+  const formatDateTime = (date, format, timezone) => {
     const d = new Date(date);
 
-    const day = d.getDate(); // No leading zero
-    const month = d.getMonth() + 1; // No leading zero, Months are 0-indexed
-    const year = d.getFullYear();
-    const hours = d.getHours();
-    const minutes = String(d.getMinutes()).padStart(2, "0");
-    const ampm = hours >= 12 ? "PM" : "AM";
-    const formattedHours = hours % 12 || 12; // 12-hour format
+    // Convert the date to the selected timezone
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+      timeZone: timezone, // Use the selected timezone here
+    };
 
-    let formattedDate;
+    // Get the formatted date and time in the selected timezone
+    const dateFormatter = new Intl.DateTimeFormat("en-US", options);
+    const formattedDate = dateFormatter.format(d);
+
+    // Extract individual parts of the date and time
+    const parts = formattedDate.split(", ");
+    const datePart = parts[0]; // "12/11/2024"
+    const timePart = parts[1]; // "10:21:59 AM"
+
+    // Format the date based on the provided 'format' argument
+    let finalFormattedDate;
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute, second] = timePart.split(":");
+
     switch (format) {
       case "D/M/Y":
-        formattedDate = `${day}/${month}/${year}`;
+        finalFormattedDate = `${day}/${month}/${year}`;
         break;
       case "M/Y/D":
-        formattedDate = `${month}/${year}/${day}`;
+        finalFormattedDate = `${month}/${year}/${day}`;
         break;
       case "Y/M/D":
-        formattedDate = `${year}/${month}/${day}`;
+        finalFormattedDate = `${year}/${month}/${day}`;
+        break;
+      case "Y-M-D":
+        finalFormattedDate = `${year}-${month}-${day}`;
+        break;
+      case "M-D-Y":
+        finalFormattedDate = `${month}-${day}-${year}`;
         break;
       default:
-        formattedDate = d.toLocaleDateString(); // Default fallback
+        finalFormattedDate = datePart;
     }
 
-    return `${formattedDate} ${formattedHours}:${minutes} ${ampm}`;
+    return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
   };
 
   //this is for date formate
@@ -208,6 +231,9 @@ const UiBadges = () => {
               <div className="d-flex align-items-center justify-content-between mt-0 ">
                 <div style={{ gap: "5px" }}>
                   <h4>All Invoices of {restData?.restName}</h4>
+                </div>
+                <div className="riaz" id="riaz">
+                  i am for testing
                 </div>
 
                 <div>
@@ -340,7 +366,11 @@ const UiBadges = () => {
                   <tr key={index}>
                     <td>{item?.invoiceNo}</td>
                     <td>
-                      {formatDateTime(item?.createdAt, restData?.dateFormate)}
+                      {formatDateTime(
+                        item?.createdAt,
+                        restData?.dateFormate,
+                        restData?.selectedTimezone
+                      )}
                     </td>
                     <td>{item?.counter?.name}</td>
                     <td>{item?.table?.name}</td>

@@ -35,6 +35,8 @@ const DashboardCrm = () => {
   const [showPrint, setShowPrint] = useState(false);
   const [kotData, setKotData] = useState({});
   const [forPrint, setForPrint] = useState(false);
+  const [myDate, setMyDate] = useState("");
+  const [myTime, setMyTime] = useState("");
 
   //this is for show guest function
   const {
@@ -62,10 +64,6 @@ const DashboardCrm = () => {
 
   //this is for navigate
   const navigate = useNavigate();
-
-  //this is for current data
-  const currentDate = new Date().toLocaleDateString();
-  const currentTime = new Date().toLocaleTimeString();
 
   //this is for search items
   const OnchangeHandler = (e) => {
@@ -567,6 +565,71 @@ const DashboardCrm = () => {
     console.log("table data", tableData);
   };
 
+  //this is for the date and time formate
+  const formatDateTime = (date, format, timezone) => {
+    const d = new Date(date);
+
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+      timeZone: timezone,
+    };
+
+    const dateFormatter = new Intl.DateTimeFormat("en-US", options);
+    const formattedDate = dateFormatter.format(d);
+
+    const parts = formattedDate.split(", ");
+    const datePart = parts[0];
+    const timePart = parts[1];
+
+    let finalFormattedDate;
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute, second] = timePart.split(":");
+
+    switch (format) {
+      case "D/M/Y":
+        finalFormattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        finalFormattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        finalFormattedDate = `${year}/${month}/${day}`;
+        break;
+      case "Y-M-D":
+        finalFormattedDate = `${year}-${month}-${day}`;
+        break;
+      case "M-D-Y":
+        finalFormattedDate = `${month}-${day}-${year}`;
+        break;
+      default:
+        finalFormattedDate = datePart;
+    }
+
+    setMyDate(finalFormattedDate);
+    setMyTime(`${hour}:${minute} ${timePart.split(" ")[1]}`);
+    return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
+  };
+
+  //this is for current data
+  const currentDate = new Date().toLocaleDateString("en-US", {
+    timeZone: "UTC",
+  });
+
+  //this is for calling only once
+  useEffect(() => {
+    formatDateTime(
+      currentDate,
+      restData?.dateFormate,
+      restData?.selectedTimezone
+    );
+  }, []);
+
   return (
     <React.Fragment>
       <div
@@ -613,7 +676,7 @@ const DashboardCrm = () => {
                   >
                     Date
                   </span>
-                  {currentDate},{currentTime}
+                  {myDate} , {myTime}
                 </p>
 
                 <p className="m-0 p-0">

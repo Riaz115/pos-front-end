@@ -441,6 +441,55 @@ const DashboardAnalytics = () => {
     }
   });
 
+  //this is for the date and time formate
+  const formatDateTime = (date, format, timezone) => {
+    const d = new Date(date);
+
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+      timeZone: timezone,
+    };
+
+    const dateFormatter = new Intl.DateTimeFormat("en-US", options);
+    const formattedDate = dateFormatter.format(d);
+
+    const parts = formattedDate.split(", ");
+    const datePart = parts[0];
+    const timePart = parts[1];
+
+    let finalFormattedDate;
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute, second] = timePart.split(":");
+
+    switch (format) {
+      case "D/M/Y":
+        finalFormattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        finalFormattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        finalFormattedDate = `${year}/${month}/${day}`;
+        break;
+      case "Y-M-D":
+        finalFormattedDate = `${year}-${month}-${day}`;
+        break;
+      case "M-D-Y":
+        finalFormattedDate = `${month}-${day}-${year}`;
+        break;
+      default:
+        finalFormattedDate = datePart;
+    }
+
+    return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
+  };
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -1241,7 +1290,12 @@ const DashboardAnalytics = () => {
                           }}
                         >
                           <div className="d-flex align-items-center justify-content-center">
-                            KOT/{item.number} - 04/12/2024 12:30:32
+                            KOT/{item.number} -{" "}
+                            {formatDateTime(
+                              item?.createdAt,
+                              restData?.dateFormate,
+                              restData?.selectedTimezone
+                            )}
                           </div>
                           <div
                             className="d-flex align-items-center justify-content-center   "

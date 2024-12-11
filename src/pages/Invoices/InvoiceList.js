@@ -108,30 +108,53 @@ const InvoiceList = () => {
     forGettingGuestData();
   }, []);
 
-  //this is for the date
-  const formatDateTime = (date, format) => {
+  //this is for the date and time formate
+  const formatDateTime = (date, format, timezone) => {
     const d = new Date(date);
 
-    const day = d.getDate(); // No leading zero
-    const month = d.getMonth() + 1; // No leading zero, Months are 0-indexed
-    const year = d.getFullYear();
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+      timeZone: timezone,
+    };
 
-    let formattedDate;
+    const dateFormatter = new Intl.DateTimeFormat("en-US", options);
+    const formattedDate = dateFormatter.format(d);
+
+    const parts = formattedDate.split(", ");
+    const datePart = parts[0];
+    const timePart = parts[1];
+
+    let finalFormattedDate;
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute, second] = timePart.split(":");
+
     switch (format) {
       case "D/M/Y":
-        formattedDate = `${day}/${month}/${year}`;
+        finalFormattedDate = `${day}/${month}/${year}`;
         break;
       case "M/Y/D":
-        formattedDate = `${month}/${year}/${day}`;
+        finalFormattedDate = `${month}/${year}/${day}`;
         break;
       case "Y/M/D":
-        formattedDate = `${year}/${month}/${day}`;
+        finalFormattedDate = `${year}/${month}/${day}`;
+        break;
+      case "Y-M-D":
+        finalFormattedDate = `${year}-${month}-${day}`;
+        break;
+      case "M-D-Y":
+        finalFormattedDate = `${month}-${day}-${year}`;
         break;
       default:
-        formattedDate = d.toLocaleDateString(); // Default fallback
+        finalFormattedDate = datePart;
     }
 
-    return `${formattedDate} `;
+    return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
   };
 
   //this is for date formate
@@ -211,46 +234,6 @@ const InvoiceList = () => {
                 </tr>
               </thead>
 
-              {/* <tbody>
-                {allFilterPayOfGuest.map((item, index) => (
-                  <tr key={index}>
-                    <td>{index + 1}</td>
-                    <td>
-                      {item?.amountGivenDate
-                        ? formatDateTime(
-                            item?.amountGivenDate,
-                            restData?.dateFormate
-                          )
-                        : "Empty"}
-                    </td>
-
-                    <td>
-                      {restData.currencyPosition === "before"
-                        ? `${
-                            restData.restCurrencySymbol
-                          }${item.givenAmount.toFixed(restData.precision)}`
-                        : `${item.givenAmount.toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
-                    </td>
-
-                    <td>
-                      <div className="hstack gap-3 flex-wrap">
-                        <Link
-                          to={`/guest/${id}/credit/allpsys/${item._id}/check`}
-                          className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                          style={{
-                            padding: "4px 8px",
-                            backgroundColor: "#E6F7FC",
-                          }}
-                        >
-                          Check Amound Useage
-                        </Link>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody> */}
               <tbody>
                 {allFilterPayOfGuest.map((item, index) => (
                   <React.Fragment key={index}>
@@ -271,7 +254,8 @@ const InvoiceList = () => {
                         {item?.amountGivenDate
                           ? formatDateTime(
                               item?.amountGivenDate,
-                              restData?.dateFormate
+                              restData?.dateFormate,
+                              restData?.selectedTimezone
                             )
                           : "Empty"}
                       </td>

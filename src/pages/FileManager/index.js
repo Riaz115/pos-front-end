@@ -348,7 +348,7 @@ const FileManager = () => {
       if (response.ok) {
         setRestName(data.myRest.restName);
         setRestEmail(data.myRest.restEmail);
-        setRestLogo(data.restLogo);
+        setRestLogo(data.myRest.restLogo);
         setRestPhone(data.myRest.restPhone);
         setMyCountry(data.myRest.myCountry);
         setRestState(data.myRest.restState);
@@ -1537,7 +1537,7 @@ const FileManager = () => {
               <FaTimes onClick={toggleModal} style={{ cursor: "pointer" }} />
             }
           >
-            <span style={{ flex: 1, fontSize: "20px" }}>Invoice Logo</span>{" "}
+            <span style={{ flex: 1, fontSize: "20px" }}>Restaurent Logo</span>{" "}
             {/* Title */}
           </ModalHeader>
           <ModalBody

@@ -162,8 +162,8 @@ const Navdata = () => {
       subItems: [
         {
           id: "users",
-          label: "All Users",
-          link: "/all-users",
+          label: "Start Restaurent Day",
+          link: "/restaurent/start/day",
           parentId: "User",
         },
         {
@@ -400,7 +400,7 @@ const Navdata = () => {
         {
           id: "Settlements",
           label: "Settlements",
-          link: "/settlements",
+          link: "/restaurent/counter/settlements",
           parentId: "Counter",
         },
       ],

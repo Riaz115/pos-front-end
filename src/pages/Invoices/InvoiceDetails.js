@@ -8,15 +8,8 @@ import {
   CardHeader,
   Container,
 } from "reactstrap";
-import BreadCrumb from "../../Components/Common/BreadCrumb";
-import { Link } from "react-router-dom";
-
-import logoDark from "../../assets/images/logo-dark.png";
-import logoLight from "../../assets/images/logo-light.png";
 
 const InvoiceDetails = () => {
-  document.title =
-    "Invoice Details | Velzon - React Admin & Dashboard Template";
   //Print the Invoice
   const printInvoice = () => {
     window.print();
@@ -25,7 +18,10 @@ const InvoiceDetails = () => {
   return (
     <div className="page-content">
       <Container fluid>
-        <h1>i am for the pay use age </h1>
+        <div>
+          <h5>Add Transition</h5>
+        </div>
+        <div></div>
       </Container>
     </div>
   );

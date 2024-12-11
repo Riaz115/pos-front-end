@@ -1,48 +1,85 @@
 import React from "react";
-import { Container, Table } from "reactstrap";
+import { Container, Table, Col } from "reactstrap";
+import BreadCrumb from "../../../Components/Common/BreadCrumb";
 import { Link } from "react-router-dom";
+import {
+  FaTicketAlt,
+  FaFileAlt,
+  FaRupeeSign,
+  FaExchangeAlt,
+} from "react-icons/fa";
+import { FiEdit } from "react-icons/fi";
 
 const GoogleMaps = () => {
   return (
     <React.Fragment>
       <div className="page-content">
-        <Container fluid>
-          <div className=" py-2 px-1 mt-1">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <h5 className="bg-light-dark ">Cash Book</h5>
-              <button
-                type="button"
-                className="btn btn-primary btn-outline-on-hover">
+        <Col sm={12}>
+          <div className="d-flex align-items-center justify-content-between mt-0 ">
+            <div>
+              <h5>Cash Book</h5>
+            </div>
+
+            <div>
+              <Link
+                to={"/add/restaurent/transition"}
+                style={{
+                  backgroundColor: "#0000FF",
+                  color: "white",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
                 <i className="ri-add-circle-line align-middle me-1"></i> Add
-                transition
-              </button>
+                Transition
+              </Link>
+              <Link
+                style={{
+                  backgroundColor: "#FE9900",
+                  color: "black",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                {" "}
+                <FaExchangeAlt className="mx-1" />
+                Export To Excel
+              </Link>
             </div>
           </div>
-
-          <hr />
-
+        </Col>
+        <hr></hr>
+        <Container fluid>
           {/* Table Section */}
           <div className="table-responsive mt-4">
             <Table striped bordered hover>
               <thead>
                 <tr>
-                  <th>vocture#</th>
+                  <th>vocture</th>
                   <th>Date</th>
-                  <th>Account head</th>
-                  <th>Account name</th>
+                  <th>Acc head</th>
+                  <th>Acc name</th>
+                  <th>Narration</th>
                   <th>Created by</th>
                   <th>Payment Mode</th>
-                  <th>Amount paid</th>
-                  <th>Amount received</th>
+                  <th>Paid</th>
+                  <th>Received</th>
                   <th>Action</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
+                  <td>45/5/2023</td>
                   <td>customer</td>
                   <td>ali raza shb</td>
+                  <td>i am for description part</td>
                   <td>cashier</td>
                   <td>cash</td>
                   <td>12575.00</td>
@@ -54,7 +91,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -63,7 +101,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -85,7 +124,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -94,7 +134,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -116,7 +157,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -125,7 +167,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -147,7 +190,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -156,7 +200,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -178,7 +223,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -187,7 +233,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -209,7 +256,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -218,7 +266,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -240,7 +289,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -249,7 +299,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -271,7 +322,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -280,7 +332,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -302,7 +355,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -311,7 +365,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -333,7 +388,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -342,7 +398,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -364,7 +421,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -373,7 +431,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -395,7 +454,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -404,7 +464,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -426,7 +487,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -435,7 +497,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>
@@ -457,7 +520,8 @@ const GoogleMaps = () => {
                         style={{
                           padding: "4px 8px",
                           backgroundColor: "#E6F7FC",
-                        }}>
+                        }}
+                      >
                         <i className="ri-pencil-fill align-bottom" />
                       </button>
                       <button
@@ -466,7 +530,8 @@ const GoogleMaps = () => {
                           padding: "4px 8px",
                           backgroundColor: "#FEEDE9",
                           color: "red",
-                        }}>
+                        }}
+                      >
                         <i className="ri-delete-bin-5-fill align-bottom" />
                       </button>
                     </div>

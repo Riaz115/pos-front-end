@@ -87,7 +87,6 @@
     "redux": "^5.0.0",
     "remixicon-react": "^1.0.0",
     "reselect": "^5.0.1",
-    "sass": "^1.80.4",
     "save": "^2.9.0",
     "simplebar-react": "^3.2.4",
     "swiper": "^11.0.5",
@@ -122,6 +121,7 @@
     "@types/lodash": "^4.14.195",
     "@types/react-bootstrap-table2-paginator": "^2.1.2",
     "@types/react-bootstrap-table2-toolkit": "^2.1.7",
-    "babel-eslint": "^10.1.0"
+    "babel-eslint": "^10.1.0",
+    "sass": "^1.82.0"
   }
 }
