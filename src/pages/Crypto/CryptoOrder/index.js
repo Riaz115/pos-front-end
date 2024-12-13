@@ -1,23 +1,45 @@
 import React, { useState } from "react";
-import { Container, Row } from "reactstrap";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
-import logoLight from "../../../../src/assets/images/logo-light.png";
+import { toast } from "react-toastify";
 
 const CryproOrder = () => {
-  const [startAmount, setStartAmount] = useState("");
+  const [restOpeningAmount, setRestOpeningAmount] = useState(0);
 
   //this is for getting data from my custome hook
-  const { restData, myUrl } = UseRiazHook();
+  const { restData, myUrl, restId, token } = UseRiazHook();
 
-  console.log("rest data", restData);
-
-  const handleDayStart = () => {
-    if (!startAmount) {
-      alert("Please enter the start amount!");
+  //this is for start day of restaurent
+  const startRestaurentDayOrOpen = async () => {
+    if (!restOpeningAmount || restOpeningAmount === 0) {
+      toast.error("please Enter restaurent opening amount");
       return;
     }
-    console.log("Day started with amount:", startAmount);
-    alert(`Day started with amount: ${startAmount}`);
+    const dayOPenData = {
+      restOpeningAmount,
+    };
+    const url = `${myUrl}/restaurent/${restId}/open/day/start`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+      body: JSON.stringify(dayOPenData),
+    };
+
+    try {
+      const respone = await fetch(url, options);
+      const data = await respone.json();
+      if (respone.ok) {
+        console.log("okk data", data);
+        toast.success(data.msg);
+      } else {
+        console.log("err data", data);
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log("there is error in the day open restaurent funtion", err);
+    }
   };
   return (
     <React.Fragment>
@@ -53,15 +75,15 @@ const CryproOrder = () => {
         </h1>
         <div style={{ width: "100%", maxWidth: "400px", marginBottom: "20px" }}>
           <label htmlFor="startAmount" style={{ marginBottom: "10px" }}>
-            Enter Start Amount
+            Enter Opening Amount
           </label>
           <input
             id="startAmount"
             type="number"
             className="form-control"
             placeholder="Enter amount"
-            value={startAmount}
-            onChange={(e) => setStartAmount(e.target.value)}
+            value={restOpeningAmount}
+            onChange={(e) => setRestOpeningAmount(e.target.value)}
             style={{
               backgroundColor: "white",
               color: "black",
@@ -72,7 +94,7 @@ const CryproOrder = () => {
         </div>
         <button
           className="btn btn-lg btn-light"
-          onClick={handleDayStart}
+          onClick={startRestaurentDayOrOpen}
           style={{
             width: "100%",
             maxWidth: "400px",

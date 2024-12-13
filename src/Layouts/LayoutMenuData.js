@@ -167,6 +167,18 @@ const Navdata = () => {
           parentId: "User",
         },
         {
+          id: "users",
+          label: "Account Head",
+          link: `/restaurent/${restId}/create/new/account/head`,
+          parentId: "User",
+        },
+        {
+          id: "users",
+          label: "Account Name",
+          link: `/restaurent/${restId}/new/name/account`,
+          parentId: "User",
+        },
+        {
           id: "setting",
           label: "Rest Settings",
           link: "/add-restaurent",
@@ -421,7 +433,7 @@ const Navdata = () => {
         {
           id: "Cash Book",
           label: "Cash Book",
-          link: "/cash-book",
+          link: `/restaurent/${restId}/cash-book`,
           parentId: "books",
         },
         {

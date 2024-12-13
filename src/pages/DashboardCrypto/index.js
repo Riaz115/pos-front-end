@@ -208,6 +208,7 @@ const DashboardCrypto = () => {
 
     return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
   };
+
   //this is for date formate
   const dateFormatMapper = (format) => {
     switch (format) {

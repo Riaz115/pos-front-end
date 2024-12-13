@@ -1,16 +1,51 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Container, Table, Col } from "reactstrap";
 import BreadCrumb from "../../../Components/Common/BreadCrumb";
-import { Link } from "react-router-dom";
-import {
-  FaTicketAlt,
-  FaFileAlt,
-  FaRupeeSign,
-  FaExchangeAlt,
-} from "react-icons/fa";
-import { FiEdit } from "react-icons/fi";
+import { Link, useParams } from "react-router-dom";
+import { FaExchangeAlt } from "react-icons/fa";
+import { UseRiazHook } from "../../../RiazStore/RiazStore";
 
 const GoogleMaps = () => {
+  const [allExpenses, setAllExpenses] = useState([]);
+
+  //this is for getting id from url
+  const { id } = useParams();
+
+  //this is for getting data from my custome hook
+  const { myUrl, token, restData } = UseRiazHook();
+
+  //this is for getting all expenses of the restaurent
+  const forGettingAllExpensesOfRest = async () => {
+    const url = `${myUrl}/restaurent/${id}/get/all/expenes/cashbook`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("ok data", data);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the get all expense of restaurent funciton",
+        err
+      );
+    }
+  };
+
+  //this is for controll the rendering of the get all expenses function
+  useEffect(() => {
+    forGettingAllExpensesOfRest();
+  }, []);
+
   return (
     <React.Fragment>
       <div className="page-content">
@@ -22,7 +57,7 @@ const GoogleMaps = () => {
 
             <div>
               <Link
-                to={"/add/restaurent/transition"}
+                to={`/add/restaurent/${id}/transition`}
                 style={{
                   backgroundColor: "#0000FF",
                   color: "white",

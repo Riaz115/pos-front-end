@@ -8,7 +8,26 @@
 }
 
 .my-custome-button-edit {
-  background-color: blue;
+  background-color: #e6f7fc;
+  color: #0dcaf0;
+  border: none;
+  border-radius: 5px;
+}
+
+.my-custome-button-edit:hover {
+  background-color: #0dcaf0;
+  color: #e6f7fc;
+}
+.my-custome-button-delete {
+  background-color: #feede9;
+  color: red;
+  border: none;
+  border-radius: 5px;
+}
+
+.my-custome-button-delete:hover {
+  background-color: red;
+  color: #feede9;
 }
 
 @media (prefers-reduced-motion: no-preference) {

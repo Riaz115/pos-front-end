@@ -249,7 +249,7 @@ const authProtectedRoutes = [
   { path: "/items/:id", component: <ListTables /> },
   { path: "/restaurent/kots", component: <DashboardProject /> },
   { path: "/restaurent/invoice", component: <DashboardCrypto /> },
-  { path: "/cash-book", component: <GoogleMaps /> },
+  { path: "/restaurent/:id/cash-book", component: <GoogleMaps /> },
 
   { path: "/collection-report", component: <DashboardCrm /> },
   { path: "/restaurent/counter/settlements", component: <UiScrollbar /> },
@@ -306,8 +306,13 @@ const authProtectedRoutes = [
   { path: "/:id/credit-book", component: <DashboardNFT /> },
   { path: "/creditbook/:id/guest", component: <CrmCompanies /> },
   { path: "/guest/:id/credit/all/pays", component: <InvoiceList /> },
-  { path: "/add/restaurent/transition", component: <InvoiceDetails /> },
+  { path: "/add/restaurent/:id/transition", component: <InvoiceDetails /> },
   { path: "/restaurent/start/day", component: <CryproOrder /> },
+  { path: "/restaurent/:id/new/name/account", component: <Collections /> },
+  {
+    path: "/restaurent/:id/create/new/account/head",
+    component: <InvoiceCreate />,
+  },
 
   //already routes
 
@@ -324,8 +329,6 @@ const authProtectedRoutes = [
 
   //Invoices
 
-  { path: "/apps-invoices-create", component: <InvoiceCreate /> },
-
   //Supports Tickets
 
   { path: "/apps-tickets-details", component: <TicketsDetails /> },
@@ -338,7 +341,6 @@ const authProtectedRoutes = [
 
   // NFT Marketplace
 
-  { path: "/apps-nft-collections", component: <Collections /> },
   { path: "/apps-nft-create", component: <CreateNFT /> },
   { path: "/apps-nft-creators", component: <Creators /> },
   { path: "/apps-nft-explore", component: <ExploreNow /> },

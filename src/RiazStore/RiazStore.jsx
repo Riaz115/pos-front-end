@@ -24,6 +24,9 @@ export const MyDataProvider = ({ children }) => {
   const [userImage, setUserImage] = useState("");
   const [allGuests, setAllGuests] = useState([]);
   const [filteredGuest, setFilterGuests] = useState([]);
+  const [allHeadAccounts, setAllHeadAccounts] = useState([]);
+  const [allAccNames, setAllAccNames] = useState([]);
+  const [loading, setLoaing] = useState(false);
 
   //this is my backend url
   const myUrl = "http://localhost:8000/api";
@@ -127,6 +130,33 @@ export const MyDataProvider = ({ children }) => {
     }
   };
 
+  //this is for getting all head acccount of the restaurent
+  const ForGettingAllHeadAccounts = async () => {
+    const url = `${myUrl}/restaurent/${restId}/get/all/head/accounts`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        setAllHeadAccounts(data);
+      } else {
+        console.log("err data", err);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all head account funciton",
+        err
+      );
+    }
+  };
+
   //this is for controll rendering
   useEffect(() => {
     forGettingRestAllData();
@@ -201,6 +231,36 @@ export const MyDataProvider = ({ children }) => {
     forGettingAllGuests();
   }, [restId]);
 
+  //this is for getting all cash book all account names
+  const forGetAllAcountNames = async () => {
+    setLoaing(true);
+    const url = `${myUrl}/restaurent/${restId}/get/all/acount/names/cashbook`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        setLoaing(false);
+        setAllAccNames(data);
+      } else {
+        console.log("err data", data);
+        setLoaing(false);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all account names function",
+        err
+      );
+    }
+  };
+
   return (
     <>
       <RiazStore.Provider
@@ -247,6 +307,11 @@ export const MyDataProvider = ({ children }) => {
           forGettingAllGuests,
           filteredGuest,
           setFilterGuests,
+          allHeadAccounts,
+          ForGettingAllHeadAccounts,
+          forGetAllAcountNames,
+          allAccNames,
+          loading,
         }}
       >
         {children}
