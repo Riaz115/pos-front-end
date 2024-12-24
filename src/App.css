@@ -12,6 +12,7 @@
   color: #0dcaf0;
   border: none;
   border-radius: 5px;
+  margin: 1px 5px;
 }
 
 .my-custome-button-edit:hover {
@@ -23,6 +24,7 @@
   color: red;
   border: none;
   border-radius: 5px;
+  margin: 1px 5px;
 }
 
 .my-custome-button-delete:hover {

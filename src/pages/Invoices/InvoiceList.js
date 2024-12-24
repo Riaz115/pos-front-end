@@ -89,6 +89,7 @@ const InvoiceList = () => {
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
+        console.log(data?.gusetOrderData?.guestCreditPaidAmounts);
         setGuestData(data.gusetOrderData);
         setAllPaysOfGuest(data?.gusetOrderData?.guestCreditPaidAmounts);
         setAllFilterPaysOfGuest(data?.gusetOrderData?.guestCreditPaidAmounts);
@@ -171,6 +172,50 @@ const InvoiceList = () => {
     }
   };
 
+  //this is for formatting the amount
+  const formatAmount = (amount) => {
+    const {
+      currencyPosition,
+      restCurrencySymbol,
+      precision,
+      decimalSeparator,
+      thousandSeparator,
+    } = restData;
+
+    // Map separators to their actual values
+    const separatorMapping = {
+      dot: ".",
+      comma: ",",
+      space: " ",
+    };
+
+    const actualDecimalSeparator = separatorMapping[decimalSeparator] || ".";
+    const actualThousandSeparator = separatorMapping[thousandSeparator] || ",";
+
+    // Fix to the specified precision
+    const fixedAmount = amount
+      ? amount.toFixed(precision)
+      : (0).toFixed(precision);
+
+    // Split the amount into integer and decimal parts
+    let [integerPart, decimalPart] = fixedAmount.split(".");
+
+    // Add thousand separators to the integer part
+    integerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      actualThousandSeparator
+    );
+
+    // Combine integer and decimal parts with the appropriate separator
+    const formattedNumber = decimalPart
+      ? `${integerPart}${actualDecimalSeparator}${decimalPart}`
+      : integerPart;
+
+    // Return the formatted amount with currency symbol
+    return currencyPosition === "before"
+      ? `${restCurrencySymbol}${formattedNumber}`
+      : `${formattedNumber}${restCurrencySymbol}`;
+  };
   return (
     <React.Fragment>
       <div className="page-content">
@@ -275,13 +320,7 @@ const InvoiceList = () => {
                           width: "25%",
                         }}
                       >
-                        {restData.currencyPosition === "before"
-                          ? `${
-                              restData.restCurrencySymbol
-                            }${item.givenAmount.toFixed(restData.precision)}`
-                          : `${item.givenAmount.toFixed(restData.precision)}${
-                              restData.restCurrencySymbol
-                            }`}
+                        {formatAmount(item?.givenAmount)}
                       </td>
                       <td
                         style={{
@@ -414,17 +453,7 @@ const InvoiceList = () => {
                                       border: "1px solid #ddd",
                                     }}
                                   >
-                                    {restData.currencyPosition === "before"
-                                      ? `${restData.restCurrencySymbol}${
-                                          usage?.paidCreditAmount?.toFixed(
-                                            restData.precision
-                                          ) || "0.00"
-                                        }`
-                                      : `${
-                                          usage?.remainCreditAmount?.toFixed(
-                                            restData.precision
-                                          ) || "0.00"
-                                        }${restData.restCurrencySymbol}`}
+                                    {formatAmount(usage.paidCreditAmount)}
                                   </td>
                                   <td
                                     style={{
@@ -433,17 +462,7 @@ const InvoiceList = () => {
                                       border: "1px solid #ddd",
                                     }}
                                   >
-                                    {restData.currencyPosition === "before"
-                                      ? `${restData.restCurrencySymbol}${
-                                          usage?.remainCreditAmount?.toFixed(
-                                            restData.precision
-                                          ) || "0.00"
-                                        }`
-                                      : `${
-                                          usage?.remainCreditAmount?.toFixed(
-                                            restData.precision
-                                          ) || "0.00"
-                                        }${restData.restCurrencySymbol}`}
+                                    {formatAmount(usage.remainCreditAmount)}
                                   </td>
                                 </tr>
                               ))}

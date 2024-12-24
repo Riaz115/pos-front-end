@@ -32,7 +32,7 @@ const CrmCompanies = () => {
   const { id } = useParams();
 
   //this is for getting data from the useRiazHook
-  const { restData, myUrl, token } = UseRiazHook();
+  const { restData, myUrl, token, dayId } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -219,7 +219,7 @@ const CrmCompanies = () => {
       detail: payDetail,
     };
 
-    const url = `${myUrl}/forpay/singlecreditorder/${orderid}/guest/${id}`;
+    const url = `${myUrl}/forpay/singlecreditorder/${orderid}/guest/${id}/${dayId}/day`;
     const options = {
       method: "POST",
       headers: {
@@ -238,7 +238,7 @@ const CrmCompanies = () => {
 
         console.log("ok data", data);
       } else {
-        console.log("err data", err);
+        console.log("err data", data);
       }
     } catch (err) {
       console.log(

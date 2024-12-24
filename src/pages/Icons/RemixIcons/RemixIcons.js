@@ -13,9 +13,12 @@ import {
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import { useParams } from "react-router-dom";
 import Pagination from "../../../Components/Common/Pagination";
+import DeleteModal from "../../../Components/Common/DeleteModal";
+import BasicSuccessMsg from "../../AuthenticationInner/SuccessMessage/BasicSuccessMsg";
 
 const DashboardCrypto = () => {
   const [currentPage, setCurrentPage] = useState(1);
+  const [guestIdForDelete, setGuestIdForDelete] = useState("");
 
   //this is for getting rest id
   const { id } = useParams();
@@ -37,6 +40,10 @@ const DashboardCrypto = () => {
     filteredGuest,
     setFilterGuests,
     forGettingAllGuests,
+    successModal,
+    setSuccessModal,
+    deleteModal,
+    setDeleteModal,
     restData,
   } = UseRiazHook();
 
@@ -92,6 +99,12 @@ const DashboardCrypto = () => {
     setGuestId(id);
   };
 
+  //this is for click on delete button
+  const forClickOnDeleteButton = (id) => {
+    setGuestIdForDelete(id);
+    setDeleteModal(true);
+  };
+
   //this is for the date
   const formatDateTime = (date, format) => {
     const d = new Date(date);
@@ -120,6 +133,17 @@ const DashboardCrypto = () => {
 
   return (
     <React.Fragment>
+      <DeleteModal
+        show={deleteModal}
+        onDeleteClick={() => forDeleteGuest(guestIdForDelete)}
+        onCloseClick={() => setDeleteModal(false)}
+      />
+
+      <BasicSuccessMsg
+        show={successModal}
+        onCloseClick={() => setSuccessModal(false)}
+      />
+
       <div className="page-content">
         <Container fluid>
           <div>
@@ -209,26 +233,16 @@ const DashboardCrypto = () => {
                     <td>{item.phone}</td>
                     <td>{item.email}</td>
                     <td>
-                      <div className="hstack gap-3 flex-wrap">
+                      <div>
                         <button
                           onClick={() => forClickOnEditBtn(item._id)}
-                          className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                          style={{
-                            padding: "4px 8px",
-                            backgroundColor: "#E6F7FC",
-                          }}
+                          className="my-custome-button-edit"
                         >
                           <i className="ri-pencil-fill align-bottom" />
                         </button>
                         <button
-                          onClick={() => forDeleteGuest(item._id)}
-                          className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                          style={{
-                            padding: "4px 8px",
-
-                            backgroundColor: "#FEEDE9",
-                            color: "red",
-                          }}
+                          onClick={() => forClickOnDeleteButton(item._id)}
+                          className="my-custome-button-delete"
                         >
                           <i className="ri-delete-bin-5-fill align-bottom" />
                         </button>

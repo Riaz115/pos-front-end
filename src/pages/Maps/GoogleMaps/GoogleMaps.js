@@ -1,21 +1,30 @@
 import React, { useEffect, useState } from "react";
 import { Container, Table, Col } from "reactstrap";
-import BreadCrumb from "../../../Components/Common/BreadCrumb";
 import { Link, useParams } from "react-router-dom";
 import { FaExchangeAlt } from "react-icons/fa";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
+import Loader from "../../../Components/Common/Loader";
+import { toast } from "react-toastify";
+import DeleteModal from "../../../Components/Common/DeleteModal";
+import BasicSuccessMsg from "../../AuthenticationInner/SuccessMessage/BasicSuccessMsg";
 
 const GoogleMaps = () => {
   const [allExpenses, setAllExpenses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [testingId, setTEstingId] = useState("");
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [expIdForDel, setExpIdForDel] = useState("");
 
-  //this is for getting id from url
+  //this is for getting id from url of restaurent
   const { id } = useParams();
 
   //this is for getting data from my custome hook
-  const { myUrl, token, restData } = UseRiazHook();
+  const { myUrl, token, restData, dayId } = UseRiazHook();
 
   //this is for getting all expenses of the restaurent
   const forGettingAllExpensesOfRest = async () => {
+    setIsLoading(true);
     const url = `${myUrl}/restaurent/${id}/get/all/expenes/cashbook`;
     const options = {
       method: "GET",
@@ -29,9 +38,11 @@ const GoogleMaps = () => {
       const response = await fetch(url, options);
       const data = await response.json();
       if (response.ok) {
-        console.log("ok data", data);
+        setAllExpenses(data);
+        setIsLoading(false);
       } else {
         console.log("err data", data);
+        setIsLoading(false);
       }
     } catch (err) {
       console.log(
@@ -46,8 +57,108 @@ const GoogleMaps = () => {
     forGettingAllExpensesOfRest();
   }, []);
 
+  //this is for the date and time formate
+  const formatDateTime = (date, format, timezone) => {
+    const d = new Date(date);
+
+    // Convert the date to the selected timezone
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+      timeZone: timezone, // Use the selected timezone here
+    };
+
+    // Get the formatted date and time in the selected timezone
+    const dateFormatter = new Intl.DateTimeFormat("en-US", options);
+    const formattedDate = dateFormatter.format(d);
+
+    // Extract individual parts of the date and time
+    const parts = formattedDate.split(", ");
+    const datePart = parts[0]; // "12/11/2024"
+    const timePart = parts[1]; // "10:21:59 AM"
+
+    // Format the date based on the provided 'format' argument
+    let finalFormattedDate;
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute, second] = timePart.split(":");
+
+    switch (format) {
+      case "D/M/Y":
+        finalFormattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        finalFormattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        finalFormattedDate = `${year}/${month}/${day}`;
+        break;
+      case "Y-M-D":
+        finalFormattedDate = `${year}-${month}-${day}`;
+        break;
+      case "M-D-Y":
+        finalFormattedDate = `${month}-${day}-${year}`;
+        break;
+      default:
+        finalFormattedDate = datePart;
+    }
+
+    return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
+  };
+
+  //this is for delete the transition
+  const forDeleteTheExpenseTransitionFromDay = async () => {
+    const url = `${myUrl}/restaurent/transition/${expIdForDel}/delete/expense/${dayId}/fromday`;
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        forGettingAllExpensesOfRest();
+        toast.success(data.msg);
+        setDeleteModal(false);
+        setSuccessModal(true);
+      } else {
+        console.log("err data", data);
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the delete expense from day function",
+        err
+      );
+    }
+  };
+
+  //this is for click on delete button
+  const forClickOnDeleteButton = (id) => {
+    setExpIdForDel(id);
+    setDeleteModal(true);
+  };
+
   return (
     <React.Fragment>
+      <DeleteModal
+        show={deleteModal}
+        onDeleteClick={forDeleteTheExpenseTransitionFromDay}
+        onCloseClick={() => setDeleteModal(false)}
+      />
+
+      <BasicSuccessMsg
+        show={successModal}
+        onCloseClick={() => setSuccessModal(false)}
+      />
       <div className="page-content">
         <Col sm={12}>
           <div className="d-flex align-items-center justify-content-between mt-0 ">
@@ -108,470 +219,84 @@ const GoogleMaps = () => {
                   <th>Action</th>
                 </tr>
               </thead>
+
               <tbody>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>i am for description part</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>{" "}
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-                <tr>
-                  <td>5</td>
-                  <td>45/5/2023/ 12:34pm</td>
-                  <td>customer</td>
-                  <td>ali raza shb</td>
-                  <td>cashier</td>
-                  <td>cash</td>
-                  <td>12575.00</td>
-                  <td>234567.00</td>
-                  <td>
-                    <div className="hstack gap-3 flex-wrap">
-                      <button
-                        className="btn btn-sm btn-soft-info edit-list text-info edit-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#E6F7FC",
-                        }}
-                      >
-                        <i className="ri-pencil-fill align-bottom" />
-                      </button>
-                      <button
-                        className="btn btn-sm btn-soft-danger remove-list delete-btn"
-                        style={{
-                          padding: "4px 8px",
-                          backgroundColor: "#FEEDE9",
-                          color: "red",
-                        }}
-                      >
-                        <i className="ri-delete-bin-5-fill align-bottom" />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
+                {isLoading ? (
+                  <div
+                    className="d-flex align-items-center justify-content-center"
+                    style={{ position: "fixed", left: "50%", top: "50%" }}
+                  >
+                    <Loader />{" "}
+                  </div>
+                ) : (
+                  allExpenses.map((item, index) => (
+                    <tr key={index}>
+                      <td>{item.votureNo}</td>
+                      <td>
+                        {" "}
+                        {formatDateTime(
+                          item?.createdAt,
+                          restData?.dateFormate,
+                          restData?.selectedTimezone
+                        )}
+                      </td>
+                      <td>{item?.headAcount}</td>
+                      <td>{item?.accountName}</td>
+                      <td>{item?.description}</td>
+                      <td>{item?.createdBy?.name}</td>
+                      <td>{item.paymentType}</td>
+                      <td>
+                        {item.exprensType === "paid"
+                          ? restData.currencyPosition === "before"
+                            ? `${
+                                restData.restCurrencySymbol
+                              }${item.amount.toFixed(restData.precision)}`
+                            : `${item.amount.toFixed(restData.precision)}${
+                                restData.restCurrencySymbol
+                              }`
+                          : "0.00"}
+                      </td>
+                      <td>
+                        {item.exprensType === "received"
+                          ? restData.currencyPosition === "before"
+                            ? `${
+                                restData.restCurrencySymbol
+                              }${item.amount.toFixed(restData.precision)}`
+                            : `${item.amount.toFixed(restData.precision)}${
+                                restData.restCurrencySymbol
+                              }`
+                          : "0.00"}
+                      </td>
+
+                      <td>
+                        {item.dayId === dayId && (
+                          <Link
+                            to={`/restaurent/${id}/edit/expense/${item._id}/runningday`}
+                            className=" my-custome-button-edit"
+                            style={{
+                              padding: "4px 8px",
+                              textDecoration: "none",
+                              textAlign: "center",
+                            }}
+                          >
+                            <i className="ri-pencil-fill align-bottom" />
+                          </Link>
+                        )}
+                        {item.dayId === dayId && (
+                          <button
+                            onClick={() => forClickOnDeleteButton(item._id)}
+                            className="my-custome-button-delete"
+                            style={{
+                              padding: "4px 8px",
+                            }}
+                          >
+                            <i className="ri-delete-bin-5-fill align-bottom" />
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </Table>
           </div>

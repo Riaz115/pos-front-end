@@ -128,7 +128,7 @@ const Marketplace = () => {
 
                       <Link
                         to="#"
-                        onClick={() => forDeleteRestaurent(item._id)}
+                        // onClick={() => forDeleteRestaurent(item._id)}
                         className="btn btn-primary btn-smn py-1 px-4  mx-2"
                       >
                         Delete

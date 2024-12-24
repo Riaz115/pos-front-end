@@ -163,7 +163,13 @@ const Navdata = () => {
         {
           id: "users",
           label: "Start Restaurent Day",
-          link: "/restaurent/start/day",
+          link: `/restaurent/${restId}/start/day`,
+          parentId: "User",
+        },
+        {
+          id: "users",
+          label: "Close Restaurent Day",
+          link: `/restaurent/${restId}/close/day`,
           parentId: "User",
         },
         {

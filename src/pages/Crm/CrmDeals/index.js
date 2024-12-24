@@ -1,263 +1,798 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 
-import {
-  Col,
-  Container,
-  Row,
-  Card,
-  CardBody,
-  Input,
-  Button,
-  UncontrolledDropdown,
-  DropdownToggle,
-  DropdownMenu,
-  DropdownItem,
-  Modal,
-  Form,
-  ModalBody,
-  ModalFooter,
-  ModalHeader,
-} from "reactstrap";
-
-import BreadCrumb from "../../../Components/Common/BreadCrumb";
-import Select from "react-select";
-import LeadDiscover from "./leadDiscover";
-
-
-//Import actions
-import { getDeals as onGetDeals } from "../../../slices/thunks";
-//redux
-import { useSelector, useDispatch } from "react-redux";
-import { createSelector } from "reselect";
+import { Container, Col, Row, Table } from "reactstrap";
+import { UseRiazHook } from "../../../RiazStore/RiazStore";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import DeleteModal from "../../../Components/Common/DeleteModal";
+import BasicSuccessMsg from "../../AuthenticationInner/SuccessMessage/BasicSuccessMsg";
+import { toast } from "react-toastify";
 
 const CrmDeals = () => {
-  document.title="Deals | Velzon - React Admin & Dashboard Template";
+  const [runningDayData, setRunningDayData] = useState(null);
+  const [allExpenses, setAllExpenses] = useState([]);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [expIdForDel, setExpIdForDel] = useState("");
+  const [totalAmount, setTotalAmount] = useState(0);
+  const [ncCollection, setNcCollection] = useState(0);
+  const [unBilledAmount, setUnBilledAmount] = useState(0);
+  const [totalDiscount, setTotalDiscount] = useState(0);
+  const [parcelCharges, setParcelCharges] = useState(0);
+  const [billedAmount, setBilledAmount] = useState(0);
+  const [totalCredit, setTotalCredit] = useState(0);
+  const [newBilledAmount, setNewBilledAmount] = useState(0);
+  const [myAllItems, setMyAllItems] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [todayAllOrders, setTodayAllOrders] = useState([]);
+  const [recoveredCredit, setRecoveredCredit] = useState([]);
+  const [allPaymentMethods, setAllPaymentMethods] = useState([]);
 
-  const dispatch = useDispatch();
-  const crmdealsData = createSelector(
-    (state) => state.Crm,
-    (deals) => deals.deals
-  );
-  // Inside your component
-  const deals = useSelector(crmdealsData);
+  //this is for getting id of restaurent from the url
+  const { id } = useParams();
 
+  //this is for navigate
+  const navigate = useNavigate();
+
+  //this is for getting data from my custome hook
+  const { myUrl, restData, dayId, token } = UseRiazHook();
+
+  //this isfor getting of running day data
+  const forGettingRunningDayData = async () => {
+    const url = `${myUrl}/restaurent/${id}/get/data/ofrunningday/${dayId}/rest`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        setRunningDayData(data.runningDay);
+        setAllExpenses(data.runningDay.expenses);
+        setRecoveredCredit(data.runningDay.recoveredCredit);
+      } else {
+        consol.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all data of running day function",
+        err
+      );
+    }
+  };
+
+  //this is for control rendering of getting data
   useEffect(() => {
-    if (deals && !deals.length) {
-      dispatch(onGetDeals());
+    forGettingRunningDayData();
+  }, []);
+
+  //this is for delete the transition
+  const forDeleteTheExpenseTransitionFromDay = async () => {
+    const url = `${myUrl}/restaurent/transition/${expIdForDel}/delete/expense/${dayId}/fromday`;
+    const options = {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        forGettingRunningDayData();
+        toast.success(data.msg);
+        setDeleteModal(false);
+        setSuccessModal(true);
+      } else {
+        console.log("err data", data);
+        toast.error(data.msg);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the delete expense from day function",
+        err
+      );
     }
-  }, [dispatch, deals]);
+  };
 
-  const [sortBy, setsortBy] = useState("Owner");
-  const [modal, setModal] = useState(false);
+  //this is for click on delete button
+  const forClickOnDeleteButton = (id) => {
+    setExpIdForDel(id);
+    setDeleteModal(true);
+  };
 
-  function handlesortBy(sortBy) {
-    setsortBy(sortBy);
-  }
+  //this is for calculation i.e total amount billed amount unbilled amount etc
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        // Fetch all data in parallel
+        const [ordersResponse, tablesResponse, kotsResponse] =
+          await Promise.all([
+            fetch(`${myUrl}/get/${id}/restaurent/all/orders`),
+            fetch(`${myUrl}/forget/all/tables/${id}`),
+            fetch(`${myUrl}/get/${id}/restaurent/all/delivered/kots`),
+          ]);
 
-  const sortbyname = [
-    {
-      options: [
-        { label: "Owner", value: "Owner" },
-        { label: "Company", value: "Company" },
-        { label: "Location", value: "Location" },
-      ],
-    },
-  ];
+        const ordersData = await ordersResponse.json();
+        const tablesData = await tablesResponse.json();
+        const kotsData = await kotsResponse.json();
 
-  const toggle = () => {
-    if (modal) {
-      setModal(false);
-    } else {
-      setModal(true);
-    }
+        if (ordersResponse.ok && tablesResponse.ok && kotsResponse.ok) {
+          // Process today's orders
+          const today = new Date().toISOString().split("T")[0];
+          const todaysOrders = ordersData.myFilterOrders.filter((order) =>
+            order.createdAt.startsWith(today)
+          );
+
+          setTodayAllOrders(todaysOrders);
+          const paymentTotals = calculatePaymentMethodTotals(todaysOrders);
+
+          const totalBilled = todaysOrders
+            .filter((order) => order.isNoCharge !== "yes")
+            .reduce(
+              (sum, order) =>
+                sum +
+                (order.credit
+                  ? order.totalAmount - order.credit
+                  : order.totalAmount || 0),
+              0
+            );
+
+          const totalNoCharge = todaysOrders
+            .filter((order) => order.isNoCharge === "yes")
+            .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+
+          const totalDiscount = todaysOrders.reduce(
+            (sum, order) => sum + (order.discount || 0),
+            0
+          );
+
+          const forTotalCredit = todaysOrders.reduce(
+            (sum, order) => sum + (order?.credit || 0),
+            0
+          );
+
+          const forParcleChargesCount = todaysOrders.reduce(
+            (sum, order) => sum + (order.parcel || 0),
+            0
+          );
+
+          setBilledAmount(totalBilled);
+          setNcCollection(totalNoCharge);
+          setTotalDiscount(totalDiscount);
+          setParcelCharges(forParcleChargesCount);
+          setTotalCredit(forTotalCredit);
+
+          // Process tables for unbilled amounts
+          const runningAndInvoicedTables = tablesData.allTables.filter(
+            (table) =>
+              table.currentOrder.status === "running" ||
+              table.currentOrder.status === "invoiced"
+          );
+
+          const totalUnbilled = runningAndInvoicedTables.reduce(
+            (sum, table) => sum + (table.currentOrder.remainAmount || 0),
+            0
+          );
+
+          const totalPaid = runningAndInvoicedTables.reduce(
+            (sum, table) => sum + (table.currentOrder.paidAmount || 0),
+            0
+          );
+
+          setUnBilledAmount(totalUnbilled);
+          setNewBilledAmount(totalBilled + totalPaid);
+
+          // Collect KOT IDs from today's orders
+          const kotIdsSet = new Set(
+            todaysOrders.flatMap((order) => order.kots)
+          );
+
+          // Filter KOTs based on collected KOT IDs
+          const filteredKots = kotsData.allKots.filter((kot) =>
+            kotIdsSet.has(kot._id)
+          );
+
+          // Calculate totalQuantity and totalSale for each item
+          let allItemsData = {};
+          filteredKots.forEach((kot) => {
+            kot.orderItems.forEach((item) => {
+              const itemId = item.id;
+              if (!allItemsData[itemId]) {
+                allItemsData[itemId] = {
+                  name: item.name,
+                  totalQuantity: 0,
+                  price: item.price,
+                  totalSale: 0,
+                };
+              }
+              allItemsData[itemId].totalQuantity += item.quantity;
+              allItemsData[itemId].totalSale += item.quantity * item.price;
+            });
+          });
+
+          const itemsArray = Object.values(allItemsData);
+          setMyAllItems(itemsArray);
+
+          // Calculate final total amount
+          const calculatedTotalAmount =
+            totalBilled +
+            totalUnbilled +
+            totalNoCharge +
+            forTotalCredit +
+            totalPaid;
+          setTotalAmount(calculatedTotalAmount);
+        } else {
+          console.error("Error in API responses");
+        }
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  //this is for formatting the amount
+  const formatAmount = (amount) => {
+    const {
+      currencyPosition,
+      restCurrencySymbol,
+      precision,
+      decimalSeparator,
+      thousandSeparator,
+    } = restData;
+
+    // Map separators to their actual values
+    const separatorMapping = {
+      dot: ".",
+      comma: ",",
+      space: " ",
+    };
+
+    const actualDecimalSeparator = separatorMapping[decimalSeparator] || ".";
+    const actualThousandSeparator = separatorMapping[thousandSeparator] || ",";
+
+    // Fix to the specified precision
+    const fixedAmount = amount
+      ? amount.toFixed(precision)
+      : (0).toFixed(precision);
+
+    // Split the amount into integer and decimal parts
+    let [integerPart, decimalPart] = fixedAmount.split(".");
+
+    // Add thousand separators to the integer part
+    integerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      actualThousandSeparator
+    );
+
+    // Combine integer and decimal parts with the appropriate separator
+    const formattedNumber = decimalPart
+      ? `${integerPart}${actualDecimalSeparator}${decimalPart}`
+      : integerPart;
+
+    // Return the formatted amount with currency symbol
+    return currencyPosition === "before"
+      ? `${restCurrencySymbol}${formattedNumber}`
+      : `${formattedNumber}${restCurrencySymbol}`;
+  };
+
+  const calculateTotal = () => {
+    let forTotalAmount =
+      totalAmount +
+      runningDayData?.creditRecovered +
+      runningDayData?.openingAmount;
+
+    // Loop through each expense
+    allExpenses.forEach((expense) => {
+      if (expense.exprensType === "received") {
+        forTotalAmount += expense.amount;
+      } else if (expense.exprensType === "paid") {
+        forTotalAmount -= expense.amount;
+      }
+    });
+
+    return forTotalAmount;
+  };
+
+  //this is for calculation all methods total amount
+  const calculatePaymentMethodTotals = (orders, expenses) => {
+    const paymentTotals = {};
+
+    orders.forEach((order) => {
+      if (order.paymentMethod) {
+        try {
+          const paymentMethods = JSON.parse(order.paymentMethod);
+          paymentMethods.forEach(({ payMethod, amount }) => {
+            if (!paymentTotals[payMethod]) {
+              paymentTotals[payMethod] = 0;
+            }
+            paymentTotals[payMethod] += amount;
+          });
+        } catch (error) {
+          console.error(
+            "Error parsing paymentMethod:",
+            order.paymentMethod,
+            error
+          );
+        }
+      }
+    });
+
+    console.log("expenses", allExpenses);
+
+    // Process expenses
+    allExpenses?.forEach((expense) => {
+      const type = expense.paymentType;
+      const amount = expense.amount;
+
+      if (!paymentTotals[type]) {
+        paymentTotals[type] = 0;
+      }
+
+      if (expense.exprensType === "received") {
+        paymentTotals[type] += amount;
+      } else if (expense.exprensType === "paid") {
+        paymentTotals[type] -= amount;
+      }
+    });
+
+    // Process recovered credits
+    recoveredCredit.forEach((credit) => {
+      const type = credit.paymentMeth;
+      const amount = credit.amount;
+
+      if (!paymentTotals[type]) {
+        paymentTotals[type] = 0;
+      }
+      paymentTotals[type] += amount;
+    });
+
+    // Convert paymentTotals object to an array
+    const paymentTotalsArray = Object.entries(paymentTotals).map(
+      ([method, amount]) => {
+        return { method, amount };
+      }
+    );
+
+    setAllPaymentMethods(paymentTotalsArray);
+    console.log("all methods", paymentTotalsArray);
+    return paymentTotalsArray;
   };
 
   return (
     <React.Fragment>
+      <DeleteModal
+        show={deleteModal}
+        onDeleteClick={forDeleteTheExpenseTransitionFromDay}
+        onCloseClick={() => setDeleteModal(false)}
+      />
+      <BasicSuccessMsg
+        show={successModal}
+        onCloseClick={() => setSuccessModal(false)}
+      />
       <div className="page-content">
-        <Container fluid>
-          <BreadCrumb title="Deals" pageTitle="CRM" />
-          <Card>
-            <CardBody>
-              <Row className="g-3">
-                <Col md={3}>
-                  <div className="search-box">
-                    <Input
-                      type="text"
-                      className="form-control search"
-                      placeholder="Search for deals..."
-                    />
-                    <i className="ri-search-line search-icon"></i>
-                  </div>
-                </Col>
-                <div className="col-md-auto ms-auto">
-                  <div className="d-flex hastck gap-2 flex-wrap">
-                    <div className="d-flex align-items-center gap-2">
-                      <span className="text-muted">Sort by: </span>
-                      <Select
-                        className="mb-0"
-                        value={sortBy}
-                        onChange={() => {
-                          handlesortBy();
-                        }}
-                        options={sortbyname}
-                        id="choices-single-default"
-                      ></Select>
-                    </div>
-                    <button className="btn btn-success" onClick={toggle}>
-                      <i className="ri-add-fill align-bottom me-1"></i> Add
-                      Deals
-                    </button>
-                    <UncontrolledDropdown>
-                      <DropdownToggle
-                        href="#"
-                        className="btn btn-soft-info btn-icon fs-14"
-                        tag="button"
-                      >
-                        <i className="ri-settings-4-line"></i>
-                      </DropdownToggle>
-                      <DropdownMenu className="dropdown-menu-end">
-                        <DropdownItem className="dropdown-item" href="#">
-                          Copy
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" href="#">
-                          Move to pipline
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" href="#">
-                          Add to exceptions
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" href="#">
-                          Switch to common form view
-                        </DropdownItem>
-                        <DropdownItem className="dropdown-item" href="#">
-                          Reset form view to default
-                        </DropdownItem>
-                      </DropdownMenu>
-                    </UncontrolledDropdown>
-                  </div>
-                </div>
-              </Row>
-            </CardBody>
-          </Card>
+        <Col sm={12}>
+          <div className="d-flex align-items-center justify-content-between mt-0 ">
+            <div>
+              <h5>Close Day of {restData?.restName} </h5>
+            </div>
 
-          <Row className="row-cols-xxl-5 row-cols-lg-3 row-cols-md-2 row-cols-1">
-            {deals.map((deal, key) => (
-              <React.Fragment key={key}>
-                <LeadDiscover deal={deal} index={key} />
-              </React.Fragment>
-            ))}
+            <div>
+              <Link
+                to={`/add/restaurent/${id}/transition`}
+                style={{
+                  backgroundColor: "#0000FF",
+                  color: "white",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                <i className="ri-add-circle-line align-middle me-1"></i> Add
+                Transition
+              </Link>
+            </div>
+          </div>
+        </Col>
+        <hr></hr>
+        <Container fluid>
+          <Row>
+            <Col>
+              <div>
+                <table
+                  className="table table-bordered"
+                  style={{
+                    borderCollapse: "collapse",
+                    width: "100%",
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        UnBilled Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(unBilledAmount)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Total Discount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(totalDiscount)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Parcel Charges
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(parcelCharges)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        No Charge Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(ncCollection)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Today Credit
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(totalCredit)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Billed Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(billedAmount)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Credit Recovered
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(runningDayData?.creditRecovered)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Total Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(
+                          totalAmount + runningDayData?.creditRecovered
+                        )}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Opening Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(runningDayData?.openingAmount)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Grand Total
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(
+                          totalAmount +
+                            runningDayData?.creditRecovered +
+                            runningDayData?.openingAmount
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Col>
+            <Col md={12}>
+              <div className="table-responsive">
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>votur</th>
+                      <th>Acc head</th>
+                      <th>Acc name</th>
+                      <th>Payment Mode</th>
+                      <th>Amount</th>
+                      <th>Type</th>
+                      <th className="text-center">Action</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {allExpenses?.map((item, index) => (
+                      <tr key={index}>
+                        <td>{item.votureNo}</td>
+                        <td>{item.headAcount}</td>
+                        <td>{item.accountName}</td>
+                        <td>{item.paymentType}</td>
+                        <td>{item.amount}</td>
+                        <td>{item.exprensType}</td>
+                        <td className="text-center">
+                          <button
+                            onClick={() =>
+                              navigate(
+                                `/restaurent/${id}/edit/expense/${item.id}/runningday`
+                              )
+                            }
+                            className="my-custome-button-edit"
+                            style={{
+                              padding: "4px 8px",
+                            }}
+                          >
+                            <i className="ri-pencil-fill align-bottom" />
+                          </button>
+
+                          <button
+                            onClick={() => forClickOnDeleteButton(item.id)}
+                            className="my-custome-button-delete"
+                            style={{
+                              padding: "4px 8px",
+                            }}
+                          >
+                            <i className="ri-delete-bin-5-fill align-bottom" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </Table>
+              </div>
+            </Col>
+
+            <Col md={12}>
+              <div>
+                <table
+                  className="table table-bordered"
+                  style={{
+                    borderCollapse: "collapse",
+                    width: "100%",
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Total After Expenses
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(calculateTotal())}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Col>
+
+            <Col md={12}>
+              <div>
+                <table
+                  className="table table-bordered"
+                  style={{
+                    borderCollapse: "collapse",
+                    width: "100%",
+                  }}
+                >
+                  <tbody>
+                    {allPaymentMethods?.map((item, index) => (
+                      <tr key={index}>
+                        <td
+                          style={{
+                            border: "1px solid #dee2e6",
+                            padding: "10px",
+                            fontWeight: "bold",
+                            textAlign: "left",
+                          }}
+                        >
+                          Total {item.method} Sale
+                        </td>
+                        <td
+                          style={{
+                            border: "1px solid #dee2e6",
+                            padding: "10px",
+                            fontWeight: "bold",
+                            textAlign: "right",
+                          }}
+                        >
+                          {formatAmount(item?.amount)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Col>
           </Row>
         </Container>
       </div>
-
-      <Modal id="adddeals" isOpen={modal} toggle={toggle} centered>
-        <ModalHeader className="bg-light p-3" toggle={toggle}>
-          Create Deals
-        </ModalHeader>
-        <Form>
-          <ModalBody>
-            <div className="mb-3">
-              <label htmlFor="deatType" className="form-label">Deals Type</label>
-              <select className="form-select" id="deatType" data-choices
-                aria-label="Default select example" required>
-                <option value=""
-                >Select deals type</option>
-                <option value="Lead Disovered">Lead Disovered</option>
-                <option value="Contact Initiated">Contact Initiated</option>
-                <option value="Need Identified">Need Identified</option>
-                <option value="Meeting Arranged">Meeting Arranged</option>
-                <option value="Offer Accepted">Offer Accepted</option>
-              </select>
-              <div className="invalid-feedback">
-                Please write an deals owner name.
-              </div>
-              
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="dealTitle" className="form-label">Deal Title</label>
-              <input type="text" className="form-control" id="dealTitle"
-                placeholder="Enter title" required />
-              <div className="invalid-feedback">
-                Please write a title.
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="dealValue" className="form-label">Value (USD)</label>
-              <input type="number" className="form-control" id="dealValue" step="0.01"
-                placeholder="Enter value" required />
-              <div className="invalid-feedback">
-                Please write a value.
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="dealOwner" className="form-label">Deals Owner</label>
-              <input type="text" className="form-control" id="dealOwner" required
-                placeholder="Enter owner name" />
-              <div className="invalid-feedback">
-                Please write an deals owner name.
-              </div>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="dueDate" className="form-label">Due Date</label>
-              <input type="text" className="form-control" id="dueDate"
-                data-provider="flatpickr" placeholder="Select date" required />
-              <div className="invalid-feedback">
-                Please select a due date.
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="dealEmail" className="form-label">Email</label>
-              <input type="email" className="form-control" id="dealEmail"
-                placeholder="Enter email" required />
-              <div className="invalid-feedback">
-                Please write a email.
-              </div>
-            </div>
-
-            <div className="mb-3">
-              <label htmlFor="contactNumber" className="form-label">Contact</label>
-              <input type="text" className="form-control" id="contactNumber"
-                placeholder="Enter contact number" required />
-              <div className="invalid-feedback">
-                Please add a contact.
-              </div>
-            </div>
-            <div className="mb-3">
-              <label htmlFor="contactDescription" className="form-label">Description</label>
-              <textarea className="form-control" id="contactDescription" rows="3"
-                placeholder="Enter description" required></textarea>
-              <div className="invalid-feedback">
-                Please add a description.
-              </div>
-            </div>
-          </ModalBody>
-          <ModalFooter>
-            <Button
-              type="button"
-              color="light"
-              id="close-modal"
-              onClick={() => {
-                setModal(false);
-              }}
-            >
-              Close
-            </Button>
-            <Button
-              type="submit"
-              color="success"
-              onClick={() => {
-                setModal(false);
-              }}
-            >
-              <i className="ri-save-line align-bottom me-1"></i> Save
-            </Button>
-          </ModalFooter>
-        </Form>
-      </Modal>
     </React.Fragment>
   );
 };

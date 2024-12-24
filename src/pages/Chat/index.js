@@ -230,8 +230,8 @@ const Chat = () => {
     }
   };
   //this is for the date and time formate
-  const formatDateTime = (date, format, timezone) => {
-    const d = new Date(date);
+  const formatDateTime = (format, timezone) => {
+    const d = new Date();
 
     const options = {
       year: "numeric",
@@ -314,7 +314,6 @@ const Chat = () => {
                     }}
                   >
                     {formatDateTime(
-                      kotData?.createdAt,
                       restData?.dateFormate,
                       restData?.selectedTimezone
                     )}
@@ -391,21 +390,21 @@ const Chat = () => {
                         <td>{item.quantity}</td>
                         <td>
                           {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(
-                                item.price * item.quantity
-                              ).toFixed(restData.precision)}`
+                            ? `${
+                                restData.restCurrencySymbol
+                              }${item.price.toFixed(restData.precision)}`
                             : `${item.price.toFixed(restData.precision)}${
                                 restData.restCurrencySymbol
                               }`}
                         </td>
                         <td>
                           {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(
-                                item.totalPrice * item.quantity
-                              ).toFixed(restData.precision)}`
-                            : `${(item.price * item.quantity).toFixed(
-                                restData.precision
-                              )}${restData.restCurrencySymbol}`}
+                            ? `${
+                                restData.restCurrencySymbol
+                              }${item.totalPrice.toFixed(restData.precision)}`
+                            : `${item.totalPrice.toFixed(restData.precision)}${
+                                restData.restCurrencySymbol
+                              }`}
                         </td>
                       </tr>
                     ))}

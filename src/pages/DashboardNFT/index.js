@@ -35,6 +35,7 @@ const DashboardNFT = () => {
     restData,
     myUrl,
     token,
+    dayId,
   } = UseRiazHook();
 
   //this is for controll rendering of all all guest getting data function
@@ -114,7 +115,7 @@ const DashboardNFT = () => {
       detail: payDetail,
     };
 
-    const url = `${myUrl}/forpay/multiorder/credit/${guestid}/guest/`;
+    const url = `${myUrl}/forpay/multiorder/credit/${guestid}/guest/${dayId}/day`;
     const options = {
       method: "POST",
       headers: {
@@ -508,7 +509,7 @@ const DashboardNFT = () => {
                     >
                       <input
                         type="number"
-                        value={guestData?.totalCredit}
+                        value={guestData?.totalCredit || 0}
                         className="px-2 m-0"
                         style={{
                           border: "1px solid #B3C8CF",

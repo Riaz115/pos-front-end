@@ -1,12 +1,17 @@
 import React, { useState } from "react";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import { toast } from "react-toastify";
+import { useParams } from "react-router-dom";
+import { set } from "lodash";
 
 const CryproOrder = () => {
   const [restOpeningAmount, setRestOpeningAmount] = useState(0);
 
+  //this is for getting restaurent id from url
+  const { id } = useParams();
+
   //this is for getting data from my custome hook
-  const { restData, myUrl, restId, token } = UseRiazHook();
+  const { restData, myUrl, token } = UseRiazHook();
 
   //this is for start day of restaurent
   const startRestaurentDayOrOpen = async () => {
@@ -17,7 +22,7 @@ const CryproOrder = () => {
     const dayOPenData = {
       restOpeningAmount,
     };
-    const url = `${myUrl}/restaurent/${restId}/open/day/start`;
+    const url = `${myUrl}/restaurent/${id}/open/day/start`;
     const options = {
       method: "POST",
       headers: {
@@ -31,8 +36,9 @@ const CryproOrder = () => {
       const respone = await fetch(url, options);
       const data = await respone.json();
       if (respone.ok) {
-        console.log("okk data", data);
         toast.success(data.msg);
+        setRestOpeningAmount("");
+        localStorage.setItem("dayid", data?.startDay?._id);
       } else {
         console.log("err data", data);
         toast.error(data.msg);
@@ -63,7 +69,6 @@ const CryproOrder = () => {
             width: "50%",
             maxWidth: "300px",
             height: "auto",
-            // maxHeight: "250px",
             marginBottom: "20px",
             padding: "20px 10px",
           }}

@@ -232,9 +232,6 @@ const UiBadges = () => {
                 <div style={{ gap: "5px" }}>
                   <h4>All Invoices of {restData?.restName}</h4>
                 </div>
-                <div className="riaz" id="riaz">
-                  i am for testing
-                </div>
 
                 <div>
                   <Link

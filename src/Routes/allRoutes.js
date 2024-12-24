@@ -307,12 +307,17 @@ const authProtectedRoutes = [
   { path: "/creditbook/:id/guest", component: <CrmCompanies /> },
   { path: "/guest/:id/credit/all/pays", component: <InvoiceList /> },
   { path: "/add/restaurent/:id/transition", component: <InvoiceDetails /> },
-  { path: "/restaurent/start/day", component: <CryproOrder /> },
+  { path: "/restaurent/:id/start/day", component: <CryproOrder /> },
   { path: "/restaurent/:id/new/name/account", component: <Collections /> },
+  {
+    path: "/restaurent/:restid/edit/expense/:id/runningday",
+    component: <MyWallet />,
+  },
   {
     path: "/restaurent/:id/create/new/account/head",
     component: <InvoiceCreate />,
   },
+  { path: "/restaurent/:id/close/day", component: <CrmDeals /> },
 
   //already routes
 
@@ -324,7 +329,6 @@ const authProtectedRoutes = [
 
   //Crm
 
-  { path: "/apps-crm-deals", component: <CrmDeals /> },
   { path: "/apps-crm-leads", component: <CrmLeads /> },
 
   //Invoices
@@ -334,8 +338,6 @@ const authProtectedRoutes = [
   { path: "/apps-tickets-details", component: <TicketsDetails /> },
 
   //transactions
-
-  { path: "/apps-crypto-wallet", component: <MyWallet /> },
 
   { path: "/apps-crypto-kyc", component: <KYCVerification /> },
 

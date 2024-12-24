@@ -236,6 +236,60 @@ const Collections = () => {
     return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
   };
 
+  //this is for catch error for the name
+  const forCatchErrorsAccName = () => {
+    let isOk = true;
+    let newErrors = {};
+    if (!AccountNameHead.trim()) {
+      isOk = false;
+      newErrors.AccountNameHead = "Please Enter Account Name head";
+      toast.error("please Enter Account Name head");
+    } else if (!AccountName.trim()) {
+      isOk = false;
+      newErrors.AccountName = "Please Enter Account Name ";
+      toast.error("please Enter Account Name ");
+    }
+    setErrors(newErrors);
+    return isOk;
+  };
+
+  //this is for add account name
+  const forAddAccountName = async (e) => {
+    e.preventDefault();
+    if (forCatchErrorsAccName()) {
+      const accNameData = {
+        AccountName,
+        AccountNameHead,
+      };
+      const url = `${myUrl}/restaurent/${id}/add/acc/head/name/cashbook`;
+      const options = {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          authorization: token,
+        },
+        body: JSON.stringify(accNameData),
+      };
+
+      try {
+        const response = await fetch(url, options);
+        const data = await response.json();
+        if (response.ok) {
+          setForOpenAddNameModal(false);
+          toast.success(data.msg);
+          setSuccessModal(true);
+          forGetAllAcountNames();
+          ForGettingAllHeadAccounts();
+        } else {
+          console.log("err data", data);
+          toast.error(data.msg);
+        }
+      } catch (err) {
+        console.log("there is error in the add account name funciton", err);
+      }
+    }
+  };
+
   return (
     <React.Fragment>
       <DeleteModal

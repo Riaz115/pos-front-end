@@ -27,6 +27,9 @@ export const MyDataProvider = ({ children }) => {
   const [allHeadAccounts, setAllHeadAccounts] = useState([]);
   const [allAccNames, setAllAccNames] = useState([]);
   const [loading, setLoaing] = useState(false);
+  const [dayId, setDayId] = useState(localStorage.getItem("dayid"));
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
 
   //this is my backend url
   const myUrl = "http://localhost:8000/api";
@@ -218,6 +221,8 @@ export const MyDataProvider = ({ children }) => {
       if (response.ok) {
         toast.success(data.msg);
         forGettingAllGuests();
+        setDeleteModal(false);
+        setSuccessModal(true);
       } else {
         toast.error(data.msg);
       }
@@ -312,6 +317,12 @@ export const MyDataProvider = ({ children }) => {
           forGetAllAcountNames,
           allAccNames,
           loading,
+          dayId,
+          setDayId,
+          successModal,
+          setSuccessModal,
+          deleteModal,
+          setDeleteModal,
         }}
       >
         {children}

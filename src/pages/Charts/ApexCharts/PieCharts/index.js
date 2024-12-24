@@ -24,12 +24,15 @@ const PieCharts = () => {
   const [parcelCharges, setParcelCharges] = useState(0);
   const [billedAmount, setBilledAmount] = useState(0);
   const [newBilledAmount, setNewBilledAmount] = useState(0);
+  const [totalCredit, setTotalCredit] = useState(0);
   const [myAllItems, setMyAllItems] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [runningDayData, setRunningDayData] = useState(null);
 
   //this is for getting data from the use riaz hook
-  const { restId, myUrl, restData } = UseRiazHook();
+  const { restId, myUrl, restData, dayId, token } = UseRiazHook();
 
+  //this is for calculation i.e total amount etc
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -55,7 +58,14 @@ const PieCharts = () => {
 
           const totalBilled = todaysOrders
             .filter((order) => order.isNoCharge !== "yes")
-            .reduce((sum, order) => sum + (order.totalAmount || 0), 0);
+            .reduce(
+              (sum, order) =>
+                sum +
+                (order.credit
+                  ? order.totalAmount - order.credit
+                  : order.totalAmount || 0),
+              0
+            );
 
           const totalNoCharge = todaysOrders
             .filter((order) => order.isNoCharge === "yes")
@@ -63,6 +73,11 @@ const PieCharts = () => {
 
           const totalDiscount = todaysOrders.reduce(
             (sum, order) => sum + (order.discount || 0),
+            0
+          );
+
+          const forTotalCredit = todaysOrders.reduce(
+            (sum, order) => sum + (order?.credit || 0),
             0
           );
 
@@ -75,6 +90,7 @@ const PieCharts = () => {
           setNcCollection(totalNoCharge);
           setTotalDiscount(totalDiscount);
           setParcelCharges(forParcleChargesCount);
+          setTotalCredit(forTotalCredit);
 
           // Process tables for unbilled amounts
           const runningAndInvoicedTables = tablesData.allTables.filter(
@@ -129,7 +145,11 @@ const PieCharts = () => {
 
           // Calculate final total amount
           const calculatedTotalAmount =
-            totalBilled + totalUnbilled + totalNoCharge + totalPaid;
+            totalBilled +
+            totalUnbilled +
+            forTotalCredit +
+            totalNoCharge +
+            totalPaid;
           setTotalAmount(calculatedTotalAmount);
         } else {
           console.error("Error in API responses");
@@ -142,6 +162,39 @@ const PieCharts = () => {
     };
 
     fetchData();
+  }, []);
+
+  //this is for getting running day data
+  //this isfor getting of running day data
+  const forGettingRunningDayData = async () => {
+    const url = `${myUrl}/restaurent/${restId}/get/data/ofrunningday/${dayId}/rest`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        setRunningDayData(data.runningDay);
+      } else {
+        consol.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the getting all data of running day function",
+        err
+      );
+    }
+  };
+
+  //this is for control rendering of getting data
+  useEffect(() => {
+    forGettingRunningDayData();
   }, []);
 
   return (
@@ -270,6 +323,44 @@ const PieCharts = () => {
               </CardBody>
             </Card>
           </Col>
+          <Col lg={4}>
+            <Card className="card-animate card-height-100 ">
+              <CardBody>
+                <div className="d-flex justify-content-between">
+                  <div>
+                    <h5 className="fw-semibold text-muted mb-0">
+                      Today Credit
+                    </h5>
+                    <h1 className="mt-4 ff-secondary fw-bold">
+                      <CountUp start={0} end={totalCredit} duration={3} />
+                    </h1>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+
+          <Col lg={4}>
+            <Card className="card-animate card-height-100 ">
+              <CardBody>
+                <div className="d-flex justify-content-between">
+                  <div>
+                    <h5 className="fw-semibold text-muted mb-0">
+                      Recovered Credit
+                    </h5>
+                    <h1 className="mt-4 ff-secondary fw-bold">
+                      <CountUp
+                        start={0}
+                        end={runningDayData?.creditRecovered}
+                        duration={3}
+                      />
+                    </h1>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+
           <Col xl={12}>
             <Card>
               <CardBody>

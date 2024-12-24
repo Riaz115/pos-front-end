@@ -245,6 +245,12 @@ const InvoiceCreate = () => {
     return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
   };
 
+  const handleEdit = (itemId) => {
+    navigate(`${itemId}`, {
+      state: { from: window.location.pathname }, // Set current page URL in state
+    });
+  };
+
   return (
     <React.Fragment>
       <DeleteModal

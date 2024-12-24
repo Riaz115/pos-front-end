@@ -72,7 +72,6 @@ const Transactions = () => {
       if (response.ok) {
         setTableData(data.tableData);
         setForTableData(data.tableData);
-        console.log("table data", data.tableData);
       } else {
         console.log("err data", data);
       }
@@ -153,6 +152,10 @@ const Transactions = () => {
 
   //this is for invocie to backend
   const forInovieToBackend = async () => {
+    if (forTableData?.currentOrder?.totalAmount < 0) {
+      toast.error("Amount is in minus there is some error");
+      return;
+    }
     if (
       restData?.payemtPreOrPost === "pre" &&
       forTableData?.currentOrder?.remainAmount > 0
@@ -208,6 +211,19 @@ const Transactions = () => {
       isOk = false;
       toast.error("Please Enter Discount Amount");
     }
+    // else if (discountType === "percentage") {
+    //   if (discount < 0 || discount > 100) {
+    //     isOk = false;
+    //     toast.error("Please Enter Discount Amount Between 0 and 100");
+    //   }
+    // } else if (discountType === "number") {
+    //   if (discount < 0 || discount > forTableData?.currentOrder?.foodAmount) {
+    //     isOk = false;
+    //     toast.error(
+    //       "Please Enter Discount Amount Between 0 and Total Order Amount"
+    //     );
+    //   }
+    // }
 
     return isOk;
   };
@@ -241,6 +257,7 @@ const Transactions = () => {
           forGettingTableData();
         } else {
           console.log(" err data ", data);
+          toast.error(data.msg);
         }
       } catch (err) {
         console.log("there is error in the for add discount function", err);
@@ -338,6 +355,10 @@ const Transactions = () => {
 
   //this is for no charge order
   const forNoChargeOrder = async () => {
+    if (forTableData?.currentOrder?.totalAmount < 0) {
+      toast.error("Amount is in minus there is some error");
+      return;
+    }
     if (forTableData?.currentOrder?.guest) {
       let noChargeData = {
         noChargeReason,
@@ -495,11 +516,6 @@ const Transactions = () => {
     setForMultiPaymentOpen(true);
     setForSettlement(false);
   };
-
-  //this is for testing
-  useEffect(() => {
-    console.log("table data", tableData?.currentOrder?.paidAmount);
-  });
 
   //this is for the date and time formate
   const formatDateTime = (date, format, timezone) => {
@@ -1374,7 +1390,7 @@ const Transactions = () => {
                     style={{ fontSize: "16px" }}
                     className="ms-1"
                   >
-                    Number
+                    Flat
                   </label>
                 </div>
               </div>

@@ -279,7 +279,7 @@ const InvoiceDetails = () => {
           <div className="d-flex align-items-center justify-content-between py-1">
             <h5>Cash book</h5>
             <Link
-              to={`/restaurent/${id}/cash-book`}
+              to={`/restaurent/${id}/close/day`}
               className="px-2 py-1 text-white"
               style={{
                 backgroundColor: "#6E747A",
@@ -562,6 +562,7 @@ const InvoiceDetails = () => {
                   display: "flex",
                   alignItems: "center",
                   fontSize: "12px",
+                  textDecoration: "none",
                 }}
               >
                 Return
