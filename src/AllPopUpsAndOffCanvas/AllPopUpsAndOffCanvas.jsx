@@ -508,6 +508,7 @@ function AllPopUpsAndOffCanvas() {
         toggle={addGuestChangeState}
         id="offcanvasRight"
         className="border-bottom w-75  "
+        style={{ zIndex: "50000" }}
       >
         <OffcanvasHeader toggle={addGuestChangeState} id="offcanvasRightLabel">
           <h1>Add Guest</h1>
@@ -666,6 +667,7 @@ function AllPopUpsAndOffCanvas() {
         toggle={editGuestChangeState}
         id="offcanvasRight"
         className="border-bottom w-75  "
+        style={{ zIndex: "50000" }}
       >
         <OffcanvasHeader toggle={editGuestChangeState} id="offcanvasRightLabel">
           <h1>Edit Guest</h1>

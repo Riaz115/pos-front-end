@@ -26,6 +26,9 @@ const CrmDeals = () => {
   const [todayAllOrders, setTodayAllOrders] = useState([]);
   const [recoveredCredit, setRecoveredCredit] = useState([]);
   const [allPaymentMethods, setAllPaymentMethods] = useState([]);
+  const [totalGivenExpense, setTotalGivenExpense] = useState(0);
+  const [totalReceivedExp, setTotalReceivedExp] = useState(0);
+  const [totalSale, setTotalSale] = useState(0);
 
   //this is for getting id of restaurent from the url
   const { id } = useParams();
@@ -36,39 +39,61 @@ const CrmDeals = () => {
   //this is for getting data from my custome hook
   const { myUrl, restData, dayId, token } = UseRiazHook();
 
-  //this isfor getting of running day data
-  const forGettingRunningDayData = async () => {
-    const url = `${myUrl}/restaurent/${id}/get/data/ofrunningday/${dayId}/rest`;
-    const options = {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        authorization: token,
-      },
-    };
+  //this is for calculation all methods total amount
+  const calculatePaymentMethodTotals = (orders, expenses, rcvrCredit) => {
+    const paymentTotals = {};
 
-    try {
-      const response = await fetch(url, options);
-      const data = await response.json();
-      if (response.ok) {
-        setRunningDayData(data.runningDay);
-        setAllExpenses(data.runningDay.expenses);
-        setRecoveredCredit(data.runningDay.recoveredCredit);
-      } else {
-        consol.log("err data", data);
+    //this is for calculation orders amount
+    orders.forEach((order) => {
+      if (order.paymentMethod) {
+        try {
+          const paymentMethods = JSON.parse(order.paymentMethod);
+          paymentMethods.forEach(({ payMethod, amount }) => {
+            if (!paymentTotals[payMethod]) {
+              paymentTotals[payMethod] = 0;
+            }
+            paymentTotals[payMethod] += amount;
+          });
+        } catch (error) {
+          console.error(
+            "Error parsing paymentMethod:",
+            order.paymentMethod,
+            error
+          );
+        }
       }
-    } catch (err) {
-      console.log(
-        "there is error in the getting all data of running day function",
-        err
-      );
-    }
-  };
+    });
 
-  //this is for control rendering of getting data
-  useEffect(() => {
-    forGettingRunningDayData();
-  }, []);
+    //this is for calculation expenses
+    expenses.forEach(({ paymentType, amount, exprensType }) => {
+      if (!paymentTotals[paymentType]) {
+        paymentTotals[paymentType] = 0;
+      }
+      if (exprensType === "received") {
+        paymentTotals[paymentType] += amount;
+      } else if (exprensType === "paid") {
+        paymentTotals[paymentType] -= amount;
+      }
+    });
+
+    // Process recovered credits
+    rcvrCredit.forEach(({ paymentMeth, amount }) => {
+      if (!paymentTotals[paymentMeth]) {
+        paymentTotals[paymentMeth] = 0;
+      }
+      paymentTotals[paymentMeth] += amount;
+    });
+
+    // Convert paymentTotals object to an array
+    const paymentTotalsArray = Object.entries(paymentTotals).map(
+      ([method, amount]) => {
+        return { method, amount };
+      }
+    );
+
+    setAllPaymentMethods(paymentTotalsArray);
+    return paymentTotalsArray;
+  };
 
   //this is for delete the transition
   const forDeleteTheExpenseTransitionFromDay = async () => {
@@ -85,7 +110,6 @@ const CrmDeals = () => {
       const response = await fetch(url, options);
       const data = await response.json();
       if (response.ok) {
-        forGettingRunningDayData();
         toast.success(data.msg);
         setDeleteModal(false);
         setSuccessModal(true);
@@ -113,26 +137,72 @@ const CrmDeals = () => {
       setLoading(true);
       try {
         // Fetch all data in parallel
-        const [ordersResponse, tablesResponse, kotsResponse] =
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: token,
+          },
+        };
+        const [ordersResponse, tablesResponse, kotsResponse, runningDayData] =
           await Promise.all([
             fetch(`${myUrl}/get/${id}/restaurent/all/orders`),
             fetch(`${myUrl}/forget/all/tables/${id}`),
             fetch(`${myUrl}/get/${id}/restaurent/all/delivered/kots`),
+            fetch(
+              `${myUrl}/restaurent/${id}/get/data/ofrunningday/${dayId}/rest`,
+              options
+            ),
           ]);
 
         const ordersData = await ordersResponse.json();
         const tablesData = await tablesResponse.json();
         const kotsData = await kotsResponse.json();
+        const currRunningDayData = await runningDayData.json();
+
+        setRunningDayData(currRunningDayData.runningDay);
+        setAllExpenses(currRunningDayData.runningDay.expenses);
+        setRecoveredCredit(currRunningDayData.runningDay.recoveredCredit);
+
+        //this is for counting total given expense
+        let forTotalCreditExpense = 0;
+        const totalGivenExpense =
+          currRunningDayData.runningDay.expenses.forEach((expense) => {
+            if (expense.exprensType === "paid") {
+              forTotalCreditExpense += expense.amount;
+            }
+          });
+        setTotalGivenExpense(forTotalCreditExpense);
+
+        //this is for the counting total getting expense
+        let totalReceivedExpense = 0;
+        const totalRecievedEx = currRunningDayData.runningDay.expenses.forEach(
+          (expense) => {
+            if (expense.exprensType === "received") {
+              totalReceivedExpense += expense.amount;
+            }
+          }
+        );
+
+        setTotalReceivedExp(totalReceivedExpense);
 
         if (ordersResponse.ok && tablesResponse.ok && kotsResponse.ok) {
-          // Process today's orders
-          const today = new Date().toISOString().split("T")[0];
-          const todaysOrders = ordersData.myFilterOrders.filter((order) =>
-            order.createdAt.startsWith(today)
+          //this is for getting running day orders
+          const startDateTime = new Date(
+            currRunningDayData.runningDay.startDateTime
           );
 
+          const todaysOrders = ordersData.myFilterOrders.filter((order) => {
+            const orderDate = new Date(order.createdAt);
+            return orderDate > startDateTime;
+          });
+
           setTodayAllOrders(todaysOrders);
-          const paymentTotals = calculatePaymentMethodTotals(todaysOrders);
+          const paymentTotals = calculatePaymentMethodTotals(
+            todaysOrders,
+            currRunningDayData.runningDay.expenses,
+            currRunningDayData.runningDay.recoveredCredit
+          );
 
           const totalBilled = todaysOrders
             .filter((order) => order.isNoCharge !== "yes")
@@ -287,12 +357,15 @@ const CrmDeals = () => {
       : `${formattedNumber}${restCurrencySymbol}`;
   };
 
+  //this is for calculate the total amount
   const calculateTotal = () => {
     let forTotalAmount =
       totalAmount +
       runningDayData?.creditRecovered +
-      runningDayData?.openingAmount;
-
+      runningDayData?.openingAmount -
+      totalCredit -
+      ncCollection -
+      unBilledAmount;
     // Loop through each expense
     allExpenses.forEach((expense) => {
       if (expense.exprensType === "received") {
@@ -305,69 +378,57 @@ const CrmDeals = () => {
     return forTotalAmount;
   };
 
-  //this is for calculation all methods total amount
-  const calculatePaymentMethodTotals = (orders, expenses) => {
-    const paymentTotals = {};
+  //this is for calculate the total sale
+  const forCalTotalSale = () => {
+    let forTotalSale =
+      totalAmount +
+      runningDayData?.creditRecovered +
+      totalReceivedExp -
+      unBilledAmount;
 
-    orders.forEach((order) => {
-      if (order.paymentMethod) {
-        try {
-          const paymentMethods = JSON.parse(order.paymentMethod);
-          paymentMethods.forEach(({ payMethod, amount }) => {
-            if (!paymentTotals[payMethod]) {
-              paymentTotals[payMethod] = 0;
-            }
-            paymentTotals[payMethod] += amount;
-          });
-        } catch (error) {
-          console.error(
-            "Error parsing paymentMethod:",
-            order.paymentMethod,
-            error
-          );
-        }
+    return forTotalSale;
+  };
+
+  //this is for close the day
+  const forCloseTheRestDay = async (e) => {
+    e.preventDefault();
+    const DayCloseData = {
+      paymentMethodsWithTotalAmount: allPaymentMethods,
+      noChargeAmount: ncCollection,
+      totalSales: forCalTotalSale(),
+      discounts: totalDiscount,
+      parcelCharges: parcelCharges,
+      creditGiven: totalCredit,
+      totalGivenExpense: totalGivenExpense,
+      totalGetExp: totalReceivedExp,
+      totalRemainSale: calculateTotal() - runningDayData?.openingAmount,
+    };
+
+    console.log(allPaymentMethods);
+    console.log(DayCloseData);
+    const url = `${myUrl}/restaurent/${id}/close/day/${dayId}/off`;
+    const options = {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+      body: JSON.stringify(DayCloseData),
+    };
+
+    try {
+      const response = await fetch(url, options);
+      const data = await response.json();
+      if (response.ok) {
+        console.log("ok data", data);
+        toast.success(data.msg);
+      } else {
+        console.log("err data", data);
+        toast.error(data.msg);
       }
-    });
-
-    console.log("expenses", allExpenses);
-
-    // Process expenses
-    allExpenses?.forEach((expense) => {
-      const type = expense.paymentType;
-      const amount = expense.amount;
-
-      if (!paymentTotals[type]) {
-        paymentTotals[type] = 0;
-      }
-
-      if (expense.exprensType === "received") {
-        paymentTotals[type] += amount;
-      } else if (expense.exprensType === "paid") {
-        paymentTotals[type] -= amount;
-      }
-    });
-
-    // Process recovered credits
-    recoveredCredit.forEach((credit) => {
-      const type = credit.paymentMeth;
-      const amount = credit.amount;
-
-      if (!paymentTotals[type]) {
-        paymentTotals[type] = 0;
-      }
-      paymentTotals[type] += amount;
-    });
-
-    // Convert paymentTotals object to an array
-    const paymentTotalsArray = Object.entries(paymentTotals).map(
-      ([method, amount]) => {
-        return { method, amount };
-      }
-    );
-
-    setAllPaymentMethods(paymentTotalsArray);
-    console.log("all methods", paymentTotalsArray);
-    return paymentTotalsArray;
+    } catch (err) {
+      console.log("there is error in the close restaurent fucntion", err);
+    }
   };
 
   return (
@@ -667,6 +728,7 @@ const CrmDeals = () => {
                       <th>votur</th>
                       <th>Acc head</th>
                       <th>Acc name</th>
+                      <th>Narration</th>
                       <th>Payment Mode</th>
                       <th>Amount</th>
                       <th>Type</th>
@@ -680,6 +742,7 @@ const CrmDeals = () => {
                         <td>{item.votureNo}</td>
                         <td>{item.headAcount}</td>
                         <td>{item.accountName}</td>
+                        <td>{item.description}</td>
                         <td>{item.paymentType}</td>
                         <td>{item.amount}</td>
                         <td>{item.exprensType}</td>
@@ -772,7 +835,7 @@ const CrmDeals = () => {
                             textAlign: "left",
                           }}
                         >
-                          Total {item.method} Sale
+                          Total {item.method} Amount
                         </td>
                         <td
                           style={{
@@ -790,7 +853,101 @@ const CrmDeals = () => {
                 </table>
               </div>
             </Col>
+
+            <Col md={12}>
+              <div>
+                <table
+                  className="table table-bordered"
+                  style={{
+                    borderCollapse: "collapse",
+                    width: "100%",
+                  }}
+                >
+                  <tbody>
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Sale Remaining Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(calculateTotal())}
+                      </td>
+                    </tr>
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Opening Amount
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(runningDayData?.openingAmount)}
+                      </td>
+                    </tr>
+
+                    <tr>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "left",
+                        }}
+                      >
+                        Grand Total
+                      </td>
+                      <td
+                        style={{
+                          border: "1px solid #dee2e6",
+                          padding: "10px",
+                          fontWeight: "bold",
+                          textAlign: "right",
+                        }}
+                      >
+                        {formatAmount(
+                          calculateTotal() - runningDayData?.openingAmount
+                        )}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </Col>
           </Row>
+
+          <div className=" col-md-6 mx-auto my-3">
+            <button
+              type="submit"
+              onClick={(e) => forCloseTheRestDay(e)}
+              className="add-btn bg-info  w-100 text-white px-3 py-2 border-none rounded-5"
+            >
+              Close Day Of Restaurent
+            </button>
+          </div>
         </Container>
       </div>
     </React.Fragment>

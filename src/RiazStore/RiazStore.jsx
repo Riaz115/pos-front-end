@@ -266,6 +266,12 @@ export const MyDataProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    if (showForGuestAdd || showForEditGuest) {
+      setShowForGuest(false);
+    }
+  }, [showForGuestAdd, showForEditGuest]);
+
   return (
     <>
       <RiazStore.Provider

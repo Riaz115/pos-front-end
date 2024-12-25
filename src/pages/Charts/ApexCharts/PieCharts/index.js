@@ -28,6 +28,7 @@ const PieCharts = () => {
   const [myAllItems, setMyAllItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [runningDayData, setRunningDayData] = useState(null);
+  const [totalGivenExpense, setTotalGivenExpense] = useState(0);
 
   //this is for getting data from the use riaz hook
   const { restId, myUrl, restData, dayId, token } = UseRiazHook();
@@ -38,23 +39,53 @@ const PieCharts = () => {
       setLoading(true);
       try {
         // Fetch all data in parallel
-        const [ordersResponse, tablesResponse, kotsResponse] =
+        const options = {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: token,
+          },
+        };
+
+        const [ordersResponse, tablesResponse, kotsResponse, runningDayData] =
           await Promise.all([
             fetch(`${myUrl}/get/${restId}/restaurent/all/orders`),
             fetch(`${myUrl}/forget/all/tables/${restId}`),
             fetch(`${myUrl}/get/${restId}/restaurent/all/delivered/kots`),
+            fetch(
+              `${myUrl}/restaurent/${restId}/get/data/ofrunningday/${dayId}/rest`,
+              options
+            ),
           ]);
 
         const ordersData = await ordersResponse.json();
         const tablesData = await tablesResponse.json();
         const kotsData = await kotsResponse.json();
+        const currRunningDayData = await runningDayData.json();
+
+        setRunningDayData(currRunningDayData.runningDay);
+
+        //this is for counting total given expense
+        let forTotalCreditExpense = 0;
+        const totalGivenExpense =
+          currRunningDayData.runningDay.expenses.forEach((expense) => {
+            if (expense.exprensType === "paid") {
+              forTotalCreditExpense += expense.amount;
+            }
+          });
+
+        setTotalGivenExpense(forTotalCreditExpense);
 
         if (ordersResponse.ok && tablesResponse.ok && kotsResponse.ok) {
-          // Process today's orders
-          const today = new Date().toISOString().split("T")[0];
-          const todaysOrders = ordersData.myFilterOrders.filter((order) =>
-            order.createdAt.startsWith(today)
+          //this is for getting running day orders
+          const startDateTime = new Date(
+            currRunningDayData.runningDay.startDateTime
           );
+
+          const todaysOrders = ordersData.myFilterOrders.filter((order) => {
+            const orderDate = new Date(order.createdAt);
+            return orderDate > startDateTime;
+          });
 
           const totalBilled = todaysOrders
             .filter((order) => order.isNoCharge !== "yes")
@@ -149,7 +180,8 @@ const PieCharts = () => {
             totalUnbilled +
             forTotalCredit +
             totalNoCharge +
-            totalPaid;
+            totalPaid +
+            currRunningDayData.runningDay.creditRecovered;
           setTotalAmount(calculatedTotalAmount);
         } else {
           console.error("Error in API responses");
@@ -354,6 +386,22 @@ const PieCharts = () => {
                         end={runningDayData?.creditRecovered}
                         duration={3}
                       />
+                    </h1>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </Col>
+          <Col lg={4}>
+            <Card className="card-animate card-height-100 ">
+              <CardBody>
+                <div className="d-flex justify-content-between">
+                  <div>
+                    <h5 className="fw-semibold text-muted mb-0">
+                      Total Given Expense
+                    </h5>
+                    <h1 className="mt-4 ff-secondary fw-bold">
+                      <CountUp start={0} end={totalGivenExpense} duration={3} />
                     </h1>
                   </div>
                 </div>

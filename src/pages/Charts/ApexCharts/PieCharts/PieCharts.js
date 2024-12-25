@@ -6,25 +6,51 @@ const SimplePie = () => {
   const [orders, setAllOrders] = useState([]);
 
   //this is for getting data from my hook
-  const { myUrl, restId } = UseRiazHook();
+  const { myUrl, restId, dayId, token } = UseRiazHook();
 
   const forGettingRestaurentAllOrders = async () => {
-    const url = `${myUrl}/get/${restId}/restaurent/all/orders`;
+    const allOrdersUrl = `${myUrl}/get/${restId}/restaurent/all/orders`;
+    const runDayUrl = `${myUrl}/restaurent/${restId}/get/data/ofrunningday/${dayId}/rest`;
+    const options = {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        authorization: token,
+      },
+    };
+
     try {
-      const response = await fetch(url);
-      const data = await response.json();
-      if (response.ok) {
-        const today = new Date().toISOString().split("T")[0];
-        const todaysOrders = data.myFilterOrders.filter((order) =>
-          order.createdAt.startsWith(today)
-        );
+      // Fetching all orders
+      const allOrdersResponse = await fetch(allOrdersUrl, options);
+      const allOrdersData = await allOrdersResponse.json();
+
+      // Fetching running day data
+      const runDayResponse = await fetch(runDayUrl, options);
+      const runDayData = await runDayResponse.json();
+
+      if (allOrdersResponse.ok && runDayResponse.ok) {
+        // Running day ka startDateTime nikalna
+        const startDateTime = new Date(runDayData.runningDay.startDateTime);
+
+        // Running day ke orders filter karna
+        const todaysOrders = allOrdersData?.myFilterOrders?.filter((order) => {
+          const orderDate = new Date(order.createdAt);
+          return orderDate > startDateTime;
+        });
+
         setAllOrders(todaysOrders);
       } else {
-        console.log("err data", data);
+        // Error handling for responses
+        if (!allOrdersResponse.ok) {
+          console.log("Error fetching all orders:", allOrdersData);
+        }
+        if (!runDayResponse.ok) {
+          console.log("Error fetching running day data:", runDayData);
+        }
       }
     } catch (err) {
-      console.log(
-        "there is error in the getting all restaurent orders in dashboard file",
+      console.error(
+        "Error in fetching all restaurant orders or running day data:",
         err
       );
     }
