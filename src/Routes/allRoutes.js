@@ -303,7 +303,7 @@ const authProtectedRoutes = [
   { path: "/restuarent/manage/kot", component: <BuySell /> },
   { path: "/counter/:counterid/dashboard", component: <JobOverview /> },
   { path: "/restaurent/settlements", component: <UiBadges /> },
-  { path: "/:id/credit-book", component: <DashboardNFT /> },
+  { path: "/restaurent/:id/credit-book", component: <DashboardNFT /> },
   { path: "/creditbook/:id/guest", component: <CrmCompanies /> },
   { path: "/guest/:id/credit/all/pays", component: <InvoiceList /> },
   { path: "/add/restaurent/:id/transition", component: <InvoiceDetails /> },

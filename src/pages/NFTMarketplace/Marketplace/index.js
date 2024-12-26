@@ -3,9 +3,14 @@ import { Card, CardBody, Col, Container, Row } from "reactstrap";
 import { Link } from "react-router-dom";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import { toast } from "react-toastify";
+import DeleteModal from "../../../Components/Common/DeleteModal";
+import BasicSuccessMsg from "../../AuthenticationInner/SuccessMessage/BasicSuccessMsg";
 
 const Marketplace = () => {
   const [userAllResturents, setUserAllResturents] = useState([]);
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [forDelRestId, setForDelRestId] = useState("");
 
   //this is for getting data from the hook
   const { myUrl, token, setRestId, forGettingAllGuests } = UseRiazHook();
@@ -49,8 +54,8 @@ const Marketplace = () => {
   };
 
   //this is for delete restaurent
-  const forDeleteRestaurent = async (id) => {
-    const url = `${myUrl}/delete/${id}/restaurent`;
+  const forDeleteRestaurent = async () => {
+    const url = `${myUrl}/delete/${forDelRestId}/restaurent`;
     const options = {
       method: "DELETE",
     };
@@ -61,6 +66,8 @@ const Marketplace = () => {
       if (response.ok) {
         toast.success(data.msg);
         forGetUserAllRestaurents();
+        setDeleteModal(false);
+        setSuccessModal(true);
       } else {
         console.log("err data", data);
         toast.error(data.msg);
@@ -70,8 +77,23 @@ const Marketplace = () => {
     }
   };
 
+  //this is for click on the delete button
+  const forClickOnDeletButton = (id) => {
+    setForDelRestId(id);
+    setDeleteModal(true);
+  };
+
   return (
     <React.Fragment>
+      <DeleteModal
+        show={deleteModal}
+        onDeleteClick={forDeleteRestaurent}
+        onCloseClick={() => setDeleteModal(false)}
+      />
+      <BasicSuccessMsg
+        show={successModal}
+        onCloseClick={() => setSuccessModal(false)}
+      />
       <div className="page-content">
         <Container fluid>
           <Row>
@@ -128,7 +150,7 @@ const Marketplace = () => {
 
                       <Link
                         to="#"
-                        // onClick={() => forDeleteRestaurent(item._id)}
+                        onClick={() => forClickOnDeletButton(item._id)}
                         className="btn btn-primary btn-smn py-1 px-4  mx-2"
                       >
                         Delete

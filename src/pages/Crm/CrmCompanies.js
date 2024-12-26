@@ -32,7 +32,7 @@ const CrmCompanies = () => {
   const { id } = useParams();
 
   //this is for getting data from the useRiazHook
-  const { restData, myUrl, token, dayId } = UseRiazHook();
+  const { restData, myUrl, token, dayId, formatAmount } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -327,33 +327,9 @@ const CrmCompanies = () => {
                     </td>
                     <td>{item.orderNo}</td>
 
-                    <td>
-                      {restData.currencyPosition === "before"
-                        ? `${
-                            restData.restCurrencySymbol
-                          }${item.totalAmount.toFixed(restData.precision)}`
-                        : `${item.totalAmount.toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
-                    </td>
-                    <td>
-                      {restData.currencyPosition === "before"
-                        ? `${
-                            restData.restCurrencySymbol
-                          }${item.paidAmount.toFixed(restData.precision)}`
-                        : `${item.paidAmount.toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
-                    </td>
-                    <td>
-                      {restData.currencyPosition === "before"
-                        ? `${
-                            restData.restCurrencySymbol
-                          }${item.creditAmount.toFixed(restData.precision)}`
-                        : `${item.creditAmount.toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
-                    </td>
+                    <td>{formatAmount(item?.totalAmount)}</td>
+                    <td>{formatAmount(item?.paidAmount)}</td>
+                    <td>{formatAmount(item?.creditAmount)}</td>
                     <td>
                       <div className="hstack gap-3 flex-wrap">
                         <Link
@@ -427,63 +403,21 @@ const CrmCompanies = () => {
             <div className="px-2">
               <div className="d-flex align-items-center justify-content-between">
                 <div>
-                  Geust Total Credti :
-                  {restData.currencyPosition === "before"
-                    ? `${restData.restCurrencySymbol}${
-                        guestData?.totalCredit?.toFixed(restData.precision) || 0
-                      }`
-                    : `${
-                        guestData?.totalCredit?.toFixed(restData.precision) || 0
-                      }${restData.restCurrencySymbol}`}
+                  Geust Total Credit :{formatAmount(guestData?.totalCredit)}
                 </div>
                 <div>
                   <span className="px-1">
                     Invoice No: {creditOrderData?.orderNo}
                   </span>
                   <span className="px-1">
-                    {" "}
-                    Credit Amount :
-                    {restData.currencyPosition === "before"
-                      ? `${restData.restCurrencySymbol}${
-                          creditOrderData?.creditAmount?.toFixed(
-                            restData.precision
-                          ) || 0
-                        }`
-                      : `${
-                          creditOrderData?.creditAmount?.toFixed(
-                            restData.precision
-                          ) || 0
-                        }${restData.restCurrencySymbol}`}
+                    Credit Amount :{" "}
+                    {formatAmount(creditOrderData?.creditAmount)}
                   </span>
                   <span className="px-1">
-                    {" "}
-                    Paid Amount :{" "}
-                    {restData.currencyPosition === "before"
-                      ? `${restData.restCurrencySymbol}${
-                          creditOrderData?.paidAmount?.toFixed(
-                            restData.precision
-                          ) || 0
-                        }`
-                      : `${
-                          creditOrderData?.paidAmount?.toFixed(
-                            restData.precision
-                          ) || 0
-                        }${restData.restCurrencySymbol}`}
+                    Paid Amount : {formatAmount(creditOrderData?.paidAmount)}
                   </span>
                   <span className="px-1">
-                    {" "}
-                    Total Amount:
-                    {restData.currencyPosition === "before"
-                      ? `${restData.restCurrencySymbol}${
-                          creditOrderData?.totalAmount?.toFixed(
-                            restData.precision
-                          ) || 0
-                        }`
-                      : `${
-                          creditOrderData?.totalAmount?.toFixed(
-                            restData.precision
-                          ) || 0
-                        }${restData.restCurrencySymbol}`}
+                    Total Amount: {formatAmount(creditOrderData?.totalAmount)}
                   </span>
                 </div>
               </div>
@@ -629,17 +563,7 @@ const CrmCompanies = () => {
                       }}
                     >
                       <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
-                        {restData.currencyPosition === "before"
-                          ? `${restData.restCurrencySymbol}${
-                              creditOrderData?.creditAmount?.toFixed(
-                                restData.precision
-                              ) || 0
-                            }`
-                          : `${
-                              creditOrderData?.creditAmount?.toFixed(
-                                restData.precision
-                              ) || 0
-                            }${restData.restCurrencySymbol}`}
+                        {formatAmount(creditOrderData?.creditAmount)}
                       </p>
                     </div>
                   </div>
@@ -690,8 +614,12 @@ const CrmCompanies = () => {
                       }}
                     >
                       <input
-                        type="number"
-                        value={creditOrderData?.creditAmount}
+                        type="text"
+                        value={
+                          creditOrderData?.creditAmount
+                            ? formatAmount(creditOrderData?.creditAmount)
+                            : ""
+                        }
                         className="px-2 m-0"
                         style={{
                           border: "1px solid #B3C8CF",
@@ -753,26 +681,14 @@ const CrmCompanies = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(10).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(10).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(10)}
                     </button>
                     <button
                       onClick={() => setInputValue(20)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(20).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(20).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(20)}
                     </button>
                   </div>
                   <div
@@ -784,26 +700,14 @@ const CrmCompanies = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(50).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(50).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(50)}
                     </button>
                     <button
                       onClick={() => setInputValue(100)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(100).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(100).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(100)}
                     </button>
                   </div>
                   <div
@@ -815,26 +719,14 @@ const CrmCompanies = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(200).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(200).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(200)}
                     </button>
                     <button
                       onClick={() => setInputValue(500)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(500).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(500).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(500)}
                     </button>
                   </div>
                   <div
@@ -846,26 +738,14 @@ const CrmCompanies = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(1000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(1000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(1000)}
                     </button>
                     <button
                       onClick={() => setInputValue(2000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(2000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(2000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(2000)}
                     </button>
                   </div>
                   <div
@@ -877,26 +757,14 @@ const CrmCompanies = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(3000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(3000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(3000)}
                     </button>
                     <button
                       onClick={() => setInputValue(4000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(4000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(4000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(4000)}
                     </button>
                   </div>
                   <div
@@ -908,26 +776,14 @@ const CrmCompanies = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(5000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(5000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(5000)}
                     </button>
                     <button
                       onClick={() => setInputValue(10000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(10000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(10000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(10000)}
                     </button>
                   </div>
                   <div

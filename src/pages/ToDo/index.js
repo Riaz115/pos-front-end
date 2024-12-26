@@ -24,6 +24,7 @@ const ToDoList = () => {
     forGettingTableData,
     setForTableId,
     counterId,
+    formatAmount,
   } = UseRiazHook();
 
   //this is for getting id of table and kot id
@@ -301,25 +302,8 @@ const ToDoList = () => {
                             </div>
                           )}
                         </td>
-                        <td>
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(
-                                item.price * item.quantity
-                              ).toFixed(restData.precision)}`
-                            : `${item.price.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}
-                        </td>
-                        <td>
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(
-                                item.totalPrice * item.quantity
-                              ).toFixed(restData.precision)}`
-                            : `${(item.price * item.quantity).toFixed(
-                                restData.precision
-                              )}${restData.restCurrencySymbol}`}
-                        </td>
+                        <td>{formatAmount(item?.price)}</td>
+                        <td>{formatAmount(item.totalPrice)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -400,25 +384,8 @@ const ToDoList = () => {
                         </td>
                         <td>{item.name}</td>
                         <td>{item.quantity}</td>
-                        <td>
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(
-                                item.price * item.quantity
-                              ).toFixed(restData.precision)}`
-                            : `${item.price.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}
-                        </td>
-                        <td>
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(
-                                item.totalPrice * item.quantity
-                              ).toFixed(restData.precision)}`
-                            : `${(item.price * item.quantity).toFixed(
-                                restData.precision
-                              )}${restData.restCurrencySymbol}`}
-                        </td>
+                        <td>{formatAmount(item?.price)}</td>
+                        <td>{formatAmount(item?.totalPrice)}</td>
                       </tr>
                     ))}
                   </tbody>

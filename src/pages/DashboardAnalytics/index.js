@@ -51,6 +51,7 @@ const DashboardAnalytics = () => {
     forTableData,
     forGettingTableData,
     setGuestData,
+    formatAmount,
   } = UseRiazHook();
 
   //this is for open pop up on kot button
@@ -744,18 +745,7 @@ const DashboardAnalytics = () => {
                           >
                             {userData.name}
                           </p>
-                          <p>
-                            {" "}
-                            {restData.currencyPosition === "before"
-                              ? `${
-                                  restData.restCurrencySymbol
-                                }${item.currentOrder.totalAmount.toFixed(
-                                  restData.precision
-                                )}`
-                              : `${item.currentOrder.totalAmount.toFixed(
-                                  restData.precision
-                                )}${restData.restCurrencySymbol}`}
-                          </p>
+                          <p>{formatAmount(item?.currentOrder?.totalAmount)}</p>
                         </div>
 
                         <div
@@ -1657,15 +1647,7 @@ const DashboardAnalytics = () => {
                           }}
                         >
                           <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
-                            {restData.currencyPosition === "before"
-                              ? `${
-                                  restData.restCurrencySymbol
-                                }${tableData?.currentOrder?.totalAmount.toFixed(
-                                  restData.precision
-                                )}`
-                              : `${tableData?.currentOrder?.totalAmount.toFixed(
-                                  restData.precision
-                                )}${restData.restCurrencySymbol}`}{" "}
+                            {formatAmount(tableData?.currentOrder?.totalAmount)}
                           </p>
                         </div>{" "}
                       </div>{" "}
@@ -1747,8 +1729,14 @@ const DashboardAnalytics = () => {
                           }}
                         >
                           <input
-                            type="number"
-                            value={tableData?.currentOrder?.remainAmount}
+                            type="text"
+                            value={
+                              tableData?.currentOrder?.remainAmount
+                                ? formatAmount(
+                                    tableData?.currentOrder?.remainAmount
+                                  )
+                                : "0"
+                            }
                             className="px-2 m-0"
                             style={{
                               border: "1px solid #B3C8CF",
@@ -1812,28 +1800,14 @@ const DashboardAnalytics = () => {
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(10).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(10).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(10)}
                         </button>
                         <button
                           onClick={() => setInputValue(20)}
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(20).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(20).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(20)}
                         </button>
                       </div>
                       <div
@@ -1845,28 +1819,14 @@ const DashboardAnalytics = () => {
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(50).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(50).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(50)}
                         </button>
                         <button
                           onClick={() => setInputValue(100)}
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(100).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(100).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(100)}
                         </button>
                       </div>{" "}
                       <div
@@ -1878,28 +1838,14 @@ const DashboardAnalytics = () => {
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(200).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(200).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(200)}
                         </button>
                         <button
                           onClick={() => setInputValue(500)}
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(500).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(500).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(500)}
                         </button>
                       </div>{" "}
                       <div
@@ -1911,28 +1857,14 @@ const DashboardAnalytics = () => {
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(1000).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(1000).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(1000)}
                         </button>
                         <button
                           onClick={() => setInputValue(2000)}
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(2000).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(2000).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(2000)}
                         </button>
                       </div>
                       <div
@@ -1944,28 +1876,14 @@ const DashboardAnalytics = () => {
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(3000).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(3000).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(3000)}
                         </button>
                         <button
                           onClick={() => setInputValue(4000)}
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(4000).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(4000).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(4000)}
                         </button>
                       </div>{" "}
                       <div
@@ -1977,28 +1895,14 @@ const DashboardAnalytics = () => {
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(5000).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(5000).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(5000)}
                         </button>
                         <button
                           onClick={() => setInputValue(10000)}
                           style={{ border: "none", width: "140px" }}
                           className="bg-success py-2 mx-1 px-4 text-white"
                         >
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${(10000).toFixed(
-                                restData.precision
-                              )}`
-                            : `${(10000).toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}{" "}
+                          {formatAmount(10000)}
                         </button>
                       </div>{" "}
                       <div

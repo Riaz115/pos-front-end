@@ -36,7 +36,7 @@ const BasicTables = () => {
   const [qty, setQty] = useState("");
 
   //this is for getting data from my hook
-  const { myUrl } = UseRiazHook();
+  const { myUrl, formatAmount } = UseRiazHook();
 
   //this is for getting rest id
   const { id } = useParams();
@@ -363,7 +363,8 @@ const BasicTables = () => {
                             <div className="flex-grow-1">{item.name}</div>
                           </div>
                         </td>
-                        <td>${item.price}</td>
+
+                        <td>{formatAmount(item.price)}</td>
 
                         <td>{item.catagory}</td>
                         <td>{item.qty}</td>

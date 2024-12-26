@@ -37,11 +37,18 @@ const CrmDeals = () => {
   const navigate = useNavigate();
 
   //this is for getting data from my custome hook
-  const { myUrl, restData, dayId, token } = UseRiazHook();
+  const { myUrl, restData, dayId, token, formatAmount } = UseRiazHook();
 
   //this is for calculation all methods total amount
-  const calculatePaymentMethodTotals = (orders, expenses, rcvrCredit) => {
+  const calculatePaymentMethodTotals = (
+    orders,
+    expenses,
+    rcvrCredit,
+    runningTables
+  ) => {
     const paymentTotals = {};
+
+    // console.log("run tables", runningTables);
 
     //this is for calculation orders amount
     orders.forEach((order) => {
@@ -82,6 +89,33 @@ const CrmDeals = () => {
         paymentTotals[paymentMeth] = 0;
       }
       paymentTotals[paymentMeth] += amount;
+    });
+
+    //this is for counting from tables
+    // This is for counting from runningTables
+    runningTables.forEach((order) => {
+      if (order?.currentOrder?.paymentMethod) {
+        try {
+          // Check if paymentMethod is already an object or needs parsing
+          const paymentMethods = Array.isArray(order.currentOrder.paymentMethod)
+            ? order.currentOrder.paymentMethod
+            : JSON.parse(order.currentOrder.paymentMethod);
+
+          // Iterate over paymentMethods to calculate totals
+          paymentMethods.forEach(({ payMethod, amount }) => {
+            if (!paymentTotals[payMethod]) {
+              paymentTotals[payMethod] = 0; // Initialize if not already present
+            }
+            paymentTotals[payMethod] += amount; // Add the amount to the respective method
+          });
+        } catch (error) {
+          console.error(
+            "Error parsing paymentMethod:",
+            order.currentOrder.paymentMethod,
+            error
+          );
+        }
+      }
     });
 
     // Convert paymentTotals object to an array
@@ -198,11 +232,6 @@ const CrmDeals = () => {
           });
 
           setTodayAllOrders(todaysOrders);
-          const paymentTotals = calculatePaymentMethodTotals(
-            todaysOrders,
-            currRunningDayData.runningDay.expenses,
-            currRunningDayData.runningDay.recoveredCredit
-          );
 
           const totalBilled = todaysOrders
             .filter((order) => order.isNoCharge !== "yes")
@@ -260,6 +289,13 @@ const CrmDeals = () => {
           setUnBilledAmount(totalUnbilled);
           setNewBilledAmount(totalBilled + totalPaid);
 
+          const paymentTotals = calculatePaymentMethodTotals(
+            todaysOrders,
+            currRunningDayData?.runningDay?.expenses,
+            currRunningDayData?.runningDay?.recoveredCredit,
+            runningAndInvoicedTables
+          );
+
           // Collect KOT IDs from today's orders
           const kotIdsSet = new Set(
             todaysOrders.flatMap((order) => order.kots)
@@ -311,51 +347,6 @@ const CrmDeals = () => {
 
     fetchData();
   }, []);
-
-  //this is for formatting the amount
-  const formatAmount = (amount) => {
-    const {
-      currencyPosition,
-      restCurrencySymbol,
-      precision,
-      decimalSeparator,
-      thousandSeparator,
-    } = restData;
-
-    // Map separators to their actual values
-    const separatorMapping = {
-      dot: ".",
-      comma: ",",
-      space: " ",
-    };
-
-    const actualDecimalSeparator = separatorMapping[decimalSeparator] || ".";
-    const actualThousandSeparator = separatorMapping[thousandSeparator] || ",";
-
-    // Fix to the specified precision
-    const fixedAmount = amount
-      ? amount.toFixed(precision)
-      : (0).toFixed(precision);
-
-    // Split the amount into integer and decimal parts
-    let [integerPart, decimalPart] = fixedAmount.split(".");
-
-    // Add thousand separators to the integer part
-    integerPart = integerPart.replace(
-      /\B(?=(\d{3})+(?!\d))/g,
-      actualThousandSeparator
-    );
-
-    // Combine integer and decimal parts with the appropriate separator
-    const formattedNumber = decimalPart
-      ? `${integerPart}${actualDecimalSeparator}${decimalPart}`
-      : integerPart;
-
-    // Return the formatted amount with currency symbol
-    return currencyPosition === "before"
-      ? `${restCurrencySymbol}${formattedNumber}`
-      : `${formattedNumber}${restCurrencySymbol}`;
-  };
 
   //this is for calculate the total amount
   const calculateTotal = () => {
@@ -422,6 +413,7 @@ const CrmDeals = () => {
       if (response.ok) {
         console.log("ok data", data);
         toast.success(data.msg);
+        navigate(`/restaurent/${id}/start/day`);
       } else {
         console.log("err data", data);
         toast.error(data.msg);
@@ -615,7 +607,7 @@ const CrmDeals = () => {
                           textAlign: "right",
                         }}
                       >
-                        {formatAmount(billedAmount)}
+                        {formatAmount(newBilledAmount)}
                       </td>
                     </tr>
 
@@ -720,6 +712,7 @@ const CrmDeals = () => {
                 </table>
               </div>
             </Col>
+
             <Col md={12}>
               <div className="table-responsive">
                 <Table striped bordered hover>

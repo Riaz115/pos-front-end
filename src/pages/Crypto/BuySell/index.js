@@ -22,7 +22,7 @@ const BuySell = () => {
   const [tableType, setTableType] = useState("");
 
   //this is for getting data from my hook
-  const { myUrl, restId, restData } = UseRiazHook();
+  const { myUrl, restId, restData, formatAmount } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -303,7 +303,7 @@ const BuySell = () => {
                     <td>{item?.orderType}</td>
                     <td>{item?.orderTaker}</td>
                     <td>{item?.totalItem}</td>
-                    <td>{item?.grandTotal}</td>
+                    <td>{formatAmount(item?.grandTotal)}</td>
                     <td>
                       <div className="hstack gap-3 flex-wrap">
                         <button className="btn btn-sm btn-soft-info edit-list">

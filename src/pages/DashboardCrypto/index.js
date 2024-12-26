@@ -24,7 +24,7 @@ const DashboardCrypto = () => {
   const [tableType, setTableType] = useState("");
 
   //this is for getting data from my custome hookk
-  const { restData, myUrl, restId } = UseRiazHook();
+  const { restData, myUrl, restId, formatAmount } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -375,7 +375,7 @@ const DashboardCrypto = () => {
                     <td>{item?.orderType}</td>
                     <td>{item?.orderTaker}</td>
                     <td>{item?.guest?.name}</td>
-                    <td>{item?.totalAmount}</td>
+                    <td>{formatAmount(item?.totalAmount)}</td>
                     <td>
                       {(() => {
                         // Handle potential undefined or invalid JSON gracefully
@@ -397,7 +397,7 @@ const DashboardCrypto = () => {
                         } else if (paymentMethods.length > 1) {
                           return "multi";
                         } else {
-                          return "No Payment Method"; // Fallback if no payment method exists
+                          return "No Charge"; // Fallback if no payment method exists
                         }
                       })()}
                     </td>

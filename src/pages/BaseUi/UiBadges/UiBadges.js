@@ -23,7 +23,7 @@ const UiBadges = () => {
   const [tableType, setTableType] = useState("");
 
   //this is for getting data from my custome hookk
-  const { restData, myUrl, restId } = UseRiazHook();
+  const { restData, myUrl, restId, formatAmount } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -374,7 +374,7 @@ const UiBadges = () => {
                     <td>{item?.orderType}</td>
                     <td>{item?.orderTaker}</td>
                     <td>{item?.guest?.name}</td>
-                    <td>{item?.totalAmount}</td>
+                    <td>{formatAmount(item?.totalAmount)}</td>
                     <td>
                       {(() => {
                         // Handle potential undefined or invalid JSON gracefully
@@ -396,7 +396,7 @@ const UiBadges = () => {
                         } else if (paymentMethods.length > 1) {
                           return "multi";
                         } else {
-                          return "No Payment Method";
+                          return "No Charge";
                         }
                       })()}
                     </td>

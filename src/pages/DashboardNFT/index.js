@@ -36,6 +36,7 @@ const DashboardNFT = () => {
     myUrl,
     token,
     dayId,
+    formatAmount,
   } = UseRiazHook();
 
   //this is for controll rendering of all all guest getting data function
@@ -203,16 +204,7 @@ const DashboardNFT = () => {
                     <td>{index + 1}</td>
                     <td>{item.name}</td>
                     <td>{item.phone}</td>
-                    <td>
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${
-                            restData.restCurrencySymbol
-                          }${item.totalCredit.toFixed(restData.precision)}`
-                        : `${item.totalCredit.toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
-                    </td>
+                    <td>{formatAmount(item?.totalCredit)}</td>
                     <td>
                       <Link
                         to={`/guest/${item._id}/credit/all/pays`}
@@ -447,17 +439,7 @@ const DashboardNFT = () => {
                       }}
                     >
                       <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
-                        {restData.currencyPosition === "before"
-                          ? `${restData.restCurrencySymbol}${
-                              guestData?.totalCredit?.toFixed(
-                                restData.precision
-                              ) || 0
-                            }`
-                          : `${
-                              guestData?.totalCredit?.toFixed(
-                                restData.precision
-                              ) || 0
-                            }${restData.restCurrencySymbol}`}
+                        {formatAmount(guestData?.totalCredit)}
                       </p>
                     </div>
                   </div>
@@ -508,8 +490,12 @@ const DashboardNFT = () => {
                       }}
                     >
                       <input
-                        type="number"
-                        value={guestData?.totalCredit || 0}
+                        type="text"
+                        value={
+                          guestData?.totalCredit
+                            ? formatAmount(guestData?.totalCredit)
+                            : ""
+                        }
                         className="px-2 m-0"
                         style={{
                           border: "1px solid #B3C8CF",
@@ -571,26 +557,14 @@ const DashboardNFT = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(10).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(10).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(10)}
                     </button>
                     <button
                       onClick={() => setInputValue(20)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(20).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(20).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(20)}
                     </button>
                   </div>
                   <div
@@ -602,26 +576,14 @@ const DashboardNFT = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(50).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(50).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(50)}
                     </button>
                     <button
                       onClick={() => setInputValue(100)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(100).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(100).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(100)}
                     </button>
                   </div>
                   <div
@@ -633,26 +595,14 @@ const DashboardNFT = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(200).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(200).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(200)}
                     </button>
                     <button
                       onClick={() => setInputValue(500)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(500).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(500).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(500)}
                     </button>
                   </div>
                   <div
@@ -664,26 +614,14 @@ const DashboardNFT = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(1000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(1000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(1000)}
                     </button>
                     <button
                       onClick={() => setInputValue(2000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(2000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(2000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(2000)}
                     </button>
                   </div>
                   <div
@@ -695,26 +633,14 @@ const DashboardNFT = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(3000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(3000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(3000)}
                     </button>
                     <button
                       onClick={() => setInputValue(4000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(4000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(4000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(4000)}
                     </button>
                   </div>
                   <div
@@ -726,26 +652,14 @@ const DashboardNFT = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(5000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(5000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(5000)}
                     </button>
                     <button
                       onClick={() => setInputValue(10000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(10000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(10000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}
+                      {formatAmount(10000)}
                     </button>
                   </div>
                   <div

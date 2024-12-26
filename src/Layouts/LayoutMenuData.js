@@ -445,7 +445,7 @@ const Navdata = () => {
         {
           id: "Credit Book",
           label: "Credit Book",
-          link: `/${restId}/credit-book`,
+          link: `/restaurent/${restId}/credit-book`,
           parentId: "books",
         },
       ],

@@ -26,6 +26,7 @@ const Chat = () => {
     setForTableId,
     token,
     counterId,
+    formatAmount,
   } = UseRiazHook();
 
   //this is for navigate
@@ -388,24 +389,8 @@ const Chat = () => {
                         </td>
                         <td>{item.name}</td>
                         <td>{item.quantity}</td>
-                        <td>
-                          {restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${item.price.toFixed(restData.precision)}`
-                            : `${item.price.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}
-                        </td>
-                        <td>
-                          {restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${item.totalPrice.toFixed(restData.precision)}`
-                            : `${item.totalPrice.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}
-                        </td>
+                        <td>{formatAmount(item?.price)}</td>
+                        <td>{formatAmount(item?.totalPrice)}</td>
                       </tr>
                     ))}
                   </tbody>

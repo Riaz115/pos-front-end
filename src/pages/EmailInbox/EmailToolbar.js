@@ -60,9 +60,9 @@ const EmailToolbar = () => {
   const { myUrl, token } = UseRiazHook();
 
   //this is for states options
-  const forStatesOptions = allStatesForTimeZone.map((everyState) => ({
-    label: everyState,
-    value: everyState,
+  const forStatesOptions = allStatesForTimeZone.map((state) => ({
+    value: state.zone,
+    label: state.name,
   }));
 
   //this is for select country
@@ -137,7 +137,6 @@ const EmailToolbar = () => {
   const handleChange = (selectedOption) => {
     setSelectedTimezone(selectedOption.value);
     forFetchTime(selectedOption.value);
-    console.log("Selected timezone:", selectedOption);
   };
 
   //this is for catch errors for add restaurent
@@ -688,7 +687,9 @@ const EmailToolbar = () => {
                     Time Zone
                   </Label>
                   <Select
-                    value={selectedTimezone}
+                    value={forStatesOptions.find(
+                      (option) => option.value === selectedTimezone
+                    )}
                     onChange={handleChange}
                     options={forStatesOptions}
                     placeholder={

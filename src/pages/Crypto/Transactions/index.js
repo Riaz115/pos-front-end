@@ -49,6 +49,7 @@ const Transactions = () => {
     forTableData,
     setForTableId,
     counterId,
+    formatAmount,
   } = UseRiazHook();
 
   //this is for navigate
@@ -714,25 +715,8 @@ const Transactions = () => {
                         <td>{index + 1}</td>
                         <td>{item.name}</td>
                         <td>{item.quantity}</td>
-                        <td>
-                          {" "}
-                          {restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${item.price.toFixed(restData.precision)}`
-                            : `${item.price.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}
-                        </td>
-                        <td>
-                          {restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${item.totalPrice.toFixed(restData.precision)}`
-                            : `${item.totalPrice.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`}
-                        </td>
+                        <td>{formatAmount(item?.price)} </td>
+                        <td>{formatAmount(item?.totalPrice)}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -770,72 +754,19 @@ const Transactions = () => {
                         style={{ fontSize: "12px" }}
                         className="fw-bold"
                       >
-                        {tableData?.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData?.currentOrder?.foodAmount
-                                  ? tableData?.currentOrder?.foodAmount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData?.currentOrder?.foodAmount
-                                  ? tableData?.currentOrder?.foodAmount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData?.restCurrencySymbol}`
-                          : ""}
+                        {formatAmount(tableData?.currentOrder?.foodAmount)}
                       </th>
                     </tr>
                   </thead>
                   <tbody style={{ fontSize: "12px" }}>
                     <tr>
                       <td>Parcel Charges </td>
-                      <td>
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData.currentOrder?.parcel
-                                  ? tableData.currentOrder.parcel.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData.currentOrder?.parcel
-                                  ? tableData.currentOrder.parcel.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData.restCurrencySymbol}`
-                          : ""}
-                      </td>
+                      <td>{formatAmount(tableData?.currentOrder?.parcel)}</td>
                     </tr>
 
                     <tr>
-                      <td>Discount</td>
-                      <td>
-                        {" "}
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData.currentOrder?.discount
-                                  ? tableData.currentOrder.discount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData.currentOrder?.discount
-                                  ? tableData.currentOrder.discount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData.restCurrencySymbol}`
-                          : ""}
-                      </td>
+                      <td>Discount</td>{" "}
+                      <td>{formatAmount(tableData?.currentOrder?.discount)}</td>{" "}
                     </tr>
 
                     <tr>
@@ -845,30 +776,8 @@ const Transactions = () => {
                         className="fw-bold"
                       >
                         SubTotal
-                      </td>
-                      <td
-                        scope="col"
-                        style={{ fontSize: "12px" }}
-                        className="fw-bold"
-                      >
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData.currentOrder?.subTotal
-                                  ? tableData.currentOrder.subTotal.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData.currentOrder?.subTotal
-                                  ? tableData.currentOrder.subTotal.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData.restCurrencySymbol}`
-                          : ""}
-                      </td>
+                      </td>{" "}
+                      <td>{formatAmount(tableData?.currentOrder?.subTotal)}</td>{" "}
                     </tr>
 
                     {tableData?.tableType === "delivery" ? (
@@ -876,36 +785,15 @@ const Transactions = () => {
                         <td>
                           Delivery Charges on FOOD{" "}
                           {restData?.typeOfDeliveryCharges === "number"
-                            ? restData.currencyPosition === "before"
-                              ? `${
-                                  restData.restCurrencySymbol
-                                }${restData.deliveryChargesAmount.toFixed(
-                                  restData.precision
-                                )}`
-                              : `${restData.deliveryChargesAmount.toFixed(
-                                  restData.precision
-                                )}${restData.restCurrencySymbol}`
-                            : `${restData.deliveryChargesAmount}%`}
+                            ? formatAmount(
+                                tableData?.currentOrder?.deliveryChargesAmount
+                              )
+                            : `${restData?.deliveryChargesAmount}%`}
                         </td>
                         <td>
-                          {" "}
-                          {tableData.currentOrder
-                            ? restData.currencyPosition === "before"
-                              ? `${restData.restCurrencySymbol}${
-                                  tableData.currentOrder.deliveryCharges
-                                    ? tableData.currentOrder.deliveryCharges.toFixed(
-                                        restData.precision
-                                      )
-                                    : "0.00"
-                                }`
-                              : `${
-                                  tableData.currentOrder.deliveryCharges
-                                    ? tableData.currentOrder.deliveryCharges.toFixed(
-                                        restData.precision
-                                      )
-                                    : "0.00"
-                                }${restData.restCurrencySymbol}`
-                            : ""}
+                          {formatAmount(
+                            tableData?.currentOrder?.deliveryCharges
+                          )}
                         </td>
                       </tr>
                     ) : (
@@ -913,36 +801,15 @@ const Transactions = () => {
                         <td>
                           sr.Charges on FOOD{" "}
                           {restData?.typeOfServiceCharges === "number"
-                            ? restData.currencyPosition === "before"
-                              ? `${
-                                  restData.restCurrencySymbol
-                                }${restData.serviceChargesAmount.toFixed(
-                                  restData.precision
-                                )}`
-                              : `${restData.serviceChargesAmount.toFixed(
-                                  restData.precision
-                                )}${restData.restCurrencySymbol}`
-                            : `${restData.serviceChargesAmount}%`}
+                            ? formatAmount(
+                                tableData?.currentOrder?.serviceChargesAmount
+                              )
+                            : `${restData?.serviceChargesAmount}%`}
                         </td>
                         <td>
-                          {" "}
-                          {tableData.currentOrder
-                            ? restData.currencyPosition === "before"
-                              ? `${restData.restCurrencySymbol}${
-                                  tableData.currentOrder.serviceCharges
-                                    ? tableData.currentOrder.serviceCharges.toFixed(
-                                        restData.precision
-                                      )
-                                    : "0.00"
-                                }`
-                              : `${
-                                  tableData.currentOrder.serviceCharges
-                                    ? tableData.currentOrder.serviceCharges.toFixed(
-                                        restData.precision
-                                      )
-                                    : "0.00"
-                                }${restData.restCurrencySymbol}`
-                            : ""}
+                          {formatAmount(
+                            tableData?.currentOrder?.serviceCharges
+                          )}
                         </td>
                       </tr>
                     )}
@@ -951,37 +818,10 @@ const Transactions = () => {
                       <td>
                         SGST ON FOOD{" "}
                         {restData?.gstTexType === "number"
-                          ? restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${restData.gstTexAmount.toFixed(
-                                restData.precision
-                              )}`
-                            : `${restData.gstTexAmount.toFixed(
-                                restData.precision
-                              )}${restData.restCurrencySymbol}`
+                          ? formatAmount(tableData?.currentOrder?.gstTexAmount)
                           : `${restData.gstTexAmount}%`}
                       </td>
-                      <td>
-                        {" "}
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData.currentOrder.gstTex
-                                  ? tableData.currentOrder.gstTex.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData.currentOrder.gstTex
-                                  ? tableData.currentOrder.gstTex.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData.restCurrencySymbol}`
-                          : ""}
-                      </td>
+                      <td>{formatAmount(tableData?.currentOrder?.gstTex)}</td>
                     </tr>
 
                     <tr>
@@ -997,23 +837,7 @@ const Transactions = () => {
                         style={{ fontSize: "12px" }}
                         className="fw-bold"
                       >
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData.currentOrder.paidAmount
-                                  ? tableData.currentOrder.paidAmount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData.currentOrder.paidAmount
-                                  ? tableData.currentOrder.paidAmount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData.restCurrencySymbol}`
-                          : ""}
+                        {formatAmount(tableData?.currentOrder?.paidAmount)}
                       </th>
                     </tr>
 
@@ -1030,40 +854,14 @@ const Transactions = () => {
                         style={{ fontSize: "12px" }}
                         className="fw-bold"
                       >
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${restData.restCurrencySymbol}${
-                                tableData.currentOrder.remainAmount
-                                  ? tableData.currentOrder.remainAmount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }`
-                            : `${
-                                tableData.currentOrder.remainAmount
-                                  ? tableData.currentOrder.remainAmount.toFixed(
-                                      restData.precision
-                                    )
-                                  : "0.00"
-                              }${restData.restCurrencySymbol}`
-                          : ""}
+                        {formatAmount(tableData?.currentOrder?.remainAmount)}
                       </th>
                     </tr>
 
                     <tr className="fw-bold">
                       <td>Grand Total</td>
                       <td>
-                        {tableData.currentOrder
-                          ? restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${tableData.currentOrder.totalAmount.toFixed(
-                                restData.precision
-                              )}`
-                            : `${tableData.currentOrder.totalAmount.toFixed(
-                                restData.precision
-                              )}${restData.restCurrencySymbol}`
-                          : "0"}
+                        {formatAmount(tableData?.currentOrder?.totalAmount)}
                       </td>
                     </tr>
                   </tbody>
@@ -1732,15 +1530,7 @@ const Transactions = () => {
                       }}
                     >
                       <p className="p-0 m-0 " style={{ fontWeight: "600" }}>
-                        {restData.currencyPosition === "before"
-                          ? `${
-                              restData.restCurrencySymbol
-                            }${tableData?.currentOrder?.totalAmount.toFixed(
-                              restData.precision
-                            )}`
-                          : `${tableData?.currentOrder?.totalAmount.toFixed(
-                              restData.precision
-                            )}${restData.restCurrencySymbol}`}{" "}
+                        {formatAmount(tableData?.currentOrder?.totalAmount)}
                       </p>
                     </div>{" "}
                   </div>{" "}
@@ -1820,8 +1610,14 @@ const Transactions = () => {
                       }}
                     >
                       <input
-                        type="number"
-                        value={tableData?.currentOrder?.remainAmount}
+                        type="text"
+                        value={
+                          tableData?.currentOrder?.remainAmount
+                            ? formatAmount(
+                                tableData?.currentOrder?.remainAmount
+                              )
+                            : "0"
+                        }
                         className="px-2 m-0"
                         style={{
                           border: "1px solid #B3C8CF",
@@ -1884,27 +1680,14 @@ const Transactions = () => {
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
                       {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(10).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(10).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(10)}
                     </button>
                     <button
                       onClick={() => setInputValue(20)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(20).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(20).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(20)}
                     </button>
                   </div>
                   <div
@@ -1916,28 +1699,14 @@ const Transactions = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(50).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(50).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(50)}
                     </button>
                     <button
                       onClick={() => setInputValue(100)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(100).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(100).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(100)}
                     </button>
                   </div>{" "}
                   <div
@@ -1949,28 +1718,14 @@ const Transactions = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(200).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(200).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(200)}
                     </button>
                     <button
                       onClick={() => setInputValue(500)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(500).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(500).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(500)}
                     </button>
                   </div>{" "}
                   <div
@@ -1982,28 +1737,14 @@ const Transactions = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(1000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(1000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(1000)}
                     </button>
                     <button
                       onClick={() => setInputValue(2000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(2000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(2000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(2000)}
                     </button>
                   </div>
                   <div
@@ -2015,28 +1756,14 @@ const Transactions = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(3000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(3000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(3000)}
                     </button>
                     <button
                       onClick={() => setInputValue(4000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(4000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(4000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(4000)}
                     </button>
                   </div>{" "}
                   <div
@@ -2048,28 +1775,14 @@ const Transactions = () => {
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(5000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(5000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(5000)}
                     </button>
                     <button
                       onClick={() => setInputValue(10000)}
                       style={{ border: "none", width: "140px" }}
                       className="bg-success py-2 mx-1 px-4 text-white"
                     >
-                      {" "}
-                      {restData.currencyPosition === "before"
-                        ? `${restData.restCurrencySymbol}${(10000).toFixed(
-                            restData.precision
-                          )}`
-                        : `${(10000).toFixed(restData.precision)}${
-                            restData.restCurrencySymbol
-                          }`}{" "}
+                      {formatAmount(10000)}
                     </button>
                   </div>{" "}
                   <div

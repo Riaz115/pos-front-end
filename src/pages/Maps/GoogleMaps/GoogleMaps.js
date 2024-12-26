@@ -20,7 +20,7 @@ const GoogleMaps = () => {
   const { id } = useParams();
 
   //this is for getting data from my custome hook
-  const { myUrl, token, restData, dayId } = UseRiazHook();
+  const { myUrl, token, restData, dayId, formatAmount } = UseRiazHook();
 
   //this is for getting all expenses of the restaurent
   const forGettingAllExpensesOfRest = async () => {
@@ -247,24 +247,12 @@ const GoogleMaps = () => {
                       <td>{item.paymentType}</td>
                       <td>
                         {item.exprensType === "paid"
-                          ? restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${item.amount.toFixed(restData.precision)}`
-                            : `${item.amount.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`
+                          ? formatAmount(item?.amount)
                           : "0.00"}
                       </td>
                       <td>
                         {item.exprensType === "received"
-                          ? restData.currencyPosition === "before"
-                            ? `${
-                                restData.restCurrencySymbol
-                              }${item.amount.toFixed(restData.precision)}`
-                            : `${item.amount.toFixed(restData.precision)}${
-                                restData.restCurrencySymbol
-                              }`
+                          ? formatAmount(item?.amount)
                           : "0.00"}
                       </td>
 

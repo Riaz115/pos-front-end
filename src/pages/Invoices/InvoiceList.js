@@ -17,7 +17,7 @@ const InvoiceList = () => {
   const { id } = useParams();
 
   //this is for getting data from the useRiazHook
-  const { restData, myUrl, token } = UseRiazHook();
+  const { restData, myUrl, token, formatAmount } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -172,50 +172,6 @@ const InvoiceList = () => {
     }
   };
 
-  //this is for formatting the amount
-  const formatAmount = (amount) => {
-    const {
-      currencyPosition,
-      restCurrencySymbol,
-      precision,
-      decimalSeparator,
-      thousandSeparator,
-    } = restData;
-
-    // Map separators to their actual values
-    const separatorMapping = {
-      dot: ".",
-      comma: ",",
-      space: " ",
-    };
-
-    const actualDecimalSeparator = separatorMapping[decimalSeparator] || ".";
-    const actualThousandSeparator = separatorMapping[thousandSeparator] || ",";
-
-    // Fix to the specified precision
-    const fixedAmount = amount
-      ? amount.toFixed(precision)
-      : (0).toFixed(precision);
-
-    // Split the amount into integer and decimal parts
-    let [integerPart, decimalPart] = fixedAmount.split(".");
-
-    // Add thousand separators to the integer part
-    integerPart = integerPart.replace(
-      /\B(?=(\d{3})+(?!\d))/g,
-      actualThousandSeparator
-    );
-
-    // Combine integer and decimal parts with the appropriate separator
-    const formattedNumber = decimalPart
-      ? `${integerPart}${actualDecimalSeparator}${decimalPart}`
-      : integerPart;
-
-    // Return the formatted amount with currency symbol
-    return currencyPosition === "before"
-      ? `${restCurrencySymbol}${formattedNumber}`
-      : `${formattedNumber}${restCurrencySymbol}`;
-  };
   return (
     <React.Fragment>
       <div className="page-content">

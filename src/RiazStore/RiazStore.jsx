@@ -272,6 +272,59 @@ export const MyDataProvider = ({ children }) => {
     }
   }, [showForGuestAdd, showForEditGuest]);
 
+  //this is for formate amount
+  const formatAmount = (amount) => {
+    const {
+      currencyPosition,
+      restCurrencySymbol,
+      precision,
+      decimalSprator,
+      thousandSapreater,
+    } = restData;
+
+    // Allowed values for separators
+    const validSeparators = ["dot", "comma", "space"];
+
+    // Map separators to their actual values
+    const separatorMapping = {
+      dot: ".",
+      comma: ",",
+      space: " ",
+    };
+
+    // Validate and assign actual separators
+    const actualDecimalSeparator = validSeparators.includes(decimalSprator)
+      ? separatorMapping[decimalSprator]
+      : "."; // Default to dot (.)
+    const actualThousandSeparator = validSeparators.includes(thousandSapreater)
+      ? separatorMapping[thousandSapreater]
+      : ","; // Default to comma (,)
+
+    // Fix to the specified precision
+    const fixedAmount = amount
+      ? parseFloat(amount).toFixed(precision)
+      : (0).toFixed(precision);
+
+    // Split the amount into integer and decimal parts
+    let [integerPart, decimalPart] = fixedAmount.split(".");
+
+    // Add thousand separators to the integer part
+    integerPart = integerPart.replace(
+      /\B(?=(\d{3})+(?!\d))/g,
+      actualThousandSeparator
+    );
+
+    // Combine integer and decimal parts with the appropriate separator
+    const formattedNumber = decimalPart
+      ? `${integerPart}${actualDecimalSeparator}${decimalPart}`
+      : integerPart;
+
+    // Return the formatted amount with currency symbol
+    return currencyPosition === "before"
+      ? `${restCurrencySymbol}${formattedNumber}`
+      : `${formattedNumber}${restCurrencySymbol}`;
+  };
+
   return (
     <>
       <RiazStore.Provider
@@ -329,6 +382,7 @@ export const MyDataProvider = ({ children }) => {
           setSuccessModal,
           deleteModal,
           setDeleteModal,
+          formatAmount,
         }}
       >
         {children}

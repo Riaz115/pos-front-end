@@ -64,9 +64,9 @@ const FileManager = () => {
   const { id } = useParams();
 
   //this is for states options
-  const forStatesOptions = allStatesForTimeZone.map((everyState) => ({
-    label: everyState,
-    value: everyState,
+  const forStatesOptions = allStatesForTimeZone.map((state) => ({
+    value: state.zone,
+    label: state.name,
   }));
 
   //this is for select country
@@ -141,7 +141,6 @@ const FileManager = () => {
   const handleChange = (selectedOption) => {
     setSelectedTimezone(selectedOption.value);
     forFetchTime(selectedOption.value);
-    console.log("Selected timezone:", selectedOption);
   };
 
   //this is for catch errors for add restaurent
@@ -747,7 +746,6 @@ const FileManager = () => {
                     Time Zone
                   </Label>
                   <Select
-                    value={selectedTimezone}
                     onChange={handleChange}
                     options={forStatesOptions}
                     placeholder={

@@ -21,7 +21,7 @@ const DashboardProject = () => {
   const [tableType, setTableType] = useState("");
 
   //this is for getting data from my hook
-  const { myUrl, restId, restData } = UseRiazHook();
+  const { myUrl, restId, restData, formatAmount } = UseRiazHook();
 
   //this is for pagination
   const perPageData = 50;
@@ -292,7 +292,7 @@ const DashboardProject = () => {
                     <td>{item?.orderType}</td>
                     <td>{item?.orderTaker}</td>
                     <td>{item?.totalItem}</td>
-                    <td>{item?.grandTotal}</td>
+                    <td> {formatAmount(item?.grandTotal)}</td>
                   </tr>
                 ))}
               </tbody>
