@@ -425,7 +425,8 @@ const List = () => {
 
       <h1
         style={{ boxShadow: "0px 2px 8px rgba(0, 0, 0, 0.5)" }}
-        className="mb-5 border bg-light  py-3  px-2  rounded p-2 text-capitalize ">
+        className="mb-5 border bg-light  py-3  px-2  rounded p-2 text-capitalize "
+      >
         i am owner of this software
       </h1>
       <Row className="g-4 mb-4">
@@ -434,7 +435,8 @@ const List = () => {
             <Link
               to="#!"
               className="btn bg-dark text-white "
-              onClick={toggleRightCanvas}>
+              onClick={toggleRightCanvas}
+            >
               <i className="ri-add-line align-bottom me-1 "></i> Add User
             </Link>
           </div>
@@ -487,7 +489,8 @@ const List = () => {
                       <img
                         src={user.image ? user.image : myImage}
                         alt="my pic"
-                        className="member-img img-fluid d-block rounded"></img>
+                        className="member-img img-fluid d-block rounded"
+                      ></img>
                     </div>
                   </div>
                   <div className="ms-3">
@@ -512,7 +515,8 @@ const List = () => {
                       style={{
                         padding: "4px 8px",
                         backgroundColor: "#E6F7FC",
-                      }}>
+                      }}
+                    >
                       <i className="ri-pencil-fill align-bottom" />
                     </button>
                     <button
@@ -522,7 +526,8 @@ const List = () => {
                         padding: "4px 8px",
                         backgroundColor: "#FEEDE9",
                         color: "red",
-                      }}>
+                      }}
+                    >
                       <i className="ri-delete-bin-5-fill align-bottom" />
                     </button>
                   </div>
@@ -548,7 +553,8 @@ const List = () => {
         direction="end"
         toggle={toggleRightCanvas}
         id="offcanvasRight"
-        className="border-bottom w-75  ">
+        className="border-bottom w-75  "
+      >
         <OffcanvasHeader toggle={toggleRightCanvas} id="offcanvasRightLabel">
           <h1>Add User</h1>
         </OffcanvasHeader>
@@ -614,7 +620,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.name}
                       </p>
                     )}
@@ -625,7 +632,8 @@ const List = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       User Email
                     </Label>
                     <input
@@ -641,7 +649,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.email}
                       </p>
                     )}
@@ -667,7 +676,8 @@ const List = () => {
                         className="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
                         type="button"
                         id="password-addon"
-                        onClick={() => setPasswordShow(!passwordShow)}>
+                        onClick={() => setPasswordShow(!passwordShow)}
+                      >
                         <i className="ri-eye-fill align-middle"></i>
                       </button>
                     </div>
@@ -693,7 +703,8 @@ const List = () => {
                         id="password-addon"
                         onClick={() =>
                           setShowConfirmPassword(!showConfrimPassword)
-                        }>
+                        }
+                      >
                         <i className="ri-eye-fill align-middle"></i>
                       </button>
                     </div>
@@ -719,7 +730,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.phone}
                       </p>
                     )}
@@ -737,14 +749,16 @@ const List = () => {
                       }
                       placeholder={gender ? gender : "select Gender"}
                       options={genders}
-                      id="gender"></Select>
+                      id="gender"
+                    ></Select>
                     {errors.gender && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.gender}
                       </p>
                     )}
@@ -756,7 +770,8 @@ const List = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="choices-single-no-search"
-                      className="form-label text-muted">
+                      className="form-label text-muted"
+                    >
                       Country
                     </Label>
 
@@ -792,7 +807,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.state}
                       </p>
                     )}
@@ -818,7 +834,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.city}
                       </p>
                     )}
@@ -843,7 +860,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.address}
                       </p>
                     )}
@@ -855,13 +873,15 @@ const List = () => {
                 <button
                   type="button"
                   className="btn bg-dark text-white"
-                  onClick={toggleRightCanvas}>
+                  onClick={toggleRightCanvas}
+                >
                   Close
                 </button>
                 <button
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={forAddUserSubmit}>
+                  onClick={forAddUserSubmit}
+                >
                   Add User
                 </button>
               </div>
@@ -876,10 +896,12 @@ const List = () => {
         direction="end"
         toggle={toggleRightCanvasforEditUser}
         id="offcanvasRight"
-        className="border-bottom w-75">
+        className="border-bottom w-75"
+      >
         <OffcanvasHeader
           toggle={toggleRightCanvasforEditUser}
-          id="offcanvasRightLabel">
+          id="offcanvasRightLabel"
+        >
           <h1>Edit User</h1>
         </OffcanvasHeader>
         <OffcanvasBody className="p-0 overflow-scroll">
@@ -944,7 +966,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.name}
                       </p>
                     )}
@@ -955,7 +978,8 @@ const List = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="billinginfo-firstName"
-                      className="form-label">
+                      className="form-label"
+                    >
                       User Email
                     </Label>
                     <input
@@ -972,7 +996,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.email}
                       </p>
                     )}
@@ -999,7 +1024,8 @@ const List = () => {
                         className="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted"
                         type="button"
                         id="password-addon"
-                        onClick={() => setPasswordShow(!passwordShow)}>
+                        onClick={() => setPasswordShow(!passwordShow)}
+                      >
                         <i className="ri-eye-fill align-middle"></i>
                       </button>
                     </div>
@@ -1026,7 +1052,8 @@ const List = () => {
                         id="password-addon"
                         onClick={() =>
                           setShowConfirmPassword(!showConfrimPassword)
-                        }>
+                        }
+                      >
                         <i className="ri-eye-fill align-middle"></i>
                       </button>
                     </div>
@@ -1053,7 +1080,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.phone}
                       </p>
                     )}
@@ -1071,14 +1099,16 @@ const List = () => {
                       }
                       placeholder={gender ? gender : "select Gender"}
                       options={genders}
-                      id="gender"></Select>
+                      id="gender"
+                    ></Select>
                     {errors.gender && (
                       <p
                         style={{
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.gender}
                       </p>
                     )}
@@ -1090,7 +1120,8 @@ const List = () => {
                   <div className="mb-3">
                     <Label
                       htmlFor="choices-single-no-search"
-                      className="form-label text-muted">
+                      className="form-label text-muted"
+                    >
                       Country
                     </Label>
 
@@ -1126,7 +1157,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.state}
                       </p>
                     )}
@@ -1153,7 +1185,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.city}
                       </p>
                     )}
@@ -1179,7 +1212,8 @@ const List = () => {
                           color: "red",
                           fontSize: "12px",
                           paddingLeft: "5px",
-                        }}>
+                        }}
+                      >
                         {errors.address}
                       </p>
                     )}
@@ -1191,13 +1225,15 @@ const List = () => {
                 <button
                   type="button"
                   className="btn bg-dark text-white"
-                  onClick={toggleRightCanvasforEditUser}>
+                  onClick={toggleRightCanvasforEditUser}
+                >
                   Close
                 </button>
                 <button
                   className="btn btn-primary"
                   id="add-btn"
-                  onClick={forEditUserSubmit}>
+                  onClick={forEditUserSubmit}
+                >
                   Edit User
                 </button>
               </div>

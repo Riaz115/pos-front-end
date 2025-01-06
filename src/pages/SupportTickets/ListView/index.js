@@ -89,11 +89,13 @@ const ListView = () => {
                   border: "1px solid black",
                   borderRadius: "10px",
                   padding: "10px",
-                }}>
+                }}
+              >
                 <h2>All Counters of the Restaruent</h2>
                 <div
                   className="d-flex align-items-center justify-content-center my-2 p-2"
-                  style={{ gap: "10px" }}>
+                  style={{ gap: "10px" }}
+                >
                   <button
                     style={{
                       textDecoration: "none",
@@ -102,7 +104,8 @@ const ListView = () => {
                       backgroundColor: "black",
                       color: "white",
                     }}
-                    onClick={toggleAddCounter}>
+                    onClick={toggleAddCounter}
+                  >
                     Add Counter
                   </button>
                   <Link
@@ -113,7 +116,8 @@ const ListView = () => {
                       borderRadius: "20px",
                       backgroundColor: "black",
                       color: "white",
-                    }}>
+                    }}
+                  >
                     Open
                   </Link>
                 </div>
@@ -126,11 +130,13 @@ const ListView = () => {
                   border: "1px solid black",
                   borderRadius: "10px",
                   padding: "10px",
-                }}>
+                }}
+              >
                 <h2>All Menu Items and catagories of the Restaurent</h2>
                 <div
                   className="d-flex align-items-center justify-content-center my-2 p-2"
-                  style={{ gap: "10px" }}>
+                  style={{ gap: "10px" }}
+                >
                   <Link
                     to={`/rest-items-catagories/${id}`}
                     style={{
@@ -139,7 +145,8 @@ const ListView = () => {
                       borderRadius: "20px",
                       backgroundColor: "black",
                       color: "white",
-                    }}>
+                    }}
+                  >
                     Open
                   </Link>
                 </div>
@@ -152,20 +159,23 @@ const ListView = () => {
                   border: "1px solid black",
                   borderRadius: "10px",
                   padding: "10px",
-                }}>
+                }}
+              >
                 <h2>All Food Items of Restaurent </h2>
                 <div
                   className="d-flex align-items-center justify-content-center my-2 p-2"
-                  style={{ gap: "10px" }}>
+                  style={{ gap: "10px" }}
+                >
                   <Link
-                    to="#"
+                    to={`/restaurent/${id}/food/items`}
                     style={{
                       textDecoration: "none",
                       padding: "5px 30px",
                       borderRadius: "20px",
                       backgroundColor: "black",
                       color: "white",
-                    }}>
+                    }}
+                  >
                     Open
                   </Link>
                 </div>
@@ -178,11 +188,13 @@ const ListView = () => {
                   border: "1px solid black",
                   borderRadius: "10px",
                   padding: "10px",
-                }}>
+                }}
+              >
                 <h2>All Guests of Restaurent </h2>
                 <div
                   className="d-flex align-items-center justify-content-center my-2 p-2"
-                  style={{ gap: "10px" }}>
+                  style={{ gap: "10px" }}
+                >
                   <Link
                     to={`/guest/${id}`}
                     style={{
@@ -191,7 +203,8 @@ const ListView = () => {
                       borderRadius: "20px",
                       backgroundColor: "black",
                       color: "white",
-                    }}>
+                    }}
+                  >
                     Open
                   </Link>
                 </div>
@@ -205,7 +218,8 @@ const ListView = () => {
           <ModalHeader
             className="bg-light p-3"
             id="exampleModalLabel"
-            toggle={toggleAddCounter}>
+            toggle={toggleAddCounter}
+          >
             Add Counter
           </ModalHeader>
           <form className="tablelist-form">
@@ -230,14 +244,16 @@ const ListView = () => {
                 <button
                   type="button"
                   className="btn btn-danger"
-                  onClick={toggleAddCounter}>
+                  onClick={toggleAddCounter}
+                >
                   Close
                 </button>
                 <button
                   type="submit"
                   onClick={handleAddCounterSubmit}
                   className="btn btn-primary px-2"
-                  id="add-btn">
+                  id="add-btn"
+                >
                   Add Counter
                 </button>
               </div>

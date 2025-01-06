@@ -313,6 +313,13 @@ const Navdata = () => {
           parentId: "items",
           stateVariables: isProfile,
         },
+        {
+          id: "All Stock Items",
+          label: "All Stock Items",
+          link: `/restaurent/${restId}/food/items`,
+          parentId: "items",
+          stateVariables: isProfile,
+        },
       ],
     },
     {

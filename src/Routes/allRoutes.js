@@ -318,6 +318,7 @@ const authProtectedRoutes = [
     component: <InvoiceCreate />,
   },
   { path: "/restaurent/:id/close/day", component: <CrmDeals /> },
+  { path: "/restaurent/:id/food/items", component: <CreateNFT /> },
 
   //already routes
 
@@ -343,7 +344,6 @@ const authProtectedRoutes = [
 
   // NFT Marketplace
 
-  { path: "/apps-nft-create", component: <CreateNFT /> },
   { path: "/apps-nft-creators", component: <Creators /> },
   { path: "/apps-nft-explore", component: <ExploreNow /> },
   { path: "/apps-nft-item-details", component: <ItemDetails /> },

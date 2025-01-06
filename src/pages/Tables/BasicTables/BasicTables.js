@@ -11,23 +11,28 @@ import {
   ModalFooter,
   ModalHeader,
   Label,
+  Input,
 } from "reactstrap";
-import Flatpickr from "react-flatpickr";
-import BreadCrumb from "../../../Components/Common/BreadCrumb";
+import { Link } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import Loader from "../../../Components/Common/Loader";
 import Select from "react-select";
-import SimpleBar from "simplebar-react";
+import DeleteModal from "../../../Components/Common/DeleteModal";
+import BasicSuccessMsg from "../../AuthenticationInner/SuccessMessage/BasicSuccessMsg";
 
 const BasicTables = () => {
   const [addCatagory, setAddCatagory] = useState(false);
   const [editCatagory, setEditCatagory] = useState(false);
   const [allCatagories, setAllCatagories] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState("");
   const [ctgryid, setCtgyid] = useState("");
   const [maincatagory, setMainCatagory] = useState("");
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [allFilteredCatagories, setAllFilteredCatagories] = useState([]);
+  const [idForDelete, setIdForDelete] = useState("");
 
   //this is for getting rest id
   const { id } = useParams();
@@ -36,7 +41,6 @@ const BasicTables = () => {
   const { myUrl, token } = UseRiazHook();
 
   //this is for parent catagory
-
   const mainCatagories = [
     {
       options: [
@@ -47,6 +51,26 @@ const BasicTables = () => {
       ],
     },
   ];
+
+  //this is for search from catagories
+  const OnchangeHandler = (e, type) => {
+    let search;
+    if (type === "name") {
+      search = e.target.value;
+      const filteredUsers = allCatagories.filter((item) =>
+        item?.name?.toString().includes(search)
+      );
+      setAllFilteredCatagories(filteredUsers);
+    } else if (type === "catagory") {
+      search = e.target.value;
+      const filteredUsers = allCatagories.filter((item) =>
+        item?.maincatagory?.toString().includes(search)
+      );
+      setAllFilteredCatagories(filteredUsers);
+    } else {
+      setAllFilteredCatagories(allCatagories);
+    }
+  };
 
   //this is for select Guest gender
   function handleSelectMainCatagory(selectedOption) {
@@ -65,6 +89,7 @@ const BasicTables = () => {
 
   //this is for getting all catagories of the restaurent
   const forGettingAllCatagories = async () => {
+    setIsLoading(true);
     const url = `${myUrl}/get-all-catagories/${id}`;
 
     try {
@@ -72,11 +97,14 @@ const BasicTables = () => {
       const data = await response.json();
       if (response.ok) {
         setAllCatagories(data.catagories);
+        setAllFilteredCatagories(data.catagories);
         setIsLoading(false);
       } else {
+        setIsLoading(false);
         console.log("err data", data);
       }
     } catch (err) {
+      setIsLoading(false);
       console.log("there is error in getting all catagories function", err);
     }
   };
@@ -129,6 +157,7 @@ const BasicTables = () => {
             setAddCatagory(false);
             forGettingAllCatagories();
             toast.success(data.msg);
+            setSuccessModal(true);
           } else {
             toast.error(data.msg);
           }
@@ -194,6 +223,7 @@ const BasicTables = () => {
             toast.success(data.msg);
             setEditCatagory(false);
             forGettingAllCatagories();
+            setSuccessModal(true);
           } else {
             toast.error(data.msg);
           }
@@ -206,9 +236,15 @@ const BasicTables = () => {
     }
   };
 
+  //this isfor click on delet button
+  const forClickOnDeleteBtn = (id) => {
+    setIdForDelete(id);
+    setDeleteModal(true);
+  };
+
   //this is for the delete catagory
-  const forDeleteCatagory = async (id) => {
-    const url = `${myUrl}/delete/${id}/catagory`;
+  const forDeleteCatagory = async () => {
+    const url = `${myUrl}/delete/${idForDelete}/catagory`;
     const options = {
       method: "DELETE",
       headers: {
@@ -220,8 +256,10 @@ const BasicTables = () => {
       const response = await fetch(url, options);
       const data = await response.json();
       if (response.ok) {
+        setDeleteModal(false);
         toast.success(data.msg);
         forGettingAllCatagories();
+        setSuccessModal(true);
       } else {
         console.log("err data", err);
         toast.error(data.msg);
@@ -233,51 +271,138 @@ const BasicTables = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
-          <BreadCrumb catagoryText="All Catagories" search="search" />
+      <DeleteModal
+        show={deleteModal}
+        onDeleteClick={forDeleteCatagory}
+        onCloseClick={() => setDeleteModal(false)}
+      />
 
-          <div className="container mt-0">
-            <div className="row">
-              <div className="col-12 col-md-3 mb-3">
-                <Flatpickr
-                  className="form-control"
-                  id="datepicker-publish-input"
-                  placeholder="Select date or search"
-                  options={{
-                    altInput: true,
-                    altFormat: "F j, Y",
-                    dateFormat: "d.m.y",
-                  }}
-                />
-              </div>
-              <div className="col-12 col-md-3 mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search by Name"
-                />
-              </div>
-              <div className="col-12 col-md-3 mb-3">
-                <input
-                  type="text"
-                  className="form-control"
-                  placeholder="Search by Number"
-                />
-              </div>
-              <div className="col-12 col-md-3 mb-3">
-                <Button
-                  className="add-btn bg-dark text-white px-3 py-1 border-none"
-                  id="create-btn"
-                  onClick={showForAddCatagory}
-                >
-                  <i className="ri-add-line align-bottom me-1"></i> Add Catagory
-                </Button>
-              </div>
+      <BasicSuccessMsg
+        show={successModal}
+        onCloseClick={() => setSuccessModal(false)}
+      />
+      <div className="page-content">
+        <Col sm={12}>
+          <div className="d-flex align-items-center justify-content-between mt-0 ">
+            <div>
+              <h5>All Catagories</h5>
+            </div>
+
+            <div>
+              <Link
+                onClick={showForAddCatagory}
+                style={{
+                  backgroundColor: "#0000FF",
+                  color: "white",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                <i className="ri-add-circle-line align-middle me-1"></i> Add
+                Item
+              </Link>
             </div>
           </div>
+        </Col>
+        <hr></hr>
+        <Container fluid>
+          <Container fluid>
+            <Row>
+              <Col md={6} xs={12} className="mb-3">
+                <Label for="kotType" style={{ fontWeight: "bold" }}>
+                  Catagory Name
+                </Label>
+                <Input
+                  type="text"
+                  id="kotType"
+                  onChange={(e) => OnchangeHandler(e, "name")}
+                  placeholder="Enter Item Name"
+                />
+              </Col>
 
-          <Row>
+              <Col md={6} xs={12} className="mb-3">
+                <Label for="additionalInfo" style={{ fontWeight: "bold" }}>
+                  Main Catagory
+                </Label>
+                <Input
+                  type="text"
+                  onChange={(e) => OnchangeHandler(e, "catagory")}
+                  id="additionalInfo"
+                  placeholder="Enter Item Catagory"
+                />
+              </Col>
+            </Row>
+
+            <Row>
+              <Col xl={12}>
+                <div className="table-responsive mt-4">
+                  <Table striped bordered hover>
+                    <thead>
+                      <tr>
+                        <th>#</th>
+                        <th>Catagory Name</th>
+                        <th>Head Catagory</th>
+                        <th>Update</th>
+                        <th>Delete</th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {isLoading ? (
+                        <tr>
+                          <td colSpan="7">
+                            <div
+                              style={{
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center",
+                                height: "100px",
+                              }}
+                            >
+                              <Loader />
+                              <span style={{ marginLeft: "10px" }}>
+                                Loading...
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ) : (
+                        allFilteredCatagories?.map((item, index) => (
+                          <tr key={index}>
+                            <td>{index + 1}</td>
+                            <td>{item.name}</td>
+                            <td>{item.maincatagory}</td>
+                            <td>
+                              {" "}
+                              <button
+                                className="my-custome-button-edit"
+                                onClick={() => forClickOnEditBtn(item._id)}
+                              >
+                                <i className="ri-pencil-fill align-bottom" />
+                              </button>
+                            </td>
+                            <td>
+                              <button
+                                onClick={() => forClickOnDeleteBtn(item._id)}
+                                className="my-custome-button-delete"
+                              >
+                                <i className="ri-delete-bin-5-fill align-bottom" />
+                              </button>
+                            </td>
+                          </tr>
+                        ))
+                      )}
+                    </tbody>
+                  </Table>
+                </div>
+              </Col>
+            </Row>
+          </Container>
+
+          {/* <Row>
             <Col xl={12}>
               <div className="table-responsive mt-4 mt-xl-0">
                 <Table className="table-success table-striped table-nowrap align-middle mb-0">
@@ -339,7 +464,7 @@ const BasicTables = () => {
                 </Table>
               </div>
             </Col>
-          </Row>
+          </Row> */}
         </Container>
       </div>
       {/* this is for add catagory */}
