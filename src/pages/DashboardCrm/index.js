@@ -1,5 +1,17 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Container, Col, Row, Input, Label } from "reactstrap";
+import {
+  Container,
+  Col,
+  Row,
+  Input,
+  Label,
+  Modal,
+  ModalBody,
+  ModalHeader,
+  ModalFooter,
+  Button,
+  Form,
+} from "reactstrap";
 import {
   FaUtensils,
   FaGlassWhiskey,
@@ -37,13 +49,17 @@ const DashboardCrm = () => {
   const [forPrint, setForPrint] = useState(false);
   const [myDate, setMyDate] = useState("");
   const [myTime, setMyTime] = useState("");
+  const [editDealModal, setEditDealModal] = useState(false);
+  const [dealItems, setDealItems] = useState([]);
+  const [showDealItemWithInput, setShowDealItemWithInput] = useState("");
+  const [dealFilteredItems, setDealFilteredItems] = useState([]);
+  const [selectedDealId, setSelectedDealId] = useState("");
 
   //this is for show guest function
   const {
     guestSearchChangeState,
     myUrl,
     restId,
-    counterAreaId,
     counterId,
     userData,
     restData,
@@ -65,6 +81,11 @@ const DashboardCrm = () => {
   //this is for navigate
   const navigate = useNavigate();
 
+  //this is for toggleEditDeal edit deal modal
+  const toggleEditDeal = () => {
+    setEditDealModal(!editDealModal);
+  };
+
   //this is for search items
   const OnchangeHandler = (e) => {
     setShowItemsWithInput(e.target.value);
@@ -79,6 +100,23 @@ const DashboardCrm = () => {
       setFilteredItems(filteredItems);
     } else {
       setFilteredItems(items);
+    }
+  };
+
+  //this is for deal items onchange handler
+  const dealItemOnchangeHandler = (e) => {
+    setShowDealItemWithInput(e.target.value);
+    const search = e.target.value.toLowerCase();
+    if (search) {
+      const filteredItems = items.filter((data) =>
+        Object.values(data).some(
+          (field) =>
+            typeof field === "string" && field.toLowerCase().includes(search)
+        )
+      );
+      setDealFilteredItems(filteredItems);
+    } else {
+      setDealFilteredItems(items);
     }
   };
 
@@ -140,6 +178,7 @@ const DashboardCrm = () => {
       if (response.ok) {
         setItems(data.allItems);
         setFilteredItems(data.allItems);
+        setDealFilteredItems(data.allItems);
       } else {
         console.log("err data", data);
       }
@@ -212,7 +251,6 @@ const DashboardCrm = () => {
         {
           ...item,
           quantity: 1,
-
           totalPrice: totalPrice,
           modifier: [], // Initialize with an empty array or null
         },
@@ -220,10 +258,31 @@ const DashboardCrm = () => {
     }
   };
 
+  //this is for add item to deal items
+  const forAddItemToDealItems = (item) => {
+    if (!selectedItems.some((selectedItem) => selectedItem._id === item._id)) {
+      setDealItems((prevItems) => [
+        ...prevItems,
+        {
+          ...item,
+          qty: 1,
+          id: item._id,
+        },
+      ]);
+    }
+    setShowDealItemWithInput("");
+  };
+
   //this is for remove items from table and select items list
   const removeSelectedItem = (id) => {
     const updatedItems = selectedItems.filter((item) => item._id !== id);
     setSelectedItems(updatedItems);
+  };
+
+  //this is for remove item from the select items of the deal
+  const removeItemOfSelectItemsOfDeal = (id) => {
+    const updatedItems = dealItems.filter((item) => item._id !== id);
+    setDealItems(updatedItems);
   };
 
   // Function to increase quantity
@@ -235,6 +294,15 @@ const DashboardCrm = () => {
     );
   };
 
+  //this is for increase quantity of the deal item
+  const increaseDealItemQty = (id) => {
+    setDealItems((prevItems) =>
+      prevItems.map((item) =>
+        item._id === id ? { ...item, qty: item.qty + 1 } : item
+      )
+    );
+  };
+
   // Function to decrease quantity
   const decreaseQuantity = (id) => {
     setSelectedItems((prevItems) =>
@@ -242,6 +310,15 @@ const DashboardCrm = () => {
         item._id === id && item.quantity > 1
           ? { ...item, quantity: item.quantity - 1 }
           : item
+      )
+    );
+  };
+
+  //this is for decrease the quantity of the deal item
+  const decreaseDealItemQty = (id) => {
+    setDealItems((prevItems) =>
+      prevItems.map((item) =>
+        item._id === id && item.qty > 1 ? { ...item, qty: item.qty - 1 } : item
       )
     );
   };
@@ -311,6 +388,7 @@ const DashboardCrm = () => {
           guestData,
         };
 
+        console.log("form data", orderData);
         // Call the add order function for post payment
         const forAddOrder = async () => {
           const url = `${myUrl}/add/${id}/kot/${restId}`;
@@ -630,6 +708,40 @@ const DashboardCrm = () => {
     );
   }, []);
 
+  //this is for getting data from select item
+  const forClickOnEditButtonOfDeal = (id) => {
+    setEditDealModal(true);
+    setSelectedDealId(id);
+    const dealData = selectedItems.find((item) => item._id === id);
+    if (dealData) {
+      setDealItems(dealData.items);
+      console.log("Deal Data Found:", dealData.items);
+      // You can now use dealData for further processing
+    } else {
+      console.log("No matching deal found for the given ID");
+    }
+  };
+
+  //this is for save deal edited items to the selectitems
+  const forSaveDealEditedItems = (e) => {
+    e.preventDefault();
+    const updatedDeal = selectedItems.find(
+      (item) => item._id === selectedDealId
+    );
+
+    if (updatedDeal) {
+      // Update the items array of the found deal
+      updatedDeal.items = dealItems;
+
+      // After updating, set the new selectedItems (you can also save it in your backend here)
+      setSelectedItems([...selectedItems]); // This will trigger a re-render with updated items
+      console.log("Updated deal items:", updatedDeal.items);
+      toggleEditDeal();
+    } else {
+      console.log("Deal not found for the given ID.");
+    }
+  };
+
   return (
     <React.Fragment>
       <div
@@ -803,10 +915,13 @@ const DashboardCrm = () => {
                       <th scope="col" style={{ fontSize: "12px" }}>
                         amount
                       </th>
+                      <th scope="col" style={{ fontSize: "12px" }}>
+                        Edit
+                      </th>
                     </tr>
                   </thead>
 
-                  <tbody>
+                  {/* <tbody>
                     {selectedItems.map((item, index) => (
                       <tr key={index}>
                         <td style={{ fontSize: "12px" }}>{index + 1}</td>
@@ -891,6 +1006,129 @@ const DashboardCrm = () => {
                             : `${(item.price * item.quantity).toFixed(
                                 restData.precision
                               )}${restData.restCurrencySymbol}`}
+                        </td>
+                        <td>
+                          {item?.items.length > 0 ? (
+                            <button className="my-custome-button-edit">
+                              <i className="ri-pencil-fill align-bottom" />
+                            </button>
+                          ) : (
+                            <button className="my-custome-button-edit" disabled>
+                              <i className="ri-pencil-fill align-bottom" />
+                            </button>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody> */}
+
+                  <tbody>
+                    {selectedItems.map((item, index) => (
+                      <tr key={index}>
+                        <td style={{ fontSize: "12px" }}>{index + 1}</td>
+                        <td style={{ fontSize: "12px" }}>
+                          <button
+                            className="mx-1"
+                            style={{
+                              border: "none",
+                              cursor: "pointer",
+                            }}
+                            onClick={() => removeSelectedItem(item._id)}
+                          >
+                            <FaTrash style={{ color: "red" }} />
+                          </button>
+                          {item.name}{" "}
+                        </td>
+                        <td style={{ fontSize: "12px" }}>
+                          {item.modifier && item.modifier.length > 0 ? (
+                            item.modifier.map((mod, idx) => (
+                              <span key={idx} style={{ marginRight: "5px" }}>
+                                {mod},
+                              </span>
+                            ))
+                          ) : (
+                            <FaPlus
+                              className="cursor-pointer"
+                              onClick={() => openModifierModal(item._id)}
+                            />
+                          )}
+                        </td>
+                        <td>
+                          <div className="input-step step-primary">
+                            <button
+                              style={{
+                                fontSize: "12px",
+                                backgroundColor: "red",
+                              }}
+                              type="button"
+                              className="minus"
+                              onClick={() => decreaseQuantity(item._id)}
+                            >
+                              –
+                            </button>
+                            <input
+                              type="number"
+                              style={{
+                                fontSize: "12px",
+                                textAlign: "center",
+                                width: "50px",
+                              }}
+                              value={item.quantity}
+                              readOnly
+                            />
+                            <button
+                              style={{
+                                fontSize: "12px",
+                                backgroundColor: "#0C96BC",
+                              }}
+                              type="button"
+                              className="plus"
+                              onClick={() => increaseQuantity(item._id)}
+                            >
+                              +
+                            </button>
+                          </div>
+                        </td>
+                        <td style={{ fontSize: "12px" }}>
+                          {restData.currencyPosition === "before"
+                            ? `${
+                                restData.restCurrencySymbol
+                              }${item.price.toFixed(restData.precision)}`
+                            : `${item.price.toFixed(restData.precision)}${
+                                restData.restCurrencySymbol
+                              }`}
+                        </td>
+                        <td style={{ fontSize: "12px" }}>
+                          {restData.currencyPosition === "before"
+                            ? `${restData.restCurrencySymbol}${(
+                                item.price * item.quantity
+                              ).toFixed(restData.precision)}`
+                            : `${(item.price * item.quantity).toFixed(
+                                restData.precision
+                              )}${restData.restCurrencySymbol}`}
+                        </td>
+                        <td>
+                          <button
+                            onClick={() => forClickOnEditButtonOfDeal(item._id)}
+                            className={
+                              item.items && item.items.length > 0
+                                ? "my-custome-button-edit"
+                                : "border-none"
+                            }
+                            style={
+                              !(item.items && item.items.length > 0)
+                                ? {
+                                    border: "none",
+                                    outline: "none",
+                                    background: "none",
+                                    cursor: "default",
+                                  }
+                                : {}
+                            }
+                            disabled={!(item.items && item.items.length > 0)}
+                          >
+                            <i className="ri-pencil-fill align-bottom" />
+                          </button>
                         </td>
                       </tr>
                     ))}
@@ -2048,6 +2286,182 @@ const DashboardCrm = () => {
           </div>
         </div>
       )}
+
+      {/* this is for edit the deal */}
+      <Modal
+        id="showModal"
+        isOpen={editDealModal}
+        toggle={toggleEditDeal}
+        centered
+        size="lg"
+      >
+        <ModalHeader className="bg-info-subtle p-3" toggle={toggleEditDeal}>
+          Edit deal
+        </ModalHeader>
+        <Form className="tablelist-form">
+          <ModalBody>
+            <div className="d-flex align-items-center justify-content-between mt-0 bg-white py-0 position-relative">
+              <div className="pe-auto search-box w-100">
+                <Input
+                  type="text"
+                  placeholder="search ..."
+                  onChange={dealItemOnchangeHandler}
+                />
+                <i className="ri-search-line search-icon"></i>
+              </div>
+
+              {showDealItemWithInput && (
+                <div style={overlayStyle}>
+                  <table className="table table-striped table-hover mb-0">
+                    <thead>
+                      <tr
+                        style={{ backgroundColor: "#007bff", color: "white" }}
+                      >
+                        <th style={{ padding: "10px", textAlign: "left" }}>
+                          Qty
+                        </th>
+                        <th style={{ padding: "10px", textAlign: "left" }}>
+                          Name
+                        </th>
+                        <th style={{ padding: "10px", textAlign: "left" }}>
+                          Price
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {dealFilteredItems.map((item, index) => (
+                        <tr
+                          key={index}
+                          style={{ cursor: "pointer" }}
+                          onClick={() => forAddItemToDealItems(item)}
+                        >
+                          <td style={{ padding: "10px", textAlign: "left" }}>
+                            {index + 1}
+                          </td>
+                          <td style={{ padding: "10px", textAlign: "left" }}>
+                            {item.name}
+                          </td>
+                          <td style={{ padding: "10px", textAlign: "left" }}>
+                            {restData.currencyPosition === "before"
+                              ? `${
+                                  restData.restCurrencySymbol
+                                }${item.price.toFixed(restData.precision)}`
+                              : `${item.price.toFixed(restData.precision)}${
+                                  restData.restCurrencySymbol
+                                }`}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+
+            <div
+              className="mt-2 table-responsive z-3"
+              style={{
+                maxHeight: "50vh",
+                overflowY: "scroll",
+                gap: "1px",
+                scrollbarWidth: "none",
+                msOverflowStyle: "none",
+              }}
+            >
+              <table className="table  table-hover table-light  ">
+                <thead>
+                  <tr>
+                    <th scope="col " style={{ fontSize: "12px" }}>
+                      #
+                    </th>
+                    <th scope="col" style={{ fontSize: "12px" }}>
+                      Name
+                    </th>
+
+                    <th scope="col" style={{ fontSize: "12px" }}>
+                      Quantity
+                    </th>
+                    <th scope="col" style={{ fontSize: "12px" }}>
+                      Remove
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody>
+                  {dealItems.map((item, index) => (
+                    <tr key={index}>
+                      <td style={{ fontSize: "12px" }}>{index + 1}</td>
+                      <td> {item?.name}</td>
+                      <td>
+                        <div className="input-step step-primary">
+                          <button
+                            style={{
+                              fontSize: "12px",
+                              backgroundColor: "red",
+                            }}
+                            type="button"
+                            className="minus"
+                            onClick={() => decreaseDealItemQty(item?._id)}
+                          >
+                            –
+                          </button>
+                          <input
+                            type="number"
+                            style={{
+                              fontSize: "12px",
+                              textAlign: "center",
+                              width: "50px",
+                            }}
+                            value={item?.qty}
+                            readOnly
+                          />
+                          <button
+                            style={{
+                              fontSize: "12px",
+                              backgroundColor: "#0C96BC",
+                            }}
+                            type="button"
+                            className="plus"
+                            onClick={() => increaseDealItemQty(item._id)}
+                          >
+                            +
+                          </button>
+                        </div>
+                      </td>{" "}
+                      <td style={{ fontSize: "12px" }}>
+                        <button
+                          className="mx-1"
+                          style={{
+                            border: "none",
+                            cursor: "pointer",
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            removeItemOfSelectItemsOfDeal(item._id);
+                          }}
+                        >
+                          <FaTrash style={{ color: "red" }} />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </ModalBody>
+          <ModalFooter>
+            <div className="hstack gap-2 justify-content-end">
+              <Button
+                onClick={(e) => forSaveDealEditedItems(e)}
+                color="success"
+                id="add-btn"
+              >
+                Save Deal
+              </Button>
+            </div>
+          </ModalFooter>
+        </Form>
+      </Modal>
     </React.Fragment>
   );
 };

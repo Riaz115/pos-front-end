@@ -7,6 +7,7 @@ import { FaTrash } from "react-icons/fa";
 const ToDoList = () => {
   const [kotData, setKotData] = useState({});
   const [kotsAllItems, setKotAllItems] = useState([]);
+  const [kotPrevItems, setKotPrevItems] = useState([]);
   const [checkedItems, setCheckedItems] = useState(
     kotsAllItems.map((item) => item.id)
   );
@@ -51,6 +52,7 @@ const ToDoList = () => {
       const data = await response.json();
       if (response.ok) {
         setKotAllItems(data.kot.orderItems);
+        setKotPrevItems(data.kot.orderItems);
         setCheckedItems(data.kot.orderItems.map((item) => item._id));
       } else {
         console.log("err data", data);
@@ -66,12 +68,41 @@ const ToDoList = () => {
     forGettingTableData();
   }, []);
 
-  // Function to increase quantity
+  // // Function to increase quantity
+  // const increaseQuantity = (id) => {
+  //   setKotAllItems((prevItems) =>
+  //     prevItems.map((item) =>
+  //       item._id === id ? { ...item, quantity: item.quantity + 1 } : item
+  //     )
+  //   );
+  // };
+
   const increaseQuantity = (id) => {
-    setKotAllItems((prevItems) =>
-      prevItems.map((item) =>
-        item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-      )
+    const itemToUpdate = kotsAllItems.find((item) => item._id === id);
+    const correspondingItem = kotPrevItems.find((item) => item._id === id);
+
+    if (
+      itemToUpdate &&
+      correspondingItem &&
+      itemToUpdate.quantity < correspondingItem.quantity
+    ) {
+      setKotAllItems((prevItems) =>
+        prevItems.map((item) =>
+          item._id === id ? { ...item, quantity: item.quantity + 1 } : item
+        )
+      );
+    }
+  };
+
+  //this is for disabled the button
+  const isButtonDisabled = (id) => {
+    const itemToUpdate = kotsAllItems.find((item) => item._id === id);
+    const correspondingItem = kotPrevItems.find((item) => item._id === id);
+
+    return (
+      itemToUpdate &&
+      correspondingItem &&
+      itemToUpdate.quantity >= correspondingItem.quantity
     );
   };
 
@@ -93,7 +124,7 @@ const ToDoList = () => {
     if (kotsAllItems) {
       orderData = {
         orderItems: kotsAllItems.map((item) => ({
-          id: item._id,
+          id: item.id,
           name: item.name,
           price: item.price,
           items: item.items,
@@ -288,14 +319,27 @@ const ToDoList = () => {
                                 value={item.quantity}
                                 readOnly
                               />
-                              <button
+                              {/* <button
+                                onClick={() => increaseQuantity(item?._id)}
                                 style={{
                                   fontSize: "12px",
-                                  backgroundColor: "#0C96BC",
+                                  backgroundColor: "#4D5156",
                                 }}
                                 type="button"
                                 className="plus"
-                                onClick={() => increaseQuantity(item._id)}
+                                disabled
+                              >
+                                +
+                              </button> */}
+                              <button
+                                onClick={() => increaseQuantity(item?._id)}
+                                style={{
+                                  fontSize: "12px",
+                                  backgroundColor: "#4D5156",
+                                }}
+                                type="button"
+                                className="plus"
+                                disabled={isButtonDisabled(item?._id)}
                               >
                                 +
                               </button>

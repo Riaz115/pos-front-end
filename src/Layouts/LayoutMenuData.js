@@ -5,7 +5,7 @@ import { UseRiazHook } from "../RiazStore/RiazStore";
 const Navdata = () => {
   const history = useNavigate();
   //this is for getting data from my hook
-  const { counterId, restId } = UseRiazHook();
+  const { counterId, restId, restData } = UseRiazHook();
 
   //state data
   const [isDashboard, setIsDashboard] = useState(false);
@@ -301,7 +301,7 @@ const Navdata = () => {
           parentId: "items",
         },
         {
-          id: "All Catagories",
+          id: "All Deals",
           label: "All Deals",
           link: `/all-deals/${restId}`,
           parentId: "items",
@@ -313,13 +313,17 @@ const Navdata = () => {
           parentId: "items",
           stateVariables: isProfile,
         },
-        {
-          id: "All Stock Items",
-          label: "All Stock Items",
-          link: `/restaurent/${restId}/food/items`,
-          parentId: "items",
-          stateVariables: isProfile,
-        },
+        ...(restData?.stockManage === "yes"
+          ? [
+              {
+                id: "All Stock Items",
+                label: "All Stock Items",
+                link: `/restaurent/${restId}/food/items`,
+                parentId: "items",
+                stateVariables: isProfile,
+              },
+            ]
+          : []),
       ],
     },
     {

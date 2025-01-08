@@ -12,13 +12,14 @@ import {
   OffcanvasHeader,
   Label,
 } from "reactstrap";
-
+import { Link } from "react-router-dom";
 import SimpleBar from "simplebar-react";
 import multiUser from "../../../assets/images/users/multi-user.jpg";
-import Flatpickr from "react-flatpickr";
-import BreadCrumb from "../../../Components/Common/BreadCrumb";
 import { UseRiazHook } from "../../../RiazStore/RiazStore";
 import { useParams } from "react-router-dom";
+import DeleteModal from "../../../Components/Common/DeleteModal";
+import BasicSuccessMsg from "../../AuthenticationInner/SuccessMessage/BasicSuccessMsg";
+import Loader from "../../../Components/Common/Loader";
 
 const Kanbanboard = () => {
   const [editImage, setEditImage] = useState("");
@@ -33,7 +34,12 @@ const Kanbanboard = () => {
   const [isEditItem, setIsEditItem] = useState(false);
   const [itemId, setItemId] = useState("");
   const [allMenuItems, setAllMenuItems] = useState([]);
+  const [allFilteredComboDeals, setAllFilteredComboDeals] = useState([]);
   const [errors, setErrors] = useState({});
+  const [deleteModal, setDeleteModal] = useState(false);
+  const [successModal, setSuccessModal] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [idForDelete, setIdForDelete] = useState("");
 
   // this is for search items when making combo deal
   const filteredItems = allMenuItems?.filter((item) =>
@@ -64,6 +70,26 @@ const Kanbanboard = () => {
       }
     } catch (err) {
       console.log("there is error in the get all menu items function", err);
+    }
+  };
+
+  //this is for search from menu items
+  const OnchangeHandler = (e, type) => {
+    let search;
+    if (type === "name") {
+      search = e.target.value;
+      const filteredUsers = allComboItems.filter((item) =>
+        item?.name?.toString().includes(search)
+      );
+      setAllFilteredComboDeals(filteredUsers);
+    } else if (type === "price") {
+      search = e.target.value;
+      const filteredUsers = allComboItems.filter((item) =>
+        item?.price?.toString().includes(search)
+      );
+      setAllFilteredComboDeals(filteredUsers);
+    } else {
+      setAllFilteredComboDeals(allComboItems);
     }
   };
 
@@ -99,6 +125,7 @@ const Kanbanboard = () => {
 
   //this is for getting all combo items data
   const forGetAllComboItems = async () => {
+    setLoading(true);
     const url = `${myUrl}/forgetalldata/${id}/comboitem`;
 
     try {
@@ -106,10 +133,14 @@ const Kanbanboard = () => {
       const data = await response.json();
       if (response.ok) {
         setAllComboItems(data.updatedrestComboItems);
+        setAllFilteredComboDeals(data.updatedrestComboItems);
+        setLoading(false);
       } else {
+        setLoading(false);
         console.log("err data", data);
       }
     } catch (err) {
+      setLoading(false);
       console.log("there is error in the getting all data of combos", err);
     }
   };
@@ -180,6 +211,7 @@ const Kanbanboard = () => {
             setIsRight(false);
             setImage("");
             setItems([]);
+            setSuccessModal(true);
           } else {
             toast.error(data.msg);
           }
@@ -219,7 +251,6 @@ const Kanbanboard = () => {
       const response = await fetch(url);
       const data = await response.json();
       if (response.ok) {
-        console.log("ok data", data);
         setName(data.myItem.name);
         setPrice(data.myItem.price);
         setDesc(data.myItem.desc);
@@ -277,6 +308,7 @@ const Kanbanboard = () => {
             forEditItemPartShow(false);
             setImage("");
             setItems([]);
+            setSuccessModal(true);
           } else {
             toast.error(data.msg);
           }
@@ -289,9 +321,15 @@ const Kanbanboard = () => {
     }
   };
 
+  //this is for click on the Delet Button
+  const forClickOnDeleteButton = (id) => {
+    setIdForDelete(id);
+    setDeleteModal(true);
+  };
+
   //this is for delete the combo item
-  const forDeleteComboItem = async (id) => {
-    const url = `${myUrl}/delete/${id}/comboitem`;
+  const forDeleteComboItem = async () => {
+    const url = `${myUrl}/delete/${idForDelete}/comboitem`;
     const options = {
       method: "DELETE",
     };
@@ -300,9 +338,10 @@ const Kanbanboard = () => {
       const response = await fetch(url, options);
       const data = await response.json();
       if (response.ok) {
-        console.log("ok data", data);
         toast.success(data.msg);
         forGetAllComboItems();
+        setSuccessModal(true);
+        setDeleteModal(false);
       } else {
         toast.error(data.msg);
       }
@@ -313,54 +352,155 @@ const Kanbanboard = () => {
 
   return (
     <React.Fragment>
-      <div className="page-content">
-        <Container fluid>
-          <BreadCrumb allItemsText="All Deals" />
+      <DeleteModal
+        show={deleteModal}
+        onDeleteClick={forDeleteComboItem}
+        onCloseClick={() => setDeleteModal(false)}
+      />
 
-          <div class="container mt-0">
-            <div class="row">
-              <div class="col-12 col-md-3 mb-3">
-                <Flatpickr
-                  className="form-control"
-                  id="datepicker-publish-input"
-                  placeholder="Select date"
-                  options={{
-                    altInput: true,
-                    altFormat: "F j, Y",
-                    mode: "multiple",
-                    dateFormat: "d.m.y",
-                  }}
-                />
-              </div>
-              <div class="col-12 col-md-3 mb-3">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Search by Name"
-                />
-              </div>
-              <div class="col-12 col-md-3 mb-3">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Search by Number"
-                />
-              </div>
-              <div class="col-12 col-md-3 mb-3">
-                <Button
-                  className="add-btn bg-dark text-white px-4 py-1 border-none cursor-pointer
-"
-                  id="create-btn"
-                  onClick={toggleRightCanvas}
-                >
-                  <i className="ri-add-line align-bottom me-1"></i> Add Deal
-                </Button>
-              </div>
+      <BasicSuccessMsg
+        show={successModal}
+        onCloseClick={() => setSuccessModal(false)}
+      />
+
+      <div className="page-content">
+        <Col sm={12}>
+          <div className="d-flex align-items-center justify-content-between mt-0 ">
+            <div>
+              <h5>All Deals</h5>
+            </div>
+
+            <div>
+              <Link
+                onClick={toggleRightCanvas}
+                style={{
+                  backgroundColor: "#0000FF",
+                  color: "white",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                <i className="ri-add-circle-line align-middle me-1"></i> Add
+                Deal
+              </Link>
             </div>
           </div>
+        </Col>
+        <hr></hr>
+        <Container fluid>
+          <Row>
+            <Col md={6} xs={12} className="mb-3">
+              <Label for="kotType" style={{ fontWeight: "bold" }}>
+                Deal Name
+              </Label>
+              <Input
+                type="text"
+                id="kotType"
+                onChange={(e) => OnchangeHandler(e, "name")}
+                placeholder="Enter Deal Name"
+              />
+            </Col>
+
+            <Col md={6} xs={12} className="mb-3">
+              <Label for="additionalInfo" style={{ fontWeight: "bold" }}>
+                Price
+              </Label>
+              <Input
+                type="text"
+                onChange={(e) => OnchangeHandler(e, "price")}
+                id="additionalInfo"
+                placeholder="Enter Deal Price"
+              />
+            </Col>
+          </Row>
 
           <Row>
             <Col xl={12}>
+              <div className="table-responsive mt-4">
+                <Table striped bordered hover>
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Deal Name</th>
+                      <th>Price</th>
+                      <th>Items</th>
+                      <th>Edit</th>
+                      <th>Delete</th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {loading ? (
+                      <tr>
+                        <td colSpan="7">
+                          <div
+                            style={{
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              height: "100px",
+                            }}
+                          >
+                            <Loader />
+                            <span style={{ marginLeft: "10px" }}>
+                              Loading...
+                            </span>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : (
+                      allFilteredComboDeals?.map((item, index) => (
+                        <tr key={index}>
+                          <td>{index + 1}</td>
+                          <td>
+                            <div className="d-flex gap-2 align-items-center">
+                              <div className="flex-shrink-0">
+                                <img
+                                  src={item?.image ? item.image : multiUser}
+                                  alt=""
+                                  className="avatar-xs rounded-circle"
+                                />
+                              </div>
+                              <div className="flex-grow-1">{item?.name}</div>
+                            </div>
+                          </td>
+                          <td>{formatAmount(item?.price)}</td>
+                          <td>
+                            {item.items.map((item, index) => (
+                              <span key={index}>
+                                {item.name}:{item.qty} ,,
+                              </span>
+                            ))}
+                          </td>
+                          <td>
+                            {" "}
+                            <button
+                              className="my-custome-button-edit"
+                              onClick={() => forClickOnEditBtn(item._id)}
+                            >
+                              <i className="ri-pencil-fill align-bottom" />
+                            </button>
+                          </td>
+                          <td>
+                            <button
+                              onClick={() => forClickOnDeleteButton(item._id)}
+                              className="my-custome-button-delete"
+                            >
+                              <i className="ri-delete-bin-5-fill align-bottom" />
+                            </button>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </Table>
+              </div>
+            </Col>
+
+            {/* <Col xl={12}>
               <div className="table-responsive mt-4 mt-xl-0">
                 <Table className="table-success table-striped table-nowrap align-middle mb-0">
                   <thead>
@@ -411,7 +551,7 @@ const Kanbanboard = () => {
                               <i className="ri-pencil-fill align-bottom" />
                             </button>
                             <button
-                              onClick={() => forDeleteComboItem(item._id)}
+                              onClick={() => forClickOnDeleteButton(item._id)}
                               className="btn btn-sm btn-soft-danger remove-list delete-btn"
                               style={{
                                 padding: "4px 8px",
@@ -428,7 +568,7 @@ const Kanbanboard = () => {
                   </tbody>
                 </Table>
               </div>
-            </Col>
+            </Col> */}
           </Row>
         </Container>
       </div>

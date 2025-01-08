@@ -49,7 +49,7 @@ const BasicTables = () => {
   const [idForDelete, setIdForDelete] = useState("");
 
   //this is for getting data from my hook
-  const { myUrl, formatAmount } = UseRiazHook();
+  const { myUrl, formatAmount, restData } = UseRiazHook();
 
   //this is for getting rest id
   const { id } = useParams();
@@ -248,7 +248,7 @@ const BasicTables = () => {
       toast.error("please enter item description");
       newErrors.desc = "please enter item description";
       isOk = false;
-    } else if (items.length === 0) {
+    } else if (items.length === 0 && restData?.stockManage === "yes") {
       toast.error("please select at one item");
       newErrors.items = "Please Select At Least One Item";
       isOk = true;
@@ -279,7 +279,7 @@ const BasicTables = () => {
       toast.error("please enter item description");
       newErrors.desc = "please enter item description";
       isOk = false;
-    } else if (items.length === 0) {
+    } else if (items.length === 0 && restData?.stockManage === "yes") {
       toast.error("please select at one item");
       newErrors.items = "Please Select At Least One Item";
       isOk = true;
@@ -759,121 +759,132 @@ const BasicTables = () => {
                   )}
                 </Col>
 
-                <Col sm={12}>
-                  <div>
-                    <label style={{ fontSize: "14px", fontWeight: "bold" }}>
-                      Select Items
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search items..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      style={{ marginBottom: "10px" }}
-                    />
-                    {errors.items && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.items}
-                      </p>
-                    )}
+                {restData?.stockManage === "yes" && (
+                  <Col sm={12}>
+                    <div>
+                      <label style={{ fontSize: "14px", fontWeight: "bold" }}>
+                        Select Items
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search items..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ marginBottom: "10px" }}
+                      />
+                      {errors.items && (
+                        <p
+                          style={{
+                            color: "red",
+                            fontSize: "12px",
+                            paddingLeft: "5px",
+                          }}
+                        >
+                          {errors.items}
+                        </p>
+                      )}
 
-                    <Row>
-                      {filteredItems?.map((item) => {
-                        const selectedItem = items.find(
-                          (i) => i.id === item._id
-                        );
-                        const qtyTypeOptions =
-                          item.qtyType === "kilogram"
-                            ? ["kilogram", "gram", "milligram"]
-                            : item.qtyType === "liter"
-                            ? ["liter", "milliliter"]
-                            : item.qtyType === "flat"
-                            ? ["flat"]
-                            : [];
+                      <Row>
+                        {filteredItems?.map((item) => {
+                          const selectedItem = items.find(
+                            (i) => i.id === item._id
+                          );
+                          const qtyTypeOptions =
+                            item.qtyType === "kilogram"
+                              ? ["kilogram", "gram", "milligram"]
+                              : item.qtyType === "gram"
+                              ? ["gram", "milligram"]
+                              : item.qtyType === "liter"
+                              ? ["liter", "milliliter"]
+                              : item.qtyType === "flat"
+                              ? ["flat"]
+                              : item.qtyType === "milligram"
+                              ? ["milligram"]
+                              : item.qtyType === "milliliter"
+                              ? ["milliliter"]
+                              : [];
 
-                        return (
-                          <Col md={6} key={item._id} className="my-1">
-                            <div className="d-flex align-items-center">
-                              <label
-                                className="d-flex align-items-center mb-0"
-                                style={{ fontSize: "12px", fontWeight: "500" }}
-                              >
-                                <input
-                                  className="p-1 mx-2"
-                                  type="checkbox"
-                                  value={item._id}
-                                  checked={Boolean(selectedItem)}
-                                  onChange={(e) =>
-                                    handleCheckboxChange(
-                                      item._id,
-                                      e.target.checked,
-                                      item.qtyType
-                                    )
-                                  }
-                                />
-                                <span>{item.name}</span>
-                              </label>
-                              {selectedItem && (
-                                <div className="d-flex align-items-center mx-2">
+                          return (
+                            <Col md={6} key={item._id} className="my-1">
+                              <div className="d-flex align-items-center">
+                                <label
+                                  className="d-flex align-items-center mb-0"
+                                  style={{
+                                    fontSize: "12px",
+                                    fontWeight: "500",
+                                  }}
+                                >
                                   <input
-                                    type="number"
-                                    value={selectedItem.qty || ""}
-                                    min="1"
+                                    className="p-1 mx-2"
+                                    type="checkbox"
+                                    value={item._id}
+                                    checked={Boolean(selectedItem)}
                                     onChange={(e) =>
-                                      handleQuantityChange(
+                                      handleCheckboxChange(
                                         item._id,
-                                        e.target.value
+                                        e.target.checked,
+                                        item.qtyType
                                       )
                                     }
-                                    className="form-control"
-                                    style={{
-                                      width: "70px",
-                                      height: "35px",
-                                      padding: "4px",
-                                      backgroundColor: "#f8f9fa",
-                                      borderRadius: "5px",
-                                    }}
                                   />
-                                  <select
-                                    className="form-control mx-2"
-                                    style={{
-                                      width: "120px",
-                                      height: "35px",
-                                      padding: "4px",
-                                      backgroundColor: "#f8f9fa",
-                                      borderRadius: "5px",
-                                    }}
-                                    value={selectedItem.qtyType || ""}
-                                    onChange={(e) =>
-                                      handleOptionChange(
-                                        item._id,
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    {qtyTypeOptions.map((option) => (
-                                      <option key={option} value={option}>
-                                        {option}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-                            </div>
-                          </Col>
-                        );
-                      })}
-                    </Row>
-                  </div>
-                </Col>
+                                  <span>{item.name}</span>
+                                </label>
+                                {selectedItem && (
+                                  <div className="d-flex align-items-center mx-2">
+                                    <input
+                                      type="number"
+                                      value={selectedItem.qty || ""}
+                                      min="1"
+                                      onChange={(e) =>
+                                        handleQuantityChange(
+                                          item._id,
+                                          e.target.value
+                                        )
+                                      }
+                                      className="form-control"
+                                      style={{
+                                        width: "70px",
+                                        height: "35px",
+                                        padding: "4px",
+                                        backgroundColor: "#f8f9fa",
+                                        borderRadius: "5px",
+                                      }}
+                                    />
+                                    <select
+                                      className="form-control mx-2"
+                                      style={{
+                                        width: "120px",
+                                        height: "35px",
+                                        padding: "4px",
+                                        backgroundColor: "#f8f9fa",
+                                        borderRadius: "5px",
+                                      }}
+                                      value={selectedItem.qtyType || ""}
+                                      onChange={(e) =>
+                                        handleOptionChange(
+                                          item._id,
+                                          e.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      {qtyTypeOptions.map((option) => (
+                                        <option key={option} value={option}>
+                                          {option}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+                              </div>
+                            </Col>
+                          );
+                        })}
+                      </Row>
+                    </div>
+                  </Col>
+                )}
               </Row>
 
               <div className="hstack gap-2 justify-content-end my-5">
@@ -1064,121 +1075,131 @@ const BasicTables = () => {
                   )}
                 </Col>
 
-                <Col sm={12}>
-                  <div>
-                    <label style={{ fontSize: "14px", fontWeight: "bold" }}>
-                      Select Items
-                    </label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search items..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      style={{ marginBottom: "10px" }}
-                    />
-                    {errors.items && (
-                      <p
-                        style={{
-                          color: "red",
-                          fontSize: "12px",
-                          paddingLeft: "5px",
-                        }}
-                      >
-                        {errors.items}
-                      </p>
-                    )}
+                {restData?.stockManage === "yes" && (
+                  <Col sm={12}>
+                    <div>
+                      <label style={{ fontSize: "14px", fontWeight: "bold" }}>
+                        Select Items
+                      </label>
+                      <input
+                        type="text"
+                        className="form-control"
+                        placeholder="Search items..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        style={{ marginBottom: "10px" }}
+                      />
+                      {errors.items && (
+                        <p
+                          style={{
+                            color: "red",
+                            fontSize: "12px",
+                            paddingLeft: "5px",
+                          }}
+                        >
+                          {errors.items}
+                        </p>
+                      )}
 
-                    <Row>
-                      {filteredItems?.map((item) => {
-                        const selectedItem = items.find(
-                          (i) => i.id === item._id
-                        );
-                        const qtyTypeOptions =
-                          item.qtyType === "kilogram"
-                            ? ["kilogram", "gram", "milligram"]
-                            : item.qtyType === "liter"
-                            ? ["liter", "milliliter"]
-                            : item.qtyType === "flat"
-                            ? ["flat"]
-                            : [];
-
-                        return (
-                          <Col md={6} key={item._id} className="my-1">
-                            <div className="d-flex align-items-center">
-                              <label
-                                className="d-flex align-items-center mb-0"
-                                style={{ fontSize: "12px", fontWeight: "500" }}
-                              >
-                                <input
-                                  className="p-1 mx-2"
-                                  type="checkbox"
-                                  value={item._id}
-                                  checked={Boolean(selectedItem)}
-                                  onChange={(e) =>
-                                    handleCheckboxChange(
-                                      item._id,
-                                      e.target.checked,
-                                      item.qtyType
-                                    )
-                                  }
-                                />
-                                <span>{item.name}</span>
-                              </label>
-                              {selectedItem && (
-                                <div className="d-flex align-items-center mx-2">
+                      <Row>
+                        {filteredItems?.map((item) => {
+                          const selectedItem = items.find(
+                            (i) => i.id === item._id
+                          );
+                          const qtyTypeOptions =
+                            item.qtyType === "kilogram"
+                              ? ["kilogram", "gram", "milligram"]
+                              : item.qtyType === "gram"
+                              ? ["gram", "milligram"]
+                              : item.qtyType === "liter"
+                              ? ["liter", "milliliter"]
+                              : item.qtyType === "flat"
+                              ? ["flat"]
+                              : item.qtyType === "milligram"
+                              ? ["milligram"]
+                              : item.qtyType === "milliliter"
+                              ? ["milliliter"]
+                              : [];
+                          return (
+                            <Col md={6} key={item._id} className="my-1">
+                              <div className="d-flex align-items-center">
+                                <label
+                                  className="d-flex align-items-center mb-0"
+                                  style={{
+                                    fontSize: "12px",
+                                    fontWeight: "500",
+                                  }}
+                                >
                                   <input
-                                    type="number"
-                                    value={selectedItem.qty || ""}
-                                    min="1"
+                                    className="p-1 mx-2"
+                                    type="checkbox"
+                                    value={item._id}
+                                    checked={Boolean(selectedItem)}
                                     onChange={(e) =>
-                                      handleQuantityChange(
+                                      handleCheckboxChange(
                                         item._id,
-                                        e.target.value
+                                        e.target.checked,
+                                        item.qtyType
                                       )
                                     }
-                                    className="form-control"
-                                    style={{
-                                      width: "70px",
-                                      height: "35px",
-                                      padding: "4px",
-                                      backgroundColor: "#f8f9fa",
-                                      borderRadius: "5px",
-                                    }}
                                   />
-                                  <select
-                                    className="form-control mx-2"
-                                    style={{
-                                      width: "120px",
-                                      height: "35px",
-                                      padding: "4px",
-                                      backgroundColor: "#f8f9fa",
-                                      borderRadius: "5px",
-                                    }}
-                                    value={selectedItem.qtyType || ""}
-                                    onChange={(e) =>
-                                      handleOptionChange(
-                                        item._id,
-                                        e.target.value
-                                      )
-                                    }
-                                  >
-                                    <option value="">Select</option>
-                                    {qtyTypeOptions.map((option) => (
-                                      <option key={option} value={option}>
-                                        {option}
-                                      </option>
-                                    ))}
-                                  </select>
-                                </div>
-                              )}
-                            </div>
-                          </Col>
-                        );
-                      })}
-                    </Row>
-                  </div>
-                </Col>
+                                  <span>{item.name}</span>
+                                </label>
+                                {selectedItem && (
+                                  <div className="d-flex align-items-center mx-2">
+                                    <input
+                                      type="number"
+                                      value={selectedItem.qty || ""}
+                                      min="1"
+                                      onChange={(e) =>
+                                        handleQuantityChange(
+                                          item._id,
+                                          e.target.value
+                                        )
+                                      }
+                                      className="form-control"
+                                      style={{
+                                        width: "70px",
+                                        height: "35px",
+                                        padding: "4px",
+                                        backgroundColor: "#f8f9fa",
+                                        borderRadius: "5px",
+                                      }}
+                                    />
+                                    <select
+                                      className="form-control mx-2"
+                                      style={{
+                                        width: "120px",
+                                        height: "35px",
+                                        padding: "4px",
+                                        backgroundColor: "#f8f9fa",
+                                        borderRadius: "5px",
+                                      }}
+                                      value={selectedItem.qtyType || ""}
+                                      onChange={(e) =>
+                                        handleOptionChange(
+                                          item._id,
+                                          e.target.value
+                                        )
+                                      }
+                                    >
+                                      <option value="">Select</option>
+                                      {qtyTypeOptions.map((option) => (
+                                        <option key={option} value={option}>
+                                          {option}
+                                        </option>
+                                      ))}
+                                    </select>
+                                  </div>
+                                )}
+                              </div>
+                            </Col>
+                          );
+                        })}
+                      </Row>
+                    </div>
+                  </Col>
+                )}
               </Row>
 
               <div className="hstack gap-2 justify-content-end my-5">

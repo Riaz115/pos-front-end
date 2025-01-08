@@ -114,7 +114,7 @@ const CreateNFT = () => {
     { value: "kilogram", label: "Kilogram (kg)" },
     { value: "gram", label: "Gram (g)" },
     { value: "liter", label: "Liter (L)" },
-    { value: "mililiter", label: "Milliliter (ml)" },
+    { value: "milliliter", label: "Milliliter (ml)" },
     { value: "flat", label: "Flat (Count)" },
   ];
 

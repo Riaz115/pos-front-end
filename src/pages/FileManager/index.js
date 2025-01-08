@@ -56,6 +56,8 @@ const FileManager = () => {
   const [typeOfDeliveryCharges, setTypeOfDeliveryCharges] = useState("");
   const [gstTexAmount, setGstTexAmount] = useState(0);
   const [gstTexType, setGstTexType] = useState("");
+  const [overSelling, setOverSelling] = useState("");
+  const [stockManage, setStockMange] = useState("");
 
   //this is data from my hook
   const { myUrl, token } = UseRiazHook();
@@ -264,6 +266,14 @@ const FileManager = () => {
       isOk = false;
       newErrors.gstTexAmount = "Please enter the food tex amount";
       toast.error("Please enter the food tex amount");
+    } else if (!stockManage.trim()) {
+      isOk = false;
+      newErrors.stockManage = "Please select the stock manage";
+      toast.error("Please select the stock manage");
+    } else if (!overSelling.trim() && stockManage === "yes") {
+      isOk = false;
+      newErrors.overSelling = "Please select the over selling";
+      toast.error("Please select the over selling");
     }
 
     setErrors(newErrors);
@@ -306,6 +316,8 @@ const FileManager = () => {
       formData.append("deliveryChargesAmount", deliveryChargesAmount);
       formData.append("gstTexType", gstTexType);
       formData.append("gstTexAmount", gstTexAmount);
+      formData.append("stockManage", stockManage);
+      formData.append("overSelling", overSelling);
 
       //this is function for add restaurent
       const forEditRetaurent = async () => {
@@ -375,6 +387,8 @@ const FileManager = () => {
         setTypeOfDeliveryCharges(data.myRest.typeOfDeliveryCharges);
         setGstTexAmount(data.myRest.gstTexAmount);
         setGstTexType(data.myRest.gstTexType);
+        setStockMange(data?.myRest?.stockManage);
+        setOverSelling(data?.myRest?.overSelling);
       } else {
         console.log("err data", data);
       }
@@ -382,6 +396,13 @@ const FileManager = () => {
       console.log("there is error in the get rest data for edit function", err);
     }
   };
+
+  //this is for select automatically no in overselling
+  useEffect(() => {
+    if (stockManage !== "yes") {
+      setOverSelling("no");
+    }
+  }, [stockManage]);
 
   //this is for get rest data
   useEffect(() => {
@@ -1506,6 +1527,85 @@ const FileManager = () => {
                       }}
                     >
                       {errors.gstTexAmount}
+                    </p>
+                  )}
+                </div>
+              </Col>{" "}
+              <Col md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Stock Manage
+                  </Label>
+                  <Select
+                    value={stockManage}
+                    onChange={(selectedOption) => {
+                      setStockMange(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "no", label: "No" },
+                      { value: "yes", label: "Yes" },
+                    ]}
+                    placeholder={
+                      stockManage ? stockManage : "select stock manage"
+                    }
+                  />
+                  {errors.stockManage && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.stockManage}
+                    </p>
+                  )}
+                </div>
+              </Col>
+              <Col md={6} className="my-2">
+                <div className="mb-3">
+                  <Label
+                    htmlFor="dateFormate"
+                    className="form-label"
+                    style={{
+                      fontSize: "15px",
+                      color: "#6C667F",
+                      fontWeight: "400",
+                    }}
+                  >
+                    Stock OverSelling
+                  </Label>
+                  <Select
+                    value={overSelling}
+                    onChange={(selectedOption) => {
+                      setOverSelling(selectedOption.value);
+                    }}
+                    options={[
+                      { value: "no", label: "No" },
+                      { value: "yes", label: "Yes" },
+                    ]}
+                    placeholder={
+                      overSelling ? overSelling : "select stock overselling"
+                    }
+                    isDisabled={stockManage !== "yes"}
+                  />
+                  {errors.overSelling && (
+                    <p
+                      style={{
+                        color: "red",
+                        fontSize: "12px",
+                        paddingLeft: "5px",
+                      }}
+                    >
+                      {errors.overSelling}
                     </p>
                   )}
                 </div>
