@@ -1,15 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  Card,
-  CardBody,
-  Col,
-  Container,
-  Row,
-  Table,
-  Button,
-  Input,
-  Label,
-} from "reactstrap";
+import { Card, CardBody, Col, Container, Row, Table, Button } from "reactstrap";
 import { SimplePie } from "./PieCharts";
 import { Link } from "react-router-dom";
 import Flatpickr from "react-flatpickr";
@@ -38,7 +28,6 @@ const PieCharts = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-       
         const options = {
           method: "GET",
           headers: {
