@@ -150,7 +150,7 @@ const JobOverview = () => {
     };
 
     fetchData();
-  }, []);
+  }, [counterid]);
 
   //this is getting counter Data
   const forGettingCounterData = async () => {
@@ -302,7 +302,7 @@ const JobOverview = () => {
           <Col xl={12}>
             <Card>
               <CardBody>
-                <NewPieChart />
+                <NewPieChart counterId={counterid} />
               </CardBody>
             </Card>
           </Col>

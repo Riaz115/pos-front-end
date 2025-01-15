@@ -4,8 +4,14 @@ import { UseRiazHook } from "../RiazStore/RiazStore";
 
 const Navdata = () => {
   const history = useNavigate();
-  //this is for getting data from my hook
-  const { counterId, restId, restData } = UseRiazHook();
+
+  const {
+    counterId,
+    restId,
+    restData,
+    forGetAllCountersofRestaurent,
+    Counters,
+  } = UseRiazHook();
 
   //state data
   const [isDashboard, setIsDashboard] = useState(false);
@@ -20,14 +26,15 @@ const Navdata = () => {
   const [isIcons, setIsIcons] = useState(false);
   const [isMaps, setIsMaps] = useState(false);
   const [isMultiLevel, setIsMultiLevel] = useState(false);
-  const [owner, setOwner] = useState(false);
-  const [show, setShow] = useState(false);
-
-  //Calender
-  const [isCalender, setCalender] = useState(false);
-
-  // Apps
   const [isEmail, setEmail] = useState(false);
+  const [isSignIn, setIsSignIn] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [isProfile, setIsProfile] = useState(false);
+  const [isLanding, setIsLanding] = useState(false);
+  const [openCounter, setOpenCounter] = useState(false);
+
+  //this is for use pending
+  const [isCalender, setCalender] = useState(false);
   const [isSubEmail, setSubEmail] = useState(false);
   const [isEcommerce, setIsEcommerce] = useState(false);
   const [isProjects, setIsProjects] = useState(false);
@@ -40,10 +47,8 @@ const Navdata = () => {
   const [isJobs, setIsJobs] = useState(false);
   const [isJobList, setIsJobList] = useState(false);
   const [isCandidateList, setIsCandidateList] = useState(false);
-
-  // Authentication
-  const [isSignIn, setIsSignIn] = useState(false);
-  const [isSignUp, setIsSignUp] = useState(false);
+  const [owner, setOwner] = useState(false);
+  const [show, setShow] = useState(false);
   const [isPasswordReset, setIsPasswordReset] = useState(false);
   const [isPasswordCreate, setIsPasswordCreate] = useState(false);
   const [isLockScreen, setIsLockScreen] = useState(false);
@@ -51,19 +56,16 @@ const Navdata = () => {
   const [isSuccessMessage, setIsSuccessMessage] = useState(false);
   const [isVerification, setIsVerification] = useState(false);
   const [isError, setIsError] = useState(false);
-
-  // Pages
-  const [isProfile, setIsProfile] = useState(false);
-  const [isLanding, setIsLanding] = useState(false);
-
-  // Charts
   const [isApex, setIsApex] = useState(false);
-
-  // Multi Level
   const [isLevel1, setIsLevel1] = useState(false);
   const [isLevel2, setIsLevel2] = useState(false);
 
   const [iscurrentState, setIscurrentState] = useState("Dashboard");
+
+  //this is for call only once time for all counter
+  useEffect(() => {
+    forGetAllCountersofRestaurent();
+  }, [restId]);
 
   function updateIconSidebar(e) {
     if (e && e.target && e.target.getAttribute("subitems")) {
@@ -264,7 +266,7 @@ const Navdata = () => {
         {
           id: "dashboard",
           label: "dashboard",
-          link: "/my-dashboard",
+          link: `/my-dashboard/${restId}/restaurent`,
           parentId: "dashboard",
         },
         {
@@ -306,6 +308,7 @@ const Navdata = () => {
           link: `/all-deals/${restId}`,
           parentId: "items",
         },
+
         {
           id: "All Items",
           label: "All Menu Items",
@@ -324,6 +327,13 @@ const Navdata = () => {
               },
             ]
           : []),
+
+        {
+          id: "All void items",
+          label: "All Void Items",
+          link: `/restaurent/${restId}/all/void/items`,
+          parentId: "items",
+        },
       ],
     },
     {
@@ -407,6 +417,7 @@ const Navdata = () => {
         },
       ],
     },
+
     {
       id: "Counter",
       label: "Counter",
@@ -420,18 +431,43 @@ const Navdata = () => {
       },
       stateVariables: isAdvanceUi,
       subItems: [
-        {
-          id: "Counter-Sale",
-          label: "Counter-Sale",
-          link: `/counter/${counterId}/dashboard`,
-          parentId: "Counter",
-        },
-        {
-          id: "Settlements",
-          label: "Settlements",
-          link: "/restaurent/counter/settlements",
-          parentId: "Counter",
-        },
+        ...(Counters?.length > 0
+          ? Counters.map((item) => ({
+              id: `nftLanding-${item._id}`,
+              label: `${item?.counterName}`,
+              link: `#`,
+              isChildItem: true,
+              click: function (e) {
+                e.preventDefault();
+                if (openCounter === item._id) {
+                  setOpenCounter(null);
+                } else {
+                  setOpenCounter(item._id);
+                }
+              },
+              stateVariables: openCounter === item._id,
+              parentId: "Counter",
+              childItems: [
+                {
+                  id: "1",
+                  label: "Counter-Sale",
+                  link: `/counter/${item._id}/dashboard`,
+                },
+                {
+                  id: "2",
+                  label: "Settlements",
+                  link: `/restaurent/counter/${item._id}/settlements`,
+                },
+              ],
+            }))
+          : [
+              {
+                id: "empty",
+                label: "No counters available",
+                link: "#",
+                isChildItem: false,
+              },
+            ]),
       ],
     },
     {

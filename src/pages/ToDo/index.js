@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { Col, Container, Row } from "reactstrap";
+import { Col, Container, Row, Input } from "reactstrap";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { UseRiazHook } from "../../RiazStore/RiazStore";
 import { FaTrash } from "react-icons/fa";
@@ -8,6 +8,9 @@ const ToDoList = () => {
   const [kotData, setKotData] = useState({});
   const [kotsAllItems, setKotAllItems] = useState([]);
   const [kotPrevItems, setKotPrevItems] = useState([]);
+  const [voidItemReasonPart, setVoidItemReason] = useState(false);
+  const [voidReason, setVoidReason] = useState("");
+  const [selectedItemId, setSelectedItemId] = useState(null);
   const [checkedItems, setCheckedItems] = useState(
     kotsAllItems.map((item) => item.id)
   );
@@ -37,12 +40,24 @@ const ToDoList = () => {
 
   // Function to handle checkbox change
   const handleCheckboxChange = (id) => {
-    setCheckedItems((prevCheckedItems) =>
-      prevCheckedItems.includes(id)
-        ? prevCheckedItems.filter((itemId) => itemId !== id)
-        : [...prevCheckedItems, id]
-    );
+    if (checkedItems.includes(id)) {
+      setCheckedItems((prevCheckedItems) =>
+        prevCheckedItems.filter((itemId) => itemId !== id)
+      );
+      setSelectedItemId(id);
+      setVoidItemReason(true);
+    } else {
+      setCheckedItems((prevCheckedItems) => [...prevCheckedItems, id]);
+    }
   };
+
+  //these are some reasons for select
+  const voidItemReasons = [
+    { value: "bad taste", name: "Bad Taste" },
+    { value: "wrong Punch", name: "Wrong Punch" },
+    { value: "extra quantity", name: "extra quantity" },
+    { value: "cutomer mind change", name: "customer mind change" },
+  ];
 
   //this is for getting kot data
   const forGettingKotDataForEdit = async () => {
@@ -69,14 +84,6 @@ const ToDoList = () => {
   }, []);
 
   // // Function to increase quantity
-  // const increaseQuantity = (id) => {
-  //   setKotAllItems((prevItems) =>
-  //     prevItems.map((item) =>
-  //       item._id === id ? { ...item, quantity: item.quantity + 1 } : item
-  //     )
-  //   );
-  // };
-
   const increaseQuantity = (id) => {
     const itemToUpdate = kotsAllItems.find((item) => item._id === id);
     const correspondingItem = kotPrevItems.find((item) => item._id === id);
@@ -131,11 +138,14 @@ const ToDoList = () => {
           quantity: item.quantity,
           totalPrice: item.price * item.quantity,
           modifier: item.modifier || null,
+          reason: item.voidReason || null,
         })),
       };
     } else {
       orderData = {};
     }
+
+    console.log("order data", orderData);
 
     const url = `${myUrl}/edit/${tableid}/kotitems/${id}`;
     const options = {
@@ -167,8 +177,21 @@ const ToDoList = () => {
 
   //this is for remove items from table and select items list
   const removeSelectedItem = (id) => {
-    const updatedItems = kotsAllItems.filter((item) => item._id !== id);
+    const updatedItems = kotsAllItems.map((item) =>
+      item._id === id ? { ...item, quantity: 0 } : item
+    );
     setKotAllItems(updatedItems);
+  };
+
+  //this is for save void reason
+  const saveVoidReason = () => {
+    setKotAllItems((prevItems) =>
+      prevItems.map((item) =>
+        item._id === selectedItemId ? { ...item, voidReason } : item
+      )
+    );
+    setVoidItemReason(false);
+    setVoidReason("");
   };
 
   return (
@@ -278,25 +301,26 @@ const ToDoList = () => {
                       <tr key={index}>
                         <td> {index + 1}</td>
                         <td>
-                          {!checkedItems.includes(item._id) && (
-                            <button
-                              className="mx-1"
-                              style={{
-                                border: "none",
-                                cursor: "pointer",
-                              }}
-                              onClick={() => removeSelectedItem(item._id)}
-                            >
-                              <FaTrash style={{ color: "red" }} />
-                            </button>
-                          )}
+                          {item.voidReason &&
+                            item.voidReason.trim() !== "" &&
+                            item.quantity > 0 && (
+                              <button
+                                className="mx-1"
+                                style={{
+                                  border: "none",
+                                  cursor: "pointer",
+                                }}
+                                onClick={() => removeSelectedItem(item._id)}
+                              >
+                                <FaTrash style={{ color: "red" }} />
+                              </button>
+                            )}
 
                           {item.name}
                         </td>
+
                         <td>
-                          {checkedItems.includes(item._id) ? (
-                            item.quantity
-                          ) : (
+                          {item.voidReason && item.voidReason.trim() !== "" ? (
                             <div className="input-step step-primary text-center">
                               <button
                                 style={{
@@ -319,18 +343,6 @@ const ToDoList = () => {
                                 value={item.quantity}
                                 readOnly
                               />
-                              {/* <button
-                                onClick={() => increaseQuantity(item?._id)}
-                                style={{
-                                  fontSize: "12px",
-                                  backgroundColor: "#4D5156",
-                                }}
-                                type="button"
-                                className="plus"
-                                disabled
-                              >
-                                +
-                              </button> */}
                               <button
                                 onClick={() => increaseQuantity(item?._id)}
                                 style={{
@@ -344,8 +356,11 @@ const ToDoList = () => {
                                 +
                               </button>
                             </div>
+                          ) : (
+                            item.quantity
                           )}
                         </td>
+
                         <td>{formatAmount(item?.price)}</td>
                         <td>{formatAmount(item.totalPrice)}</td>
                       </tr>
@@ -464,6 +479,87 @@ const ToDoList = () => {
           </Row>
         </Container>
       </div>
+
+      {/* this is for open void item reason part */}
+      {voidItemReasonPart && (
+        <div
+          className="d-flex align-items-center justify-content-center position-fixed px-2"
+          style={{
+            top: 0,
+            left: 0,
+            width: "100%",
+            height: "100%",
+            backgroundColor: "rgba(0, 0, 0, 0.5)",
+            zIndex: 5000,
+          }}
+        >
+          <div
+            className="d-flex flex-column bg-white pb-4"
+            style={{
+              width: "800px",
+              boxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
+            }}
+          >
+            <div
+              className="p-1 d-flex justify-content-between align-items-center mb-2"
+              style={{ fontSize: "14px", backgroundColor: "#E3614D" }}
+            >
+              <h5 className="p-0 m-0 text-white">Void Item Reason</h5>
+              <p
+                className="m-0 p-2 color-dark cursor-pointer"
+                onClick={() => setVoidItemReason(false)}
+              >
+                x
+              </p>
+            </div>
+            <div className="mt-1 p-1">
+              <form>
+                <div className="form-group">
+                  <div className="px-2 row d-flex flex-wrap">
+                    {voidItemReasons.map((voiditem, index) => (
+                      <div
+                        onClick={() => setVoidReason(voiditem.value)}
+                        key={index}
+                        className="my-2 cursor-pointer   col-sm-3 d-flex align-items-center justify-content-center text-white bg-danger px-3 py-1 mx-1 my-1"
+                        style={{ borderRadius: "5px" }}
+                      >
+                        {voiditem.name}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="pe-auto search-box mx-2 my-2 w-75">
+                  <Input
+                    type="text"
+                    placeholder="Enter Reason "
+                    value={voidReason}
+                    onChange={(e) => setVoidReason(e.target.value)}
+                  />
+                  <i className="ri-search-line search-icon"></i>
+                </div>
+
+                <div className="d-flex flex-column m-2">
+                  <div className="my-2">
+                    <button
+                      style={{
+                        backgroundColor: "black",
+                        color: "white",
+                        textDecoration: "none",
+                        textAlign: "center",
+                      }}
+                      className="py-2 px-5 border-none"
+                      onClick={saveVoidReason}
+                    >
+                      Save
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </React.Fragment>
   );
 };

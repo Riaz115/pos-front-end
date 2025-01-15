@@ -38,7 +38,7 @@ const PieCharts = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch all data in parallel
+       
         const options = {
           method: "GET",
           headers: {
@@ -196,7 +196,6 @@ const PieCharts = () => {
     fetchData();
   }, []);
 
-  //this is for getting running day data
   //this isfor getting of running day data
   const forGettingRunningDayData = async () => {
     const url = `${myUrl}/restaurent/${restId}/get/data/ofrunningday/${dayId}/rest`;

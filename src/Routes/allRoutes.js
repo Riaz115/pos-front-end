@@ -244,7 +244,7 @@ import FunnelCharts from "../pages/Charts/ApexCharts/FunnelCharts";
 
 const authProtectedRoutes = [
   //my all routes
-  { path: "/my-dashboard", component: <PieCharts /> },
+  { path: "/my-dashboard/:id/restaurent", component: <PieCharts /> },
   { path: "/all-catagories/:id", component: <BasicTables /> },
   { path: "/items/:id", component: <ListTables /> },
   { path: "/restaurent/kots", component: <DashboardProject /> },
@@ -252,7 +252,10 @@ const authProtectedRoutes = [
   { path: "/restaurent/:id/cash-book", component: <GoogleMaps /> },
 
   { path: "/collection-report", component: <DashboardCrm /> },
-  { path: "/restaurent/counter/settlements", component: <UiScrollbar /> },
+  {
+    path: "/restaurent/counter/:counterId/settlements",
+    component: <UiScrollbar />,
+  },
   { path: "/guest/:id", component: <RemixIcons /> },
   {
     path: "/dine",
@@ -319,6 +322,7 @@ const authProtectedRoutes = [
   },
   { path: "/restaurent/:id/close/day", component: <CrmDeals /> },
   { path: "/restaurent/:id/food/items", component: <CreateNFT /> },
+  { path: "/restaurent/:id/all/void/items", component: <BoxIcons /> },
 
   //already routes
 
@@ -428,7 +432,7 @@ const authProtectedRoutes = [
   { path: "/tables-react", component: <ReactTable /> },
 
   //Icons
-  { path: "/icons-boxicons", component: <BoxIcons /> },
+
   { path: "/icons-materialdesign", component: <MaterialDesign /> },
   { path: "/icons-feather", component: <FeatherIcons /> },
   { path: "/icons-lineawesome", component: <LineAwesomeIcons /> },

@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import ReactApexChart from "react-apexcharts";
 import { UseRiazHook } from "../../../../RiazStore/RiazStore";
+import { useParams } from "react-router-dom";
 
-const NewPieChart = () => {
+const NewPieChart = ({ counterId }) => {
   const [orders, setAllOrders] = useState([]);
 
   //this is for getting data from my hook
-  const { myUrl, restId, counterId } = UseRiazHook();
+  const { myUrl, restId } = UseRiazHook();
 
   const forGettingRestaurentAllOrders = async () => {
     const url = `${myUrl}/get/${restId}/restaurent/all/orders`;
@@ -34,7 +35,7 @@ const NewPieChart = () => {
 
   useEffect(() => {
     forGettingRestaurentAllOrders();
-  }, [restId]);
+  }, [counterId]);
 
   const paymentData = {};
   orders.forEach((order) => {

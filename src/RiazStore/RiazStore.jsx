@@ -30,6 +30,7 @@ export const MyDataProvider = ({ children }) => {
   const [dayId, setDayId] = useState(localStorage.getItem("dayid"));
   const [deleteModal, setDeleteModal] = useState(false);
   const [successModal, setSuccessModal] = useState(false);
+  const [Counters, setCounters] = useState([]);
 
   //this is my backend url
   const myUrl = "http://localhost:8000/api";
@@ -325,6 +326,85 @@ export const MyDataProvider = ({ children }) => {
       : `${formattedNumber}${restCurrencySymbol}`;
   };
 
+  //this is for the date and time formate
+  const formatDateTime = (date, format, timezone) => {
+    const d = new Date(date);
+
+    // Convert the date to the selected timezone
+    const options = {
+      year: "numeric",
+      month: "numeric",
+      day: "numeric",
+      hour: "numeric",
+      minute: "numeric",
+      second: "numeric",
+      hour12: true,
+      timeZone: timezone, // Use the selected timezone here
+    };
+
+    // Get the formatted date and time in the selected timezone
+    const dateFormatter = new Intl.DateTimeFormat("en-US", options);
+    const formattedDate = dateFormatter.format(d);
+
+    // Extract individual parts of the date and time
+    const parts = formattedDate.split(", ");
+    const datePart = parts[0]; // "12/11/2024"
+    const timePart = parts[1]; // "10:21:59 AM"
+
+    // Format the date based on the provided 'format' argument
+    let finalFormattedDate;
+    const [day, month, year] = datePart.split("/");
+    const [hour, minute, second] = timePart.split(":");
+
+    switch (format) {
+      case "D/M/Y":
+        finalFormattedDate = `${day}/${month}/${year}`;
+        break;
+      case "M/Y/D":
+        finalFormattedDate = `${month}/${year}/${day}`;
+        break;
+      case "Y/M/D":
+        finalFormattedDate = `${year}/${month}/${day}`;
+        break;
+      case "Y-M-D":
+        finalFormattedDate = `${year}-${month}-${day}`;
+        break;
+      case "M-D-Y":
+        finalFormattedDate = `${month}-${day}-${year}`;
+        break;
+      default:
+        finalFormattedDate = datePart;
+    }
+
+    return `${finalFormattedDate} ${hour}:${minute} ${timePart.split(" ")[1]}`;
+  };
+
+  //this is for get counters
+  const forGetAllCountersofRestaurent = async () => {
+    const url = `${myUrl}/getAllCountersofRestaurent/${restId}`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      if (response.ok) {
+        setCounters(data.counters);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the get all counters of the restauret function",
+        err
+      );
+    }
+  };
+
+  //this is for call only once time for all counter
+  useEffect(() => {
+    forGetAllCountersofRestaurent();
+  }, [restId]);
+
   return (
     <>
       <RiazStore.Provider
@@ -383,6 +463,9 @@ export const MyDataProvider = ({ children }) => {
           deleteModal,
           setDeleteModal,
           formatAmount,
+          formatDateTime,
+          Counters,
+          forGetAllCountersofRestaurent,
         }}
       >
         {children}

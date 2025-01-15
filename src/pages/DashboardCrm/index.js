@@ -922,6 +922,7 @@ const DashboardCrm = () => {
                   </thead>
 
                   {/* <tbody>
+
                     {selectedItems.map((item, index) => (
                       <tr key={index}>
                         <td style={{ fontSize: "12px" }}>{index + 1}</td>

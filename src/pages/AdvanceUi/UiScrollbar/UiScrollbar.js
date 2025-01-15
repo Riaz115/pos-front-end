@@ -10,7 +10,7 @@ import {
   Label,
 } from "reactstrap";
 import Flatpickr from "react-flatpickr";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { FaExchangeAlt } from "react-icons/fa";
 import Pagination from "../../../Components/Common/Pagination";
 import Select from "react-select";
@@ -21,9 +21,13 @@ const DashboardCrypto = () => {
   const [filterOrders, setFilterOrders] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [tableType, setTableType] = useState("");
+  const [counterData, setCounterData] = useState({});
 
   //this is for getting data from my custome hookk
-  const { restData, myUrl, restId, counterId, formatAmount } = UseRiazHook();
+  const { restData, myUrl, restId, formatAmount } = UseRiazHook();
+
+  //this is for getting counter id from the url
+  const { counterId } = useParams();
 
   //this is for pagination
   const perPageData = 50;
@@ -155,7 +159,7 @@ const DashboardCrypto = () => {
   //this is for control the rendering of the all invoices function
   useEffect(() => {
     forGettingAllOrdersOfRestaurent();
-  }, []);
+  }, [counterId]);
 
   //this is for the date and time formate
   const formatDateTime = (date, format, timezone) => {
@@ -219,36 +223,61 @@ const DashboardCrypto = () => {
     }
   };
 
+  //this is for get single counter data for update ya edit
+  const forGetSingleCounterDataForUpdate = async () => {
+    const url = `${myUrl}/getdataforedit/${counterId}/counter`;
+
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+      if (response.ok) {
+        setCounterData(data.counter);
+      } else {
+        console.log("err data", data);
+      }
+    } catch (err) {
+      console.log(
+        "there is error in the get single counter data for edit",
+        err
+      );
+    }
+  };
+
+  //this is for control rendering
+  useEffect(() => {
+    forGetSingleCounterDataForUpdate();
+  }, [counterId]);
+
   return (
     <React.Fragment>
       <div className="page-content">
+        <Col sm={12}>
+          <div className="d-flex align-items-center justify-content-between mt-0 ">
+            <div>
+              <h5>All Invoice Of {counterData?.counterName}</h5>
+            </div>
+
+            <div>
+              <Link
+                style={{
+                  backgroundColor: "#FE9900",
+                  color: "black",
+                  textDecoration: "none",
+                  textAlign: "center",
+
+                  fontSize: "14px",
+                }}
+                className="px-3 mx-1 py-1"
+              >
+                <FaExchangeAlt className="mx-1" />
+                Export to Excel
+              </Link>
+            </div>
+          </div>
+        </Col>
+        <hr></hr>
         <Container fluid>
           <div className="mt-0">
-            <Col sm={12} className="mt-0">
-              <div className="d-flex align-items-center justify-content-between mt-0 ">
-                <div style={{ gap: "5px" }}>
-                  <h4>All Invoices of my agree</h4>
-                </div>
-
-                <div>
-                  <Link
-                    style={{
-                      backgroundColor: "#FE9900",
-                      color: "black",
-                      textDecoration: "none",
-                      textAlign: "center",
-
-                      fontSize: "14px",
-                    }}
-                    className="px-3 mx-1 py-1"
-                  >
-                    <FaExchangeAlt className="mx-1" />
-                    Export to Excel
-                  </Link>
-                </div>
-              </div>
-            </Col>
-            <hr></hr>
             <Form>
               <Row>
                 <Col md={4} xs={12} className="mb-3">
